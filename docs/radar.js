@@ -42,6 +42,10 @@ function radar_visualization(config) {
   config.segment_angular_padding = ("segment_angular_padding" in config) ? config.segment_angular_padding : 12;
   config.chart_padding = ("chart_padding" in config) ? config.chart_padding : 60;
   config.blip_collision_radius = ("blip_collision_radius" in config) ? config.blip_collision_radius : 14;
+  config.legend_vertical_spacing = config.legend_vertical_spacing || 20;
+  config.radar_horizontal_offset = ("radar_horizontal_offset" in config)
+    ? config.radar_horizontal_offset
+    : Math.round(config.legend_column_width * 0.25);
 
   // Calculate space for title and footer
   var title_height = config.print_layout && config.title ? 60 : 0;  // Title + date + padding
@@ -159,39 +163,52 @@ function radar_visualization(config) {
     };
   }
 
-  // Generate legend positions dynamically based on number of quadrants
-  if (!config.legend_offset) {
-    config.legend_offset = [];
+  function computeLegendOffsets() {
+    if (config.legend_offset) {
+      return config.legend_offset;
+    }
+
     var num_quads = config.quadrants.length;
-    var legend_radius = Math.min(available_width, available_height) / 2 - 100;
+    var offsets = new Array(num_quads);
+    var legend_overlap = outer_radius * 0.08;
+    var left_x = -outer_radius - config.legend_column_width + legend_overlap;
+    var right_x = outer_radius - legend_overlap;
 
-    if (num_quads === 2) {
-      var legend_gap = outer_radius + 120;
-      config.legend_offset = [
-        { x: -legend_gap - config.legend_column_width, y: -outer_radius },
-        { x: legend_gap, y: -outer_radius }
-      ];
-    } else if (num_quads === 4) {
-      var legend_x = legend_radius - 50;
-      var legend_y_top = -outer_radius;
-      var legend_y_bottom = outer_radius - 220;
+    var left_column = [];
+    var right_column = [];
+    for (var i = 0; i < num_quads; i++) {
+      var targetColumn = (i % 2 === 0) ? right_column : left_column;
+      targetColumn.push(i);
+    }
 
-      config.legend_offset = [
-        { x: legend_x, y: legend_y_top },
-        { x: -legend_x - 225, y: legend_y_top },
-        { x: -legend_x - 225, y: legend_y_bottom },
-        { x: legend_x, y: legend_y_bottom }
-      ];
-    } else {
-      for (var i = 0; i < num_quads; i++) {
-        var angle = -Math.PI + (i + 0.5) * (2 * Math.PI / num_quads);
-        config.legend_offset.push({
-          x: Math.round(legend_radius * Math.cos(angle)),
-          y: Math.round(legend_radius * Math.sin(angle))
-        });
+    var baseY = -outer_radius + 80;
+    var verticalAvailable = (2 * outer_radius) - 160;
+
+    function stepFor(count) {
+      if (count <= 1) {
+        return 0;
+      }
+      return Math.max(config.legend_vertical_spacing, verticalAvailable / (count - 1));
+    }
+
+    function assignOffsets(column, xPosition) {
+      var step = stepFor(column.length);
+      for (var idx = 0; idx < column.length; idx++) {
+        var qIndex = column[idx];
+        offsets[qIndex] = {
+          x: xPosition,
+          y: baseY + idx * step
+        };
       }
     }
+
+    assignOffsets(left_column, left_x);
+    assignOffsets(right_column, right_x);
+
+    return offsets;
   }
+
+  config.legend_offset = computeLegendOffsets();
 
   function polar(cartesian) {
     var x = cartesian.x;
@@ -422,13 +439,59 @@ function radar_visualization(config) {
     .attr("width", scaled_width)
     .attr("height", scaled_height);
 
+  function ensureLayoutStructure(svgSelection) {
+    var existing = svgSelection.node().closest('.radar-layout');
+    if (existing) {
+      return d3.select(existing);
+    }
+
+    var svgNode = svgSelection.node();
+    var parent = svgNode.parentNode;
+    var wrapper = document.createElement('div');
+    wrapper.className = 'radar-layout';
+    var leftColumn = document.createElement('div');
+    leftColumn.className = 'radar-legend-column left';
+    var svgContainer = document.createElement('div');
+    svgContainer.className = 'radar-svg-container';
+    var rightColumn = document.createElement('div');
+    rightColumn.className = 'radar-legend-column right';
+
+    parent.insertBefore(wrapper, svgNode);
+    svgContainer.appendChild(svgNode);
+    wrapper.appendChild(leftColumn);
+    wrapper.appendChild(svgContainer);
+    wrapper.appendChild(rightColumn);
+
+    return d3.select(wrapper);
+  }
+
+  var layoutWrapper = ensureLayoutStructure(svg);
+  var legendLeftColumn = layoutWrapper.select('.radar-legend-column.left');
+  var legendRightColumn = layoutWrapper.select('.radar-legend-column.right');
+  var layoutWidth = layoutWrapper.node().getBoundingClientRect().width || config.width;
+  var minLegendColumnWidth = (config.legend_column_width * 2) + 60;
+  var maxLegendColumnWidth = (config.legend_column_width * 4) + 80;
+  var targetLegendColumnWidth = Math.min(
+    maxLegendColumnWidth,
+    Math.max(minLegendColumnWidth, layoutWidth * 0.3)
+  );
+  var legendSectionColumns = Math.min(4, Math.max(2, Math.floor(targetLegendColumnWidth / (config.legend_column_width + 20))));
+
+  legendLeftColumn
+    .style('gap', config.legend_vertical_spacing + 'px')
+    .style('width', targetLegendColumnWidth + 'px');
+  legendRightColumn
+    .style('gap', config.legend_vertical_spacing + 'px')
+    .style('width', targetLegendColumnWidth + 'px');
+
   var radar = svg.append("g");
   if ("zoomed_quadrant" in config) {
     svg.attr("viewBox", viewbox(config.zoomed_quadrant));
   } else {
     // Center radar in available space (accounting for title and footer)
     var radar_center_y = (scaled_height / 2) + ((title_height - footer_height) / 2);
-    radar.attr("transform", translate(scaled_width / 2, radar_center_y).concat(`scale(${config.scale})`));
+    var radar_center_x = (scaled_width / 2) + config.radar_horizontal_offset;
+    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
   }
 
   var grid = radar.append("g");
@@ -549,131 +612,61 @@ function radar_visualization(config) {
       .style("font-family", config.font_family)
       .style("font-size", "12px");
 
-    // legend
-    const legend = radar.append("g");
+    if (config.print_layout) {
+      legendLeftColumn.style('display', 'flex');
+      legendRightColumn.style('display', 'flex');
+      renderLegendColumns();
+    } else {
+      legendLeftColumn.style('display', 'none').html('');
+      legendRightColumn.style('display', 'none').html('');
+    }
+  }
+
+  function renderLegendColumns() {
+    legendLeftColumn.html('');
+    legendRightColumn.html('');
+
+    function targetColumn(quadrant) {
+      return (quadrant % 2 === 0) ? legendRightColumn : legendLeftColumn;
+    }
+
     for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
-      legend.append("text")
-        .attr("transform", translate(
-          config.legend_offset[quadrant].x,
-          config.legend_offset[quadrant].y - 45
-        ))
-        .text(config.quadrants[quadrant].name)
-        .style("font-family", config.font_family)
-        .style("font-size", "18px")
-        .style("font-weight", "bold");
+      var column = targetColumn(quadrant);
+      var section = column.append('div')
+        .attr('class', 'legend-section')
+        .style('--legend-columns', legendSectionColumns);
+      section.append('div')
+        .attr('class', 'legend-quadrant-name')
+        .text(config.quadrants[quadrant].name);
 
-      var num_columns = num_rings >= 7 ? 3 : 2;
-      var rings_per_column = Math.ceil(num_rings / num_columns);
-
-      // Track height separately for each column
-      var columnHeights = new Array(num_columns).fill(0);
-      var columnRingCounts = new Array(num_columns).fill(0);
+      var ringsContainer = section.append('div').attr('class', 'legend-rings');
 
       for (let ring = 0; ring < num_rings; ring++) {
         var entriesInRing = segmented[quadrant][ring];
         if (!entriesInRing.length) {
-          continue; // Skip empty ring sections
+          continue;
         }
 
-        var column = Math.floor(ring / rings_per_column);
+        var ringBlock = ringsContainer.append('div').attr('class', 'legend-ring');
+        ringBlock.append('div')
+          .attr('class', 'legend-ring-name')
+          .style('color', config.rings[ring].color)
+          .text(config.rings[ring].name);
 
-        // Get current height for this column
-        var currentHeight = columnHeights[column];
-
-        // Add spacing between rings after the first entry
-        if (columnRingCounts[column] > 0) {
-          currentHeight += 36;
-        }
-
-        // Add ring name header
-        legend.append("text")
-          .attr("transform", legend_transform(quadrant, ring, config.legend_column_width, null, currentHeight))
-          .text(config.rings[ring].name)
-          .style("font-family", config.font_family)
-          .style("font-size", "12px")
-          .style("font-weight", "bold")
-          .style("fill", config.rings[ring].color);
-
-        // Add space for the ring header itself
-        currentHeight += 20; // Height of ring name text + padding
-
-        // Add entries for this ring
-        var entryStartHeight = currentHeight;
-        legend.selectAll(".legend" + quadrant + ring)
+        var entriesList = ringBlock.append('div').attr('class', 'legend-ring-entries');
+        entriesList.selectAll('a')
           .data(entriesInRing)
           .enter()
-            .append("a")
-              .attr("href", function (d, i) {
-                 return d.link ? d.link : "#"; // stay on same page if no link was provided
-              })
-              // Add a target if (and only if) there is a link and we want new tabs
-              .attr("target", function (d, i) {
-                 return (d.link && config.links_in_new_tabs) ? "_blank" : null;
-              })
-            .append("text")
-              .attr("transform", function(d, i) { return legend_transform(quadrant, ring, config.legend_column_width, i, entryStartHeight); })
-              .attr("class", "legend" + quadrant + ring)
-              .attr("id", function(d, i) { return "legendItem" + d.id; })
-              .text(function(d) { return d.id + ". " + d.label; })
-              .style("font-family", config.font_family)
-              .style("font-size", "11px")
-              .on("mouseover", function(event, d) { showBubble(d); highlightLegendItem(d); })
-              .on("mouseout", function(event, d) { hideBubble(d); unhighlightLegendItem(d); })
-              .call(wrap_text)
-              .each(function() {
-                currentHeight += d3.select(this).node().getBBox().height;
-              });
-
-        // Update column height tracker with accumulated height
-        columnHeights[column] = currentHeight;
-        columnRingCounts[column] += 1;
+          .append('a')
+            .attr('href', function(d) { return d.link ? d.link : '#'; })
+            .attr('target', function(d) { return (d.link && config.links_in_new_tabs) ? '_blank' : null; })
+            .attr('id', function(d) { return 'legendItem' + d.id; })
+            .attr('class', 'legend-entry')
+            .text(function(d) { return d.id + '. ' + d.label; })
+            .on('mouseover', function(event, d) { showBubble(d); highlightLegendItem(d); })
+            .on('mouseout', function(event, d) { hideBubble(d); unhighlightLegendItem(d); });
       }
     }
-  }
-
-  function wrap_text(text) {
-    let heightForNextElement = 0;
-
-    text.each(function() {
-      const textElement = d3.select(this);
-      const words = textElement.text().split(" ");
-      let line = [];
-
-      // Use '|' at the end of the string so that spaces are not trimmed during rendering.
-      const number = `${textElement.text().split(".")[0]}. |`;
-      const legendNumberText = textElement.append("tspan").text(number);
-      const legendBar = textElement.append("tspan").text('|');
-      const numberWidth = legendNumberText.node().getComputedTextLength() - legendBar.node().getComputedTextLength();
-
-      textElement.text(null);
-
-      let tspan = textElement
-          .append("tspan")
-          .attr("x", 0)
-          .attr("y", heightForNextElement)
-          .attr("dy", 0);
-
-      for (let position = 0; position < words.length; position++) {
-        line.push(words[position]);
-        tspan.text(line.join(" "));
-
-        // Avoid wrap for first line (position !== 1) to not end up in a situation where the long text without
-        // whitespace is wrapped (causing the first line near the legend number to be blank).
-        if (tspan.node().getComputedTextLength() > config.legend_column_width && position !== 1) {
-          line.pop();
-          tspan.text(line.join(" "));
-          line = [words[position]];
-
-          tspan = textElement.append("tspan")
-              .attr("x", numberWidth)
-              .attr("dy", config.legend_line_height)
-              .text(words[position]);
-        }
-      }
-
-      const textBoundingBox = textElement.node().getBBox();
-      heightForNextElement = textBoundingBox.y + textBoundingBox.height;
-    });
   }
 
   // layer for entries
@@ -726,14 +719,16 @@ function radar_visualization(config) {
 
   function highlightLegendItem(d) {
     var legendItem = document.getElementById("legendItem" + d.id);
-    legendItem.setAttribute("filter", "url(#solid)");
-    legendItem.setAttribute("fill", "white");
+    if (legendItem) {
+      legendItem.classList.add('legend-highlight');
+    }
   }
 
   function unhighlightLegendItem(d) {
     var legendItem = document.getElementById("legendItem" + d.id);
-    legendItem.removeAttribute("filter");
-    legendItem.removeAttribute("fill");
+    if (legendItem) {
+      legendItem.classList.remove('legend-highlight');
+    }
   }
 
   // draw blips on radar
