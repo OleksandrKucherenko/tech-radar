@@ -9,7 +9,8 @@ import { JSDOM } from 'jsdom';
 import * as d3Module from 'd3';
 
 // Setup DOM environment for D3
-let dom, document, window, d3, radar_visualization;
+let dom, document, window, d3;
+let radar_visualization; // Will be assigned after eval
 
 beforeAll(() => {
   // Create a JSDOM instance
@@ -34,8 +35,12 @@ beforeAll(() => {
   const fs = require('fs');
   const path = require('path');
   const radarCode = fs.readFileSync(path.join(__dirname, '../docs/radar.js'), 'utf-8');
-  eval(radarCode);
-  radar_visualization = global.radar_visualization;
+
+  // Eval in global scope to make radar_visualization available
+  (0, eval)(radarCode);
+
+  // Retrieve the function from global scope
+  radar_visualization = globalThis.radar_visualization;
 });
 
 // Helper to create a minimal valid configuration

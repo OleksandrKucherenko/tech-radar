@@ -3,7 +3,8 @@
 
 [test]
 # Test configuration
-preload = []
+# preload - optional array of scripts to run before tests
+# preload = ["./test-setup.js"]
 
 # Coverage settings
 # Enable with: bun test --coverage
