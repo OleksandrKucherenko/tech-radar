@@ -391,31 +391,66 @@ function radar_visualization(config) {
     var angle_min = min_angle + angular_padding;
     var angle_max = max_angle - angular_padding;
 
-    // Calculate optimal grid dimensions based on segment aspect ratio
+    // Calculate optimal grid dimensions to maximize spatial distribution
     var angle_range = angle_max - angle_min;
     var radius_range = outer_radius - inner_radius;
     var count = entries.length;
 
-    // Calculate segment aspect ratio (arc length vs radial depth)
-    var segment_arc_length = angle_range * ring_center; // approximate arc length at center
-    var aspect_ratio = segment_arc_length / Math.max(radius_range, 1); // width/height ratio
+    // Calculate segment dimensions in pixels (approximate)
+    var segment_arc_length = angle_range * ring_center;
+    var segment_radial_depth = radius_range;
 
-    // Base number of divisions
-    var base_divisions = Math.ceil(Math.sqrt(count));
+    // Estimate item size (based on collision radius)
+    var item_size = config.blip_collision_radius || 14;
+
+    // Calculate maximum items that could fit in each dimension
+    // Use a more generous calculation since force simulation will adjust spacing
+    // Divide by 70% of item size to allow for better initial distribution
+    var max_angular_items = Math.max(3, Math.floor(segment_arc_length / (item_size * 0.7)));
+    var max_radial_items = Math.max(3, Math.floor(segment_radial_depth / (item_size * 0.7)));
+
+    // Calculate balanced grid that uses both dimensions effectively
     var angular_divisions, radial_divisions;
 
-    // Distribute grid cells based on aspect ratio
-    if (aspect_ratio > 1) {
-      // Wider than tall - prefer more angular divisions
-      angular_divisions = Math.max(1, Math.ceil(base_divisions * Math.sqrt(aspect_ratio)));
-      radial_divisions = Math.max(1, Math.ceil(count / angular_divisions));
+    // Start with square root distribution
+    var base = Math.ceil(Math.sqrt(count));
+
+    // Calculate aspect ratio
+    var aspect_ratio = segment_arc_length / Math.max(segment_radial_depth, 1);
+
+    if (count === 1) {
+      angular_divisions = 1;
+      radial_divisions = 1;
+    } else if (count <= 4) {
+      // For small counts, spread evenly
+      angular_divisions = Math.min(count, max_angular_items);
+      radial_divisions = Math.ceil(count / angular_divisions);
     } else {
-      // Taller than wide - prefer more radial divisions
-      radial_divisions = Math.max(1, Math.ceil(base_divisions / Math.sqrt(aspect_ratio)));
-      angular_divisions = Math.max(1, Math.ceil(count / radial_divisions));
+      // For larger counts, balance based on aspect ratio but enforce minimums
+      if (aspect_ratio > 2) {
+        // Much wider than tall - strongly prefer angular spread
+        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.5));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      } else if (aspect_ratio > 1) {
+        // Moderately wider - prefer angular spread
+        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.2));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      } else if (aspect_ratio < 0.5) {
+        // Much taller than wide - prefer radial spread but maintain minimum angular
+        angular_divisions = Math.min(max_angular_items, Math.max(3, Math.floor(base * 0.7)));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      } else {
+        // Moderately tall or square - balanced approach
+        angular_divisions = Math.min(max_angular_items, Math.max(3, base));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      }
+
+      // Ensure we don't exceed capacity in either dimension
+      angular_divisions = Math.max(2, Math.min(angular_divisions, max_angular_items));
+      radial_divisions = Math.max(2, Math.min(radial_divisions, max_radial_items));
     }
 
-    // Distribute entries in grid
+    // Distribute entries in grid with better spacing
     for (var i = 0; i < entries.length; i++) {
       var entry = entries[i];
 
@@ -423,9 +458,10 @@ function radar_visualization(config) {
       var angular_index = i % angular_divisions;
       var radial_index = Math.floor(i / angular_divisions);
 
-      // Position within grid cell with jitter
-      var angular_fraction = (angular_index + 0.3 + random() * 0.4) / angular_divisions;
-      var radial_fraction = (radial_index + 0.3 + random() * 0.4) / radial_divisions;
+      // Position within grid cell with increased jitter for better spread
+      // Use 0.15-0.85 range instead of 0.3-0.7 to fill more of each cell
+      var angular_fraction = (angular_index + 0.15 + random() * 0.7) / angular_divisions;
+      var radial_fraction = (radial_index + 0.15 + random() * 0.7) / radial_divisions;
 
       var angle = angle_min + angular_fraction * angle_range;
       var radius = inner_radius + radial_fraction * radius_range;
