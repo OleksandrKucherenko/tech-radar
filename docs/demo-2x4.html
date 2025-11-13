@@ -23,7 +23,6 @@
 </head>
 
 <body>
-
   <svg id="radar"></svg>
 
   <script>
@@ -41,17 +40,75 @@
         { name: "HOLD", color: "#e09b96" }
       ],
       entries: [
-        { label: "React", quadrant: 0, ring: 0, moved: 1, active: true },
-        { label: "Vue", quadrant: 0, ring: 1, moved: 0, active: true },
-        { label: "Angular", quadrant: 0, ring: 2, moved: 0, active: true },
-        { label: "Svelte", quadrant: 0, ring: 2, moved: 2, active: true },
-        { label: "Node.js", quadrant: 1, ring: 0, moved: 0, active: true },
-        { label: "Django", quadrant: 1, ring: 1, moved: 0, active: true },
-        { label: "Flask", quadrant: 1, ring: 1, moved: 0, active: true },
-        { label: "Rails", quadrant: 1, ring: 3, moved: -1, active: true }
+        { label: "React", quadrant: 0, ring: 0, moved: 0, active: true },
+        { label: "Vue", quadrant: 0, ring: 0, moved: 1, active: true },
+        { label: "Svelte", quadrant: 0, ring: 0, moved: -1, active: true },
+        { label: "Solid", quadrant: 0, ring: 0, moved: 2, active: true },
+        { label: "Next.js", quadrant: 0, ring: 0, moved: 0, active: true },
+        { label: "Nuxt.js", quadrant: 0, ring: 0, moved: 1, active: true },
+        { label: "Remix", quadrant: 0, ring: 0, moved: -1, active: true },
+        { label: "Astro", quadrant: 0, ring: 1, moved: 1, active: true },
+        { label: "Gatsby", quadrant: 0, ring: 1, moved: -1, active: true },
+        { label: "Qwik", quadrant: 0, ring: 1, moved: 2, active: true },
+        { label: "Preact", quadrant: 0, ring: 1, moved: 0, active: true },
+        { label: "Lit", quadrant: 0, ring: 1, moved: 1, active: true },
+        { label: "Alpine.js", quadrant: 0, ring: 1, moved: -1, active: true },
+        { label: "Stimulus", quadrant: 0, ring: 1, moved: 2, active: true },
+        { label: "Angular", quadrant: 0, ring: 2, moved: -1, active: true },
+        { label: "Backbone", quadrant: 0, ring: 2, moved: 2, active: true },
+        { label: "Ember", quadrant: 0, ring: 2, moved: 0, active: true },
+        { label: "Mithril", quadrant: 0, ring: 2, moved: 1, active: true },
+        { label: "Riot", quadrant: 0, ring: 2, moved: -1, active: true },
+        { label: "Polymer", quadrant: 0, ring: 2, moved: 2, active: true },
+        { label: "Knockout", quadrant: 0, ring: 2, moved: 0, active: true },
+        { label: "jQuery", quadrant: 0, ring: 3, moved: 2, active: true },
+        { label: "Dojo", quadrant: 0, ring: 3, moved: 0, active: true },
+        { label: "Ext JS", quadrant: 0, ring: 3, moved: 1, active: true },
+        { label: "Handlebars", quadrant: 0, ring: 3, moved: -1, active: true },
+        { label: "Mustache", quadrant: 0, ring: 3, moved: 2, active: true },
+        { label: "Marionette", quadrant: 0, ring: 3, moved: 0, active: true },
+        { label: "SproutCore", quadrant: 0, ring: 3, moved: 1, active: true },
+        { label: "Node.js", quadrant: 1, ring: 0, moved: 2, active: true },
+        { label: "Express", quadrant: 1, ring: 0, moved: 0, active: true },
+        { label: "Fastify", quadrant: 1, ring: 0, moved: 1, active: true },
+        { label: "NestJS", quadrant: 1, ring: 0, moved: -1, active: true },
+        { label: "Koa", quadrant: 1, ring: 0, moved: 2, active: true },
+        { label: "Hapi", quadrant: 1, ring: 0, moved: 0, active: true },
+        { label: "AdonisJS", quadrant: 1, ring: 0, moved: 1, active: true },
+        { label: "Deno", quadrant: 1, ring: 1, moved: 0, active: true },
+        { label: "Bun", quadrant: 1, ring: 1, moved: 1, active: true },
+        { label: "Spring Boot", quadrant: 1, ring: 1, moved: -1, active: true },
+        { label: "Micronaut", quadrant: 1, ring: 1, moved: 2, active: true },
+        { label: "Quarkus", quadrant: 1, ring: 1, moved: 0, active: true },
+        { label: "Django", quadrant: 1, ring: 1, moved: 1, active: true },
+        { label: "Flask", quadrant: 1, ring: 1, moved: -1, active: true },
+        { label: "Laravel", quadrant: 1, ring: 2, moved: 1, active: true },
+        { label: "Phoenix", quadrant: 1, ring: 2, moved: -1, active: true },
+        { label: "Rails", quadrant: 1, ring: 2, moved: 2, active: true },
+        { label: "Play", quadrant: 1, ring: 2, moved: 0, active: true },
+        { label: "Sails.js", quadrant: 1, ring: 2, moved: 1, active: true },
+        { label: "LoopBack", quadrant: 1, ring: 2, moved: -1, active: true },
+        { label: "Feathers", quadrant: 1, ring: 2, moved: 2, active: true },
+        { label: "ColdFusion", quadrant: 1, ring: 3, moved: -1, active: true },
+        { label: "CGI", quadrant: 1, ring: 3, moved: 2, active: true },
+        { label: "Struts", quadrant: 1, ring: 3, moved: 0, active: true },
+        { label: "Zend Framework", quadrant: 1, ring: 3, moved: 1, active: true },
+        { label: "SOAP Services", quadrant: 1, ring: 3, moved: -1, active: true },
+        { label: "CORBA", quadrant: 1, ring: 3, moved: 2, active: true },
+        { label: "WCF", quadrant: 1, ring: 3, moved: 0, active: true }
       ]
     });
   </script>
+
+  <nav class="demo-links">
+    <strong>Demo pages:</strong>
+    <a href="./index.html">Default</a>
+    <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
+    <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
+    <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
+    <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
+  </nav>
+
 
 </body>
 

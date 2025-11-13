@@ -38,7 +38,10 @@ function radar_visualization(config) {
 
   config.legend_column_width = config.legend_column_width || 140
   config.legend_line_height = config.legend_line_height || 10
+  config.segment_radial_padding = ("segment_radial_padding" in config) ? config.segment_radial_padding : 16;
+  config.segment_angular_padding = ("segment_angular_padding" in config) ? config.segment_angular_padding : 12;
   config.chart_padding = ("chart_padding" in config) ? config.chart_padding : 60;
+  config.blip_collision_radius = ("blip_collision_radius" in config) ? config.blip_collision_radius : 14;
 
   // Calculate space for title and footer
   var title_height = config.print_layout && config.title ? 60 : 0;  // Title + date + padding
@@ -285,33 +288,62 @@ function radar_visualization(config) {
   }
 
   function segment(quadrant, ring) {
-    var polar_min = {
-      t: quadrants[quadrant].radial_min * Math.PI,
-      r: ring === 0 ? 30 : rings[ring - 1].radius
-    };
-    var polar_max = {
-      t: quadrants[quadrant].radial_max * Math.PI,
-      r: rings[ring].radius
-    };
+    var min_angle = quadrants[quadrant].radial_min * Math.PI;
+    var max_angle = quadrants[quadrant].radial_max * Math.PI;
+    var base_inner_radius = ring === 0 ? 30 : rings[ring - 1].radius;
+    var base_outer_radius = rings[ring].radius;
+
+    var inner_radius = base_inner_radius + config.segment_radial_padding;
+    var outer_radius = base_outer_radius - config.segment_radial_padding;
+    if (outer_radius <= inner_radius) {
+      var midpoint = (base_inner_radius + base_outer_radius) / 2;
+      inner_radius = Math.max(0, midpoint - 1);
+      outer_radius = midpoint + 1;
+    }
+
+    var ring_center = (inner_radius + outer_radius) / 2;
+    var angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
+    var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
+    angular_padding = Math.min(angular_padding, angular_limit);
+
+    var angle_min = min_angle + angular_padding;
+    var angle_max = max_angle - angular_padding;
+    if (angle_max <= angle_min) {
+      angle_min = min_angle;
+      angle_max = max_angle;
+    }
+
     var cartesian_min = quadrant_bounds[quadrant].min;
     var cartesian_max = quadrant_bounds[quadrant].max;
+
+    function clampPoint(point) {
+      var c = bounded_box(point, cartesian_min, cartesian_max);
+      var p = polar(c);
+      p.r = bounded_interval(p.r, inner_radius, outer_radius);
+      p.t = bounded_interval(p.t, angle_min, angle_max);
+      return cartesian(p);
+    }
+
+    function clampAndAssign(d) {
+      var clipped = clampPoint({ x: d.x, y: d.y });
+      d.x = clipped.x;
+      d.y = clipped.y;
+      return clipped;
+    }
+
     return {
       clipx: function(d) {
-        var c = bounded_box(d, cartesian_min, cartesian_max);
-        var p = bounded_ring(polar(c), polar_min.r + 15, polar_max.r - 15);
-        d.x = cartesian(p).x; // adjust data too!
-        return d.x;
+        var clipped = clampAndAssign(d);
+        return clipped.x;
       },
       clipy: function(d) {
-        var c = bounded_box(d, cartesian_min, cartesian_max);
-        var p = bounded_ring(polar(c), polar_min.r + 15, polar_max.r - 15);
-        d.y = cartesian(p).y; // adjust data too!
-        return d.y;
+        var clipped = clampAndAssign(d);
+        return clipped.y;
       },
       random: function() {
         return cartesian({
-          t: random_between(polar_min.t, polar_max.t),
-          r: normal_between(polar_min.r, polar_max.r)
+          t: random_between(angle_min, angle_max),
+          r: normal_between(inner_radius, outer_radius)
         });
       }
     }
@@ -432,22 +464,29 @@ function radar_visualization(config) {
 
   // draw rings
   for (var i = 0; i < rings.length; i++) {
+    var outer = rings[i].radius;
+    var inner = i === 0 ? 0 : rings[i - 1].radius;
+    var thickness = Math.max(outer - inner, 1);
+    var labelRadius = outer - (thickness / 2);
+    var labelFontSize = Math.max(12, Math.min(32, thickness * 0.45));
+
     grid.append("circle")
       .attr("cx", 0)
       .attr("cy", 0)
-      .attr("r", rings[i].radius)
+      .attr("r", outer)
       .style("fill", "none")
       .style("stroke", config.colors.grid)
       .style("stroke-width", 1);
     if (config.print_layout) {
       grid.append("text")
         .text(config.rings[i].name)
-        .attr("y", -rings[i].radius + 62)
+        .attr("y", -labelRadius)
         .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
         .style("fill", config.rings[i].color)
         .style("opacity", 0.35)
         .style("font-family", config.font_family)
-        .style("font-size", "42px")
+        .style("font-size", labelFontSize + "px")
         .style("font-weight", "bold")
         .style("pointer-events", "none")
         .style("user-select", "none");
@@ -766,7 +805,11 @@ function radar_visualization(config) {
   d3.forceSimulation()
     .nodes(config.entries)
     .velocityDecay(0.19) // magic number (found by experimentation)
-    .force("collision", d3.forceCollide().radius(12).strength(0.85))
+    .force("collision", d3.forceCollide()
+      .radius(function(d) {
+        return d.collision_radius || config.blip_collision_radius;
+      })
+      .strength(0.85))
     .on("tick", ticked);
 
   function ringDescriptionsTable() {
