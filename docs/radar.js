@@ -485,6 +485,13 @@ function radar_visualization(config) {
       var seg_inner_radius = seg_base_inner_radius + config.segment_radial_padding;
       var seg_outer_radius = seg_base_outer_radius - config.segment_radial_padding;
 
+      // Guard against zero-width or negative-width segments
+      if (seg_outer_radius <= seg_inner_radius) {
+        var midpoint = (seg_base_inner_radius + seg_base_outer_radius) / 2;
+        seg_inner_radius = Math.max(0, midpoint - 1);
+        seg_outer_radius = midpoint + 1;
+      }
+
       var seg_angle_range = (quadrants[quadrant].radial_max - quadrants[quadrant].radial_min) * Math.PI;
       var seg_ring_center = (seg_inner_radius + seg_outer_radius) / 2;
       var seg_radial_thickness = seg_outer_radius - seg_inner_radius;
