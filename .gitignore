@@ -5,9 +5,10 @@ node_modules/
 # yarn
 yarn-error.log
 
-# Test coverage
+# Test coverage and results
 coverage/
 *.lcov
+test-results.xml
 
 # AI Coding
 .mcp.json

@@ -21,9 +21,10 @@ The project uses GitHub Actions for CI/CD with the following workflows:
 1. Checks out the code
 2. Sets up Bun runtime
 3. Installs dependencies
-4. Runs tests with coverage (`bun test --coverage`)
-5. Uploads coverage to Codecov.io
-6. Codecov automatically comments on PRs with coverage diff
+4. Runs tests with coverage and JUnit reporting (`bun test --coverage --reporter=junit`)
+5. Uploads code coverage to Codecov.io
+6. Uploads test results to Codecov.io (JUnit XML format)
+7. Codecov automatically comments on PRs with coverage diff and test results
 
 ### Coverage Reporting
 
@@ -35,6 +36,18 @@ Coverage is tracked using [Codecov.io](https://codecov.io), which provides:
   - Line-by-line coverage for modified files
 - **Coverage trends** over time
 - **GitHub Checks** integration
+
+### Test Results Reporting
+
+Test results are uploaded to Codecov in JUnit XML format, providing:
+- **Test execution summary** (total tests, passed, failed)
+- **Individual test results** for each test case
+- **Test duration metrics**
+- **Historical test trends** over time
+- **Flaky test detection** (tests that sometimes fail)
+- **Test performance tracking**
+
+The JUnit reporter is built into Bun and configured via `bunfig.toml` or command-line flags.
 
 ## Setup Instructions
 
@@ -74,8 +87,9 @@ Key settings:
 ### `.github/workflows/test.yml`
 Main test workflow file that:
 - Sets up Bun environment
-- Runs tests with coverage
-- Uploads results to Codecov
+- Runs tests with coverage and JUnit reporting
+- Uploads coverage to Codecov
+- Uploads test results to Codecov
 
 ### `codecov.yml`
 Codecov configuration that controls:
@@ -90,12 +104,14 @@ Bun test runner configuration:
 - Coverage reporters: `lcov`, `text`
 - Coverage threshold: 70%
 - Skips test files from coverage
+- JUnit reporter output: `./test-results.xml`
 
 ### `.gitignore`
-Excludes coverage artifacts:
+Excludes test artifacts:
 ```
 coverage/
 *.lcov
+test-results.xml
 ```
 
 ## Running Tests Locally
@@ -107,6 +123,12 @@ bun test
 # Run tests with coverage
 bun test --coverage
 
+# Run tests with coverage and JUnit report
+bun test --coverage --reporter=junit --reporter-outfile=./test-results.xml
+
+# Or use the npm script
+npm run test:junit
+
 # Run tests in watch mode
 bun test --watch
 
@@ -114,11 +136,17 @@ bun test --watch
 bun test test/radar.test.js
 ```
 
-## Coverage Reports
+## Test Reports
 
-After running `bun test --coverage`, you'll find:
+After running tests with coverage and JUnit reporting, you'll find:
+
+### Coverage Reports
 - **LCOV report**: `coverage/lcov.info` (uploaded to Codecov)
 - **Text report**: Printed to console showing coverage percentages
+
+### Test Results
+- **JUnit XML**: `test-results.xml` (uploaded to Codecov)
+- Contains test execution details, pass/fail status, and timing
 
 ## PR Comment Example
 

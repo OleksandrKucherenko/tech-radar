@@ -32,10 +32,11 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Run tests with coverage
-        run: bun test --coverage --coverage-reporter=lcov
+      - name: Run tests with coverage and JUnit reporting
+        run: bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=./test-results.xml
 
       - name: Upload coverage to Codecov
+        if: always()
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -44,6 +45,15 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
           verbose: true
+
+      - name: Upload test results to Codecov
+        if: always()
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./test-results.xml
+          flags: unittests
+          fail_ci_if_error: false
 
       - name: Add test summary to job
         if: always()

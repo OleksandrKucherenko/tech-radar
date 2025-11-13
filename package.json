@@ -25,6 +25,7 @@
     "build": "bun run build.ts",
     "screenshot": "bun run screenshot.ts",
     "test": "bun test",
+    "test:junit": "bun test --reporter=junit --reporter-outfile=./test-results.xml",
     "lint": "npm run lint:js && npm run lint:html",
     "lint:js": "eslint docs/*.js",
     "lint:html": "eslint docs/*.html"

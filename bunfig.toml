@@ -18,3 +18,8 @@ coverageSkipTestFiles = true
 # Specify test file patterns
 # By default, Bun looks for files ending in .test.{js,jsx,ts,tsx}
 root = "."
+
+# Test reporters configuration
+# JUnit XML reporter for CI/CD integration
+[test.reporter]
+junit = "./test-results.xml"
