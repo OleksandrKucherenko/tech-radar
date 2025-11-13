@@ -133,8 +133,12 @@ Test files are available in the `docs/` directory:
 
 **Demo files** - Individual configuration examples:
 - `demo-2x4.html` - 2 Quadrants × 4 Rings
+- `demo-3x4.html` - 3 Quadrants × 4 Rings
 - `index.html` - 4 Quadrants × 4 Rings (default)
+- `demo-4x8.html` - 4 Quadrants × 8 Rings
+- `demo-5x4.html` - 5 Quadrants × 4 Rings
 - `demo-6x5.html` - 6 Quadrants × 5 Rings
+- `demo-7x4.html` - 7 Quadrants × 4 Rings
 - `demo-8x8.html` - 8 Quadrants × 8 Rings (maximum)
 
 Open these files in a browser to visually verify functionality.
