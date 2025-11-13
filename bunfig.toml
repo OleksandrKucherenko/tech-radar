@@ -1,0 +1,12 @@
+# Bun configuration file
+# See https://bun.sh/docs/runtime/bunfig
+
+[test]
+# Test configuration
+preload = []
+coverage = false
+coverageThreshold = 0.8
+
+# Specify test file patterns
+# By default, Bun looks for files ending in .test.{js,jsx,ts,tsx}
+root = "."
