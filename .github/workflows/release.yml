@@ -48,18 +48,6 @@ jobs:
           echo "📦 Tag: $TAG_NAME"
           echo "🔢 Version: $VERSION"
 
-      - name: Validate semver format
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          # Validate semver format (basic check for X.Y.Z with optional prerelease and metadata)
-          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.]+)?(\+[a-zA-Z0-9\.]+)?$'; then
-            echo "❌ Error: Version '$VERSION' does not match semver format"
-            echo "Expected format: X.Y.Z[-prerelease][+metadata]"
-            echo "Examples: 0.14.1, 1.0.0-alpha.2, 0.20.0-beta+meta.1"
-            exit 1
-          fi
-          echo "✅ Version format is valid"
-
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -68,7 +56,50 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Validate semver format
+        id: validate
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG_NAME="${{ steps.version.outputs.tag }}"
+
+          # Use semver package for accurate validation
+          VALIDATION_RESULT=$(node -e "
+            const semver = require('semver');
+            const version = '$VERSION';
+            const isValid = semver.valid(version);
+
+            if (isValid) {
+              console.log('valid');
+              process.exit(0);
+            } else {
+              console.log('invalid');
+              process.exit(0);
+            }
+          ")
+
+          if [ "$VALIDATION_RESULT" = "invalid" ]; then
+            echo "ℹ️  Tag '$TAG_NAME' is not a valid semver version, skipping release"
+            echo "   Only tags matching semver format will trigger releases"
+            echo "   Examples: v0.14.1, v1.0.0-alpha.2, v0.20.0-beta+meta.1"
+            echo ""
+            echo "## ⏭️ Skipped Release" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Tag \`$TAG_NAME\` is not a valid semver version." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Only tags matching semver format will trigger releases." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Valid examples:**" >> $GITHUB_STEP_SUMMARY
+            echo "- \`v0.14.1\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`v1.0.0-alpha.2\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`v0.20.0-beta+meta.1\`" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          echo "✅ Version format is valid semver"
+          echo "is_valid=true" >> $GITHUB_OUTPUT
+
       - name: Build minified release
+        if: steps.validate.outputs.is_valid == 'true'
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
@@ -87,6 +118,7 @@ jobs:
           echo "release_file=$RELEASE_FILE" >> $GITHUB_ENV
 
       - name: Delete existing release if tag was reassigned
+        if: steps.validate.outputs.is_valid == 'true'
         run: |
           TAG_NAME="${{ steps.version.outputs.tag }}"
 
@@ -102,6 +134,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Create GitHub Release
+        if: steps.validate.outputs.is_valid == 'true'
         id: create_release
         run: |
           TAG_NAME="${{ steps.version.outputs.tag }}"
@@ -170,6 +203,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Add release summary
+        if: steps.validate.outputs.is_valid == 'true'
         run: |
           TAG_NAME="${{ steps.version.outputs.tag }}"
           VERSION="${{ steps.version.outputs.version }}"
