@@ -38,8 +38,33 @@ This repository generates a **Technology Radar visualization** for Zalando's eng
 
 Versioned releases are stored in `docs/release/radar-{version}.js`. Current version is 0.13 (using d3.js v7, supports 2-8 quadrants and 4-8 rings).
 
-To create a new release:
-1. Update the version number in `build.ts`
+#### Automated Release (Recommended)
+
+The repository has automated CI/CD for releases via GitHub Actions:
+
+1. **Create and push a version tag** (must follow semver with `v` prefix):
+   ```bash
+   git tag v0.14.0
+   git push origin v0.14.0
+   ```
+
+2. **GitHub Actions automatically**:
+   - Validates the semver format
+   - Builds the minified release file
+   - Creates a GitHub Release with the artifact
+   - Handles tag reassignment (deletes and recreates existing releases)
+
+**Supported tag formats** (semver):
+- `v0.14.1` - Standard release
+- `v1.0.0-alpha.2` - Pre-release with identifier
+- `v0.20.0-beta+meta.1` - Pre-release with metadata
+
+**Tag reassignment**: If you delete and reassign a tag to a different commit, the CI will automatically update the release.
+
+#### Manual Release
+
+To create a release locally:
+1. Set the version: `export RELEASE_VERSION=0.14.0`
 2. Run `bun run build`
 3. Test the generated file in `docs/release/` (use `test-minified.html`)
 4. Commit the new release file
