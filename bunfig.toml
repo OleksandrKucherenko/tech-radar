@@ -7,10 +7,16 @@
 # preload = ["./test-setup.js"]
 
 # Coverage settings
-# Enable with: bun test --coverage
+# Enable coverage by default
 coverage = true
+
+# Set coverage reporter (note: singular, not plural)
+coverageReporter = ["text", "lcov"]
+
+# Set coverage output directory
 coverageDir = "./coverage"
-coverageReporters = ["lcov", "text"]
+
+# Coverage threshold (70%)
 coverageThreshold = 0.7
 
 # Coverage scope - focus on docs/radar.js
