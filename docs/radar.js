@@ -360,24 +360,68 @@ function radar_visualization(config) {
       random: function() {
         return cartesian({
           t: random_between(angle_min, angle_max),
-          r: normal_between(inner_radius, outer_radius)
+          r: random_between(inner_radius, outer_radius)
         });
       }
     }
   }
 
-  // position each entry randomly in its segment
-  for (var i = 0; i < config.entries.length; i++) {
-    var entry = config.entries[i];
-    entry.segment = segment(entry.quadrant, entry.ring);
-    var point = entry.segment.random();
-    entry.x = point.x;
-    entry.y = point.y;
-    entry.color = entry.active || config.print_layout ?
-      config.rings[entry.ring].color : config.colors.inactive;
+  // Helper function to distribute entries in a grid pattern within their segment
+  function gridPosition(entries, segmentInfo) {
+    if (entries.length === 0) return;
+
+    var min_angle = quadrants[segmentInfo.quadrant].radial_min * Math.PI;
+    var max_angle = quadrants[segmentInfo.quadrant].radial_max * Math.PI;
+    var base_inner_radius = segmentInfo.ring === 0 ? 30 : rings[segmentInfo.ring - 1].radius;
+    var base_outer_radius = rings[segmentInfo.ring].radius;
+
+    var inner_radius = base_inner_radius + config.segment_radial_padding;
+    var outer_radius = base_outer_radius - config.segment_radial_padding;
+    if (outer_radius <= inner_radius) {
+      var midpoint = (base_inner_radius + base_outer_radius) / 2;
+      inner_radius = Math.max(0, midpoint - 1);
+      outer_radius = midpoint + 1;
+    }
+
+    var ring_center = (inner_radius + outer_radius) / 2;
+    var angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
+    var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
+    angular_padding = Math.min(angular_padding, angular_limit);
+
+    var angle_min = min_angle + angular_padding;
+    var angle_max = max_angle - angular_padding;
+
+    // Calculate optimal grid dimensions
+    var angle_range = angle_max - angle_min;
+    var radius_range = outer_radius - inner_radius;
+    var count = entries.length;
+
+    // Approximate grid: more angular divisions for larger angle ranges
+    var angular_divisions = Math.max(1, Math.ceil(Math.sqrt(count * (angle_range / (Math.PI / 4)))));
+    var radial_divisions = Math.max(1, Math.ceil(count / angular_divisions));
+
+    // Distribute entries in grid
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+
+      // Grid cell indices
+      var angular_index = i % angular_divisions;
+      var radial_index = Math.floor(i / angular_divisions);
+
+      // Position within grid cell with jitter
+      var angular_fraction = (angular_index + 0.3 + random() * 0.4) / angular_divisions;
+      var radial_fraction = (radial_index + 0.3 + random() * 0.4) / radial_divisions;
+
+      var angle = angle_min + angular_fraction * angle_range;
+      var radius = inner_radius + radial_fraction * radius_range;
+
+      var point = cartesian({ t: angle, r: radius });
+      entry.x = point.x;
+      entry.y = point.y;
+    }
   }
 
-  // partition entries according to segments
+  // partition entries according to segments first
   var segmented = new Array(num_quadrants);
   for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
     segmented[quadrant] = new Array(num_rings);
@@ -388,6 +432,21 @@ function radar_visualization(config) {
   for (var i=0; i<config.entries.length; i++) {
     var entry = config.entries[i];
     segmented[entry.quadrant][entry.ring].push(entry);
+  }
+
+  // position each entry using grid-based distribution
+  for (var i = 0; i < config.entries.length; i++) {
+    var entry = config.entries[i];
+    entry.segment = segment(entry.quadrant, entry.ring);
+    entry.color = entry.active || config.print_layout ?
+      config.rings[entry.ring].color : config.colors.inactive;
+  }
+
+  // Apply grid positioning to each segment
+  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
+    for (let ring = 0; ring < num_rings; ring++) {
+      gridPosition(segmented[quadrant][ring], { quadrant: quadrant, ring: ring });
+    }
   }
 
   // assign unique sequential id to each entry
@@ -410,6 +469,39 @@ function radar_visualization(config) {
       entries.sort(function(a,b) { return a.label.localeCompare(b.label); })
       for (var i=0; i<entries.length; i++) {
         entries[i].id = "" + id++;
+      }
+    }
+  }
+
+  // Calculate adaptive collision radius based on segment density
+  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
+    for (let ring = 0; ring < num_rings; ring++) {
+      var entries = segmented[quadrant][ring];
+      if (entries.length === 0) continue;
+
+      // Calculate segment area
+      var base_inner_radius = ring === 0 ? 30 : rings[ring - 1].radius;
+      var base_outer_radius = rings[ring].radius;
+      var inner_radius = base_inner_radius + config.segment_radial_padding;
+      var outer_radius = base_outer_radius - config.segment_radial_padding;
+
+      var angle_range = (quadrants[quadrant].radial_max - quadrants[quadrant].radial_min) * Math.PI;
+      var ring_center = (inner_radius + outer_radius) / 2;
+      var radial_thickness = outer_radius - inner_radius;
+
+      // Approximate segment area (sector area)
+      var segment_area = angle_range * ring_center * radial_thickness;
+
+      // Calculate area per entry
+      var area_per_entry = segment_area / entries.length;
+
+      // Collision radius based on available area (with safety factor)
+      var ideal_radius = Math.sqrt(area_per_entry / Math.PI) * 0.45;
+      var adaptive_radius = Math.max(10, Math.min(config.blip_collision_radius, ideal_radius));
+
+      // Assign collision radius to each entry
+      for (var i = 0; i < entries.length; i++) {
+        entries[i].collision_radius = adaptive_radius;
       }
     }
   }
@@ -799,12 +891,15 @@ function radar_visualization(config) {
   // distribute blips, while avoiding collisions
   d3.forceSimulation()
     .nodes(config.entries)
-    .velocityDecay(0.19) // magic number (found by experimentation)
+    .velocityDecay(0.25) // Increased for more stable movement
+    .alphaDecay(0.015) // Slower cooling for better convergence
+    .alphaMin(0.001) // Lower minimum to run longer
     .force("collision", d3.forceCollide()
       .radius(function(d) {
         return d.collision_radius || config.blip_collision_radius;
       })
-      .strength(0.85))
+      .strength(0.9) // Increased collision strength
+      .iterations(3)) // Multiple iterations per tick for better collision resolution
     .on("tick", ticked);
 
   function ringDescriptionsTable() {
