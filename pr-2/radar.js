@@ -718,8 +718,27 @@ function radar_visualization(config) {
     legendLeftColumn.html('');
     legendRightColumn.html('');
 
+    // Calculate which quadrants go in which column for clockwise ordering
+    // This ensures legends are visually close to their radar sectors
+    var left_count = Math.floor(num_quadrants / 2);
+    var right_count = num_quadrants - left_count;
+    var left_start = Math.floor((num_quadrants + 1) / 4);
+
+    var leftQuadrants = [];
+    var rightQuadrants = [];
+
+    // Fill left column quadrants (consecutive range)
+    for (var i = 0; i < left_count; i++) {
+      leftQuadrants.push((left_start + i) % num_quadrants);
+    }
+
+    // Fill right column quadrants (remaining, wrapping around)
+    for (var i = 0; i < right_count; i++) {
+      rightQuadrants.push((left_start + left_count + i) % num_quadrants);
+    }
+
     function targetColumn(quadrant) {
-      return (quadrant % 2 === 0) ? legendRightColumn : legendLeftColumn;
+      return leftQuadrants.includes(quadrant) ? legendLeftColumn : legendRightColumn;
     }
 
     for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
