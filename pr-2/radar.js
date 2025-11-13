@@ -391,14 +391,29 @@ function radar_visualization(config) {
     var angle_min = min_angle + angular_padding;
     var angle_max = max_angle - angular_padding;
 
-    // Calculate optimal grid dimensions
+    // Calculate optimal grid dimensions based on segment aspect ratio
     var angle_range = angle_max - angle_min;
     var radius_range = outer_radius - inner_radius;
     var count = entries.length;
 
-    // Approximate grid: more angular divisions for larger angle ranges
-    var angular_divisions = Math.max(1, Math.ceil(Math.sqrt(count * (angle_range / (Math.PI / 4)))));
-    var radial_divisions = Math.max(1, Math.ceil(count / angular_divisions));
+    // Calculate segment aspect ratio (arc length vs radial depth)
+    var segment_arc_length = angle_range * ring_center; // approximate arc length at center
+    var aspect_ratio = segment_arc_length / Math.max(radius_range, 1); // width/height ratio
+
+    // Base number of divisions
+    var base_divisions = Math.ceil(Math.sqrt(count));
+    var angular_divisions, radial_divisions;
+
+    // Distribute grid cells based on aspect ratio
+    if (aspect_ratio > 1) {
+      // Wider than tall - prefer more angular divisions
+      angular_divisions = Math.max(1, Math.ceil(base_divisions * Math.sqrt(aspect_ratio)));
+      radial_divisions = Math.max(1, Math.ceil(count / angular_divisions));
+    } else {
+      // Taller than wide - prefer more radial divisions
+      radial_divisions = Math.max(1, Math.ceil(base_divisions / Math.sqrt(aspect_ratio)));
+      angular_divisions = Math.max(1, Math.ceil(count / radial_divisions));
+    }
 
     // Distribute entries in grid
     for (var i = 0; i < entries.length; i++) {
