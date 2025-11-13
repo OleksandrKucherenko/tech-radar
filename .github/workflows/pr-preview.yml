@@ -77,14 +77,11 @@ jobs:
               comment.body.includes('PR Preview deployed')
             );
 
-            const body = `## 🚀 PR Preview deployed!
-
-**Preview URL:** ${previewUrl}
-
-✅ Preview updated with latest changes from commit ${context.sha.substring(0, 7)}
-
----
-<sub>This preview will be automatically removed when the PR is closed.</sub>`;
+            const body = '## 🚀 PR Preview deployed!\n\n' +
+              '**Preview URL:** ' + previewUrl + '\n\n' +
+              '✅ Preview updated with latest changes from commit ' + context.sha.substring(0, 7) + '\n\n' +
+              '---\n' +
+              '<sub>This preview will be automatically removed when the PR is closed.</sub>';
 
             if (botComment) {
               // Update existing comment
