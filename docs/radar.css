@@ -23,3 +23,10 @@ td {
 .hover-underline:hover {
   text-decoration: underline;
 }
+.demo-links {
+  margin: 10px 20px;
+  font-size: 14px;
+}
+.demo-links a {
+  margin-left: 12px;
+}

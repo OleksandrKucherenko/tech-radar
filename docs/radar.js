@@ -38,60 +38,17 @@ function radar_visualization(config) {
 
   config.legend_column_width = config.legend_column_width || 140
   config.legend_line_height = config.legend_line_height || 10
+  config.chart_padding = ("chart_padding" in config) ? config.chart_padding : 60;
 
   // Calculate space for title and footer
   var title_height = config.print_layout && config.title ? 60 : 0;  // Title + date + padding
   var footer_height = config.print_layout ? 40 : 0;  // Footer + padding
-  var available_height = config.height - title_height - footer_height;
-  var available_width = config.width;
+  var minimum_chart_height = (2 * config.chart_padding) + 40;
+  var available_height = Math.max(minimum_chart_height, config.height - title_height - footer_height);
+  var available_width = Math.max((2 * config.chart_padding) + 40, config.width);
 
-  // Adjust title and footer positions to reserve proper space
-  config.title_offset = config.title_offset || {
-    x: -available_width / 2 + 20,
-    y: -config.height / 2 + 30
-  };
-  config.footer_offset = config.footer_offset || {
-    x: -200,
-    y: config.height / 2 - 20
-  };
-
-  // Generate legend positions dynamically based on number of quadrants
-  if (!config.legend_offset) {
-    config.legend_offset = [];
-    var num_quads = config.quadrants.length;
-    // Use slightly less than half of available space for legend radius
-    var legend_radius = Math.min(available_width, available_height) / 2 - 100;
-
-    if (num_quads === 2) {
-      // For 2 quadrants, place legends on left and right sides
-      var legend_x = available_width / 2 - 200;
-      config.legend_offset = [
-        { x: -legend_x - 25, y: -available_height / 2 + 110 },
-        { x: legend_x, y: -available_height / 2 + 110 }
-      ];
-    } else if (num_quads === 4) {
-      // Use relative positions for 4 quadrants
-      var legend_x = legend_radius - 50;
-      var legend_y_top = -available_height / 2 + 110;
-      var legend_y_bottom = available_height / 2 - 290;
-
-      config.legend_offset = [
-        { x: legend_x, y: legend_y_top },
-        { x: -legend_x - 225, y: legend_y_top },
-        { x: -legend_x - 225, y: legend_y_bottom },
-        { x: legend_x, y: legend_y_bottom }
-      ];
-    } else {
-      // Calculate positions in circular arrangement
-      for (var i = 0; i < num_quads; i++) {
-        var angle = -Math.PI + (i + 0.5) * (2 * Math.PI / num_quads);
-        config.legend_offset.push({
-          x: Math.round(legend_radius * Math.cos(angle)),
-          y: Math.round(legend_radius * Math.sin(angle))
-        });
-      }
-    }
-  }
+  var raw_outer_radius = Math.min(available_width, available_height) / 2 - config.chart_padding;
+  var target_outer_radius = Math.max(10, raw_outer_radius);
 
   // Validate configuration
   if (!config.quadrants || config.quadrants.length < 2 || config.quadrants.length > 8) {
@@ -133,11 +90,12 @@ function radar_visualization(config) {
   const quadrants = [];
   const num_quadrants = config.quadrants.length;
   const angle_per_quadrant = 2 / num_quadrants; // in PI multiples
+  const rotation_offset = (num_quadrants === 2) ? -0.5 : 0; // rotate to vertical split for 2 quadrants
 
   for (let i = 0; i < num_quadrants; i++) {
-    const start_angle = -1 + (i * angle_per_quadrant);
-    const end_angle = -1 + ((i + 1) * angle_per_quadrant);
-    const mid_angle = -Math.PI + (i + 0.5) * angle_per_quadrant * Math.PI;
+    const start_angle = -1 + (i * angle_per_quadrant) + rotation_offset;
+    const end_angle = -1 + ((i + 1) * angle_per_quadrant) + rotation_offset;
+    const mid_angle = (-Math.PI + (i + 0.5) * angle_per_quadrant * Math.PI) + (rotation_offset * Math.PI);
 
     quadrants.push({
       radial_min: start_angle,
@@ -149,34 +107,86 @@ function radar_visualization(config) {
 
   // Generate rings dynamically based on config.rings.length
   // Scale the current pattern [130, 220, 310, 400] proportionally
-  const rings = [];
   const num_rings = config.rings.length;
   const base_pattern = [130, 220, 310, 400];
-  const max_radius = 400;
+  const max_base_radius = base_pattern[base_pattern.length - 1];
+  const ring_template = [];
 
   if (num_rings === 4) {
-    // Use original spacing for 4 rings
     for (let i = 0; i < 4; i++) {
-      rings.push({ radius: base_pattern[i] });
+      ring_template.push(base_pattern[i]);
     }
   } else {
-    // Scale proportionally for other ring counts
     for (let i = 0; i < num_rings; i++) {
-      // Interpolate position in the base pattern
-      const pattern_position = (i / (num_rings - 1)) * 3; // Map to 0-3 range
+      const pattern_position = (i / (num_rings - 1)) * 3;
       const pattern_index = Math.floor(pattern_position);
       const fraction = pattern_position - pattern_index;
 
       let radius;
       if (pattern_index >= 3) {
-        radius = max_radius;
+        radius = max_base_radius;
       } else {
-        // Linear interpolation between pattern points
         radius = base_pattern[pattern_index] +
                  (base_pattern[pattern_index + 1] - base_pattern[pattern_index]) * fraction;
       }
 
-      rings.push({ radius: Math.round(radius) });
+      ring_template.push(radius);
+    }
+  }
+
+  const radius_scale = target_outer_radius / max_base_radius;
+  const rings = ring_template.map(function(r) {
+    return { radius: Math.max(10, Math.round(r * radius_scale)) };
+  });
+  const outer_radius = rings[rings.length - 1].radius;
+  const quadrant_bounds = quadrants.map(function(q) {
+    return computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius);
+  });
+
+  if (!config.title_offset) {
+    config.title_offset = {
+      x: -outer_radius,
+      y: -outer_radius - 40
+    };
+  }
+  if (!config.footer_offset) {
+    config.footer_offset = {
+      x: -outer_radius,
+      y: outer_radius + 60
+    };
+  }
+
+  // Generate legend positions dynamically based on number of quadrants
+  if (!config.legend_offset) {
+    config.legend_offset = [];
+    var num_quads = config.quadrants.length;
+    var legend_radius = Math.min(available_width, available_height) / 2 - 100;
+
+    if (num_quads === 2) {
+      var legend_gap = outer_radius + 120;
+      config.legend_offset = [
+        { x: -legend_gap - config.legend_column_width, y: -outer_radius },
+        { x: legend_gap, y: -outer_radius }
+      ];
+    } else if (num_quads === 4) {
+      var legend_x = legend_radius - 50;
+      var legend_y_top = -outer_radius;
+      var legend_y_bottom = outer_radius - 220;
+
+      config.legend_offset = [
+        { x: legend_x, y: legend_y_top },
+        { x: -legend_x - 225, y: legend_y_top },
+        { x: -legend_x - 225, y: legend_y_bottom },
+        { x: legend_x, y: legend_y_bottom }
+      ];
+    } else {
+      for (var i = 0; i < num_quads; i++) {
+        var angle = -Math.PI + (i + 0.5) * (2 * Math.PI / num_quads);
+        config.legend_offset.push({
+          x: Math.round(legend_radius * Math.cos(angle)),
+          y: Math.round(legend_radius * Math.sin(angle))
+        });
+      }
     }
   }
 
@@ -216,6 +226,64 @@ function radar_visualization(config) {
     }
   }
 
+  function computeQuadrantBounds(startAngle, endAngle, radius) {
+    var twoPi = 2 * Math.PI;
+    var normalizedStart = startAngle;
+    var normalizedEnd = endAngle;
+
+    while (normalizedEnd <= normalizedStart) {
+      normalizedEnd += twoPi;
+    }
+
+    var axisAngles = [
+      -Math.PI,
+      -Math.PI / 2,
+      0,
+      Math.PI / 2,
+      Math.PI,
+      (3 * Math.PI) / 2,
+      2 * Math.PI
+    ];
+
+    var candidates = [normalizedStart, normalizedEnd];
+
+    axisAngles.forEach(function(axisAngle) {
+      var candidate = axisAngle;
+      while (candidate < normalizedStart) {
+        candidate += twoPi;
+      }
+      if (candidate <= normalizedEnd) {
+        candidates.push(candidate);
+      }
+    });
+
+    var min_x = Infinity;
+    var max_x = -Infinity;
+    var min_y = Infinity;
+    var max_y = -Infinity;
+
+    candidates.forEach(function(angle) {
+      var cosA = Math.cos(angle);
+      var sinA = Math.sin(angle);
+      min_x = Math.min(min_x, cosA);
+      max_x = Math.max(max_x, cosA);
+      min_y = Math.min(min_y, sinA);
+      max_y = Math.max(max_y, sinA);
+    });
+
+    var padding = 20;
+    return {
+      min: {
+        x: (min_x * radius) - padding,
+        y: (min_y * radius) - padding
+      },
+      max: {
+        x: (max_x * radius) + padding,
+        y: (max_y * radius) + padding
+      }
+    };
+  }
+
   function segment(quadrant, ring) {
     var polar_min = {
       t: quadrants[quadrant].radial_min * Math.PI,
@@ -225,14 +293,8 @@ function radar_visualization(config) {
       t: quadrants[quadrant].radial_max * Math.PI,
       r: rings[ring].radius
     };
-    var cartesian_min = {
-      x: 15 * quadrants[quadrant].factor_x,
-      y: 15 * quadrants[quadrant].factor_y
-    };
-    var cartesian_max = {
-      x: rings[rings.length - 1].radius * quadrants[quadrant].factor_x,
-      y: rings[rings.length - 1].radius * quadrants[quadrant].factor_y
-    };
+    var cartesian_min = quadrant_bounds[quadrant].min;
+    var cartesian_max = quadrant_bounds[quadrant].max;
     return {
       clipx: function(d) {
         var c = bounded_box(d, cartesian_min, cartesian_max);
@@ -343,7 +405,6 @@ function radar_visualization(config) {
   config.font_family = config.font_family || "Arial, Helvetica";
 
   // draw grid lines - N radial lines for N quadrants
-  var outer_radius = rings[rings.length - 1].radius;
   for (var i = 0; i < num_quadrants; i++) {
     var angle = -Math.PI + (i * 2 * Math.PI / num_quadrants);
     grid.append("line")
@@ -467,17 +528,22 @@ function radar_visualization(config) {
 
       // Track height separately for each column
       var columnHeights = new Array(num_columns).fill(0);
+      var columnRingCounts = new Array(num_columns).fill(0);
 
       for (let ring = 0; ring < num_rings; ring++) {
+        var entriesInRing = segmented[quadrant][ring];
+        if (!entriesInRing.length) {
+          continue; // Skip empty ring sections
+        }
+
         var column = Math.floor(ring / rings_per_column);
-        var row_in_column = ring % rings_per_column;
 
         // Get current height for this column
         var currentHeight = columnHeights[column];
 
-        // Add spacing between rings (but not before the first ring in column)
-        if (row_in_column > 0) {
-          currentHeight += 36; // Space between rings
+        // Add spacing between rings after the first entry
+        if (columnRingCounts[column] > 0) {
+          currentHeight += 36;
         }
 
         // Add ring name header
@@ -495,7 +561,7 @@ function radar_visualization(config) {
         // Add entries for this ring
         var entryStartHeight = currentHeight;
         legend.selectAll(".legend" + quadrant + ring)
-          .data(segmented[quadrant][ring])
+          .data(entriesInRing)
           .enter()
             .append("a")
               .attr("href", function (d, i) {
@@ -521,6 +587,7 @@ function radar_visualization(config) {
 
         // Update column height tracker with accumulated height
         columnHeights[column] = currentHeight;
+        columnRingCounts[column] += 1;
       }
     }
   }

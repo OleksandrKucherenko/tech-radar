@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <meta name="description"
+    content="Zalando Tech Radar: a tool to visualize technology choices, inspire and support Engineering teams at Zalando to pick the best technologies for new projects">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zalando Tech Radar</title>
+  <link rel="shortcut icon" href="https://www.zalando.de/favicon.ico">
+
+  <title>Demo: 4 Quadrants × 8 Rings</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="radar.js"></script>
+  <link rel="stylesheet" href="radar.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <svg id="radar"></svg>
+
+  <script>
+    radar_visualization({
+      svg_id: "radar",
+      width: 1200,
+      height: 1100,
+      title: "4 Quadrants × 8 Rings",
+      quadrants: [
+        { name: "Frontend" },
+        { name: "Backend" },
+        { name: "Data" },
+        { name: "Infrastructure" }
+      ],
+      rings: [
+        { name: "ADOPT", color: "#5ba300" },
+        { name: "TRIAL", color: "#009eb0" },
+        { name: "ASSESS", color: "#c7ba00" },
+        { name: "EXPERIMENT", color: "#f2994a" },
+        { name: "WATCH", color: "#bb6bd9" },
+        { name: "EVALUATE", color: "#9b51e0" },
+        { name: "HOLD", color: "#e09b96" },
+        { name: "RETIRE", color: "#c0392b" }
+      ],
+      entries: [
+        { label: "React", quadrant: 0, ring: 0, moved: 0, active: true },
+        { label: "Next.js", quadrant: 0, ring: 1, moved: 2, active: true },
+        { label: "Solid", quadrant: 0, ring: 2, moved: 1, active: true },
+        { label: "Astro", quadrant: 0, ring: 3, moved: 0, active: true },
+        { label: "Qwik", quadrant: 0, ring: 4, moved: 0, active: true },
+        { label: "Stimulus", quadrant: 0, ring: 5, moved: 0, active: true },
+        { label: "jQuery", quadrant: 0, ring: 6, moved: -1, active: true },
+        { label: "Backbone", quadrant: 0, ring: 7, moved: -1, active: true },
+
+        { label: "Node.js", quadrant: 1, ring: 0, moved: 0, active: true },
+        { label: "Deno", quadrant: 1, ring: 1, moved: 1, active: true },
+        { label: "Spring", quadrant: 1, ring: 0, moved: 0, active: true },
+        { label: "NestJS", quadrant: 1, ring: 2, moved: 2, active: true },
+        { label: "Bun", quadrant: 1, ring: 3, moved: 2, active: true },
+        { label: "ColdFusion", quadrant: 1, ring: 6, moved: -1, active: true },
+        { label: "CGI", quadrant: 1, ring: 7, moved: -1, active: true },
+
+        { label: "PostgreSQL", quadrant: 2, ring: 0, moved: 0, active: true },
+        { label: "MySQL", quadrant: 2, ring: 1, moved: 0, active: true },
+        { label: "MongoDB", quadrant: 2, ring: 1, moved: -1, active: true },
+        { label: "Snowflake", quadrant: 2, ring: 2, moved: 0, active: true },
+        { label: "DuckDB", quadrant: 2, ring: 3, moved: 2, active: true },
+        { label: "Kafka", quadrant: 2, ring: 4, moved: 0, active: true },
+        { label: "Redis", quadrant: 2, ring: 0, moved: 0, active: true },
+        { label: "Cassandra", quadrant: 2, ring: 5, moved: -1, active: true },
+        { label: "XML DB", quadrant: 2, ring: 6, moved: -1, active: true },
+        { label: "Tape Archive", quadrant: 2, ring: 7, moved: -1, active: true },
+
+        { label: "Docker", quadrant: 3, ring: 0, moved: 0, active: true },
+        { label: "Kubernetes", quadrant: 3, ring: 1, moved: 0, active: true },
+        { label: "Nomad", quadrant: 3, ring: 2, moved: 1, active: true },
+        { label: "Fly.io", quadrant: 3, ring: 3, moved: 2, active: true },
+        { label: "Netlify", quadrant: 3, ring: 4, moved: 0, active: true },
+        { label: "Serverless Stack", quadrant: 3, ring: 5, moved: 1, active: true },
+        { label: "Bare Metal", quadrant: 3, ring: 6, moved: 0, active: true },
+        { label: "Colocation", quadrant: 3, ring: 7, moved: -1, active: true }
+      ]
+    });
+  </script>
+
+</body>
+
+</html>
