@@ -33,11 +33,11 @@ jobs:
         run: bun install
 
       - name: Run tests with coverage
-        run: bun test
+        run: bun run test:coverage
 
       - name: Generate JUnit test results
         if: always()
-        run: bun test --reporter=junit --reporter-outfile=./test-results.xml
+        run: bun run test:junit
 
       - name: Verify test artifacts
         if: always()
@@ -74,10 +74,22 @@ jobs:
           echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ -f "coverage/lcov.info" ]; then
-            echo "✅ Tests completed with coverage reporting" >> $GITHUB_STEP_SUMMARY
+          if [ -f "test-results.xml" ]; then
+            echo "✅ Tests completed successfully with Vitest" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Coverage report has been uploaded to Codecov.io" >> $GITHUB_STEP_SUMMARY
+            echo "📊 Test results uploaded to Codecov.io" >> $GITHUB_STEP_SUMMARY
           else
-            echo "⚠️ Tests completed but coverage file not found" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ Tests completed but test results file not found" >> $GITHUB_STEP_SUMMARY
           fi
+
+          if [ -f "coverage/lcov.info" ]; then
+            echo "📈 Coverage report generated and uploaded to Codecov.io" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📝 Note: Coverage shows 0% for radar.js due to eval() loading limitation" >> $GITHUB_STEP_SUMMARY
+            echo "   See TESTING_SOLUTION.md for detailed explanation" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Coverage file not found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📖 For testing documentation, see [TESTING_SOLUTION.md](TESTING_SOLUTION.md)" >> $GITHUB_STEP_SUMMARY
