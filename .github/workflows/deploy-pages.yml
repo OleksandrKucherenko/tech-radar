@@ -1,5 +1,6 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Deploy main site to GitHub Pages using gh-pages branch
+# This approach allows PR previews to coexist in subdirectories
+name: Deploy to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -9,35 +10,62 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Permissions needed to push to gh-pages branch
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    name: Deploy main site
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout master branch
         uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
         with:
-          # Upload docs directory (HTML, CSS, JS files)
-          path: './docs'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          ref: gh-pages
+          path: gh-pages-branch
+
+      - name: Deploy to root of gh-pages
+        run: |
+          # Preserve PR preview directories
+          if [ -d "gh-pages-branch/pr-*" ]; then
+            echo "Preserving PR preview directories..."
+            mkdir -p /tmp/pr-previews
+            cp -r gh-pages-branch/pr-* /tmp/pr-previews/ 2>/dev/null || true
+          fi
+
+          # Clear gh-pages root (except PR directories)
+          cd gh-pages-branch
+          find . -maxdepth 1 ! -name '.git' ! -name 'pr-*' ! -name '.' -exec rm -rf {} +
+
+          # Copy docs content to root
+          cp -r ../docs/* .
+
+          # Restore PR preview directories
+          if [ -d "/tmp/pr-previews" ]; then
+            echo "Restoring PR preview directories..."
+            cp -r /tmp/pr-previews/pr-* . 2>/dev/null || true
+          fi
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Commit and push
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to deploy"
+          else
+            git commit -m "Deploy main site from master@${GITHUB_SHA:0:7}"
+            git push origin gh-pages
+            echo "✅ Main site deployed successfully"
+          fi

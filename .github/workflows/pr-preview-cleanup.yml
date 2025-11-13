@@ -1,0 +1,70 @@
+# Workflow for cleaning up PR previews when PR is closed
+name: PR Preview Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+    branches: ["master"]
+
+# Limit permissions to only what's needed
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  cleanup-preview:
+    name: Cleanup PR Preview
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup cleanup environment
+        id: cleanup
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          PREVIEW_DIR="pr-${PR_NUMBER}"
+          echo "preview_dir=${PREVIEW_DIR}" >> $GITHUB_OUTPUT
+          echo "Cleaning up preview for PR #${PR_NUMBER}"
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-branch
+
+      - name: Remove PR preview directory
+        run: |
+          PREVIEW_DIR="${{ steps.cleanup.outputs.preview_dir }}"
+
+          # Navigate to gh-pages branch
+          cd gh-pages-branch
+
+          # Remove preview directory if it exists
+          if [ -d "${PREVIEW_DIR}" ]; then
+            rm -rf "${PREVIEW_DIR}"
+
+            # Configure git
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            # Commit and push
+            git add .
+            git commit -m "Remove preview for closed PR #${{ github.event.pull_request.number }}"
+            git push origin gh-pages
+
+            echo "✅ Preview directory removed successfully"
+          else
+            echo "ℹ️ Preview directory does not exist, nothing to clean up"
+          fi
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ github.event.pull_request.number }};
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: '🧹 PR preview has been cleaned up and removed.'
+            });

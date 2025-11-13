@@ -1,0 +1,105 @@
+# Workflow for deploying PR previews
+name: PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["master"]
+
+# Limit permissions to only what's needed
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  deploy-preview:
+    name: Deploy PR Preview
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Setup preview environment
+        id: preview
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          PREVIEW_DIR="pr-${PR_NUMBER}"
+          PREVIEW_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${PREVIEW_DIR}/"
+          echo "preview_dir=${PREVIEW_DIR}" >> $GITHUB_OUTPUT
+          echo "preview_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
+          echo "PR #${PR_NUMBER} preview will be at: ${PREVIEW_URL}"
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-branch
+
+      - name: Deploy to PR preview directory
+        run: |
+          PREVIEW_DIR="${{ steps.preview.outputs.preview_dir }}"
+
+          # Create or update PR preview directory
+          mkdir -p "gh-pages-branch/${PREVIEW_DIR}"
+
+          # Copy docs content to preview directory
+          cp -r docs/* "gh-pages-branch/${PREVIEW_DIR}/"
+
+          # Navigate to gh-pages branch
+          cd gh-pages-branch
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Commit and push
+          git add "${PREVIEW_DIR}"
+          git commit -m "Deploy preview for PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
+          git push origin gh-pages
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const previewUrl = '${{ steps.preview.outputs.preview_url }}';
+            const prNumber = ${{ github.event.pull_request.number }};
+
+            // Find existing preview comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('PR Preview deployed')
+            );
+
+            const body = `## 🚀 PR Preview deployed!
+
+**Preview URL:** ${previewUrl}
+
+✅ Preview updated with latest changes from commit ${context.sha.substring(0, 7)}
+
+---
+<sub>This preview will be automatically removed when the PR is closed.</sub>`;
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
