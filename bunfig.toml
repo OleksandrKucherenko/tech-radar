@@ -1,0 +1,34 @@
+# Bun configuration file
+# See https://bun.sh/docs/runtime/bunfig
+
+[test]
+# Test configuration
+# preload - optional array of scripts to run before tests
+# preload = ["./test-setup.js"]
+
+# Coverage settings
+# Enable coverage by default
+coverage = true
+
+# Set coverage reporter (note: singular, not plural)
+coverageReporter = ["text", "lcov"]
+
+# Set coverage output directory
+coverageDir = "./coverage"
+
+# Coverage threshold (70%)
+coverageThreshold = 0.7
+
+# Coverage scope - focus on docs/radar.js
+coverageSkipTestFiles = true
+
+# Specify test file patterns
+# By default, Bun looks for files ending in .test.{js,jsx,ts,tsx}
+root = "."
+
+# Test reporters configuration
+# JUnit XML reporter can be enabled via command-line:
+#   bun test --reporter=junit --reporter-outfile=./test-results.xml
+# Or configured here:
+# [test.reporter]
+# junit = "./test-results.xml"

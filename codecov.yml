@@ -1,0 +1,58 @@
+# Codecov configuration
+# See https://docs.codecov.com/docs/codecov-yaml
+
+# Coverage targets
+coverage:
+  precision: 2
+  round: down
+  range: "60...90"
+
+  status:
+    # Overall project coverage
+    project:
+      default:
+        target: 70%
+        threshold: 2%
+        if_ci_failed: error
+
+    # Coverage on changed files in PR
+    patch:
+      default:
+        target: 70%
+        threshold: 5%
+        if_ci_failed: error
+
+# Comment configuration for PRs
+comment:
+  layout: "header, diff, files, footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+  # Show these sections in PR comments
+  after_n_builds: 1
+
+# Ignore paths from coverage
+ignore:
+  - "test/**/*"
+  - "node_modules/**/*"
+  - "*.test.js"
+  - "*.test.ts"
+  - "build.ts"
+  - "screenshot.ts"
+
+# Only track coverage for main source files
+flag_management:
+  default_rules:
+    carryforward: true
+
+flags:
+  unittests:
+    paths:
+      - docs/radar.js
+    carryforward: false
+
+# GitHub Checks integration
+github_checks:
+  annotations: true

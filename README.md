@@ -1,5 +1,8 @@
 # Motivation
 
+[![Tests](https://github.com/zalando/tech-radar/actions/workflows/test.yml/badge.svg)](https://github.com/zalando/tech-radar/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/zalando/tech-radar/branch/master/graph/badge.svg)](https://codecov.io/gh/zalando/tech-radar)
+
 At [Zalando](http://zalando.de), we maintain a [public Tech
 Radar](http://zalando.github.io/tech-radar/) to help our engineering teams
 align on technology choices. It is based on the [pioneering work

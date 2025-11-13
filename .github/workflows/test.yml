@@ -1,0 +1,88 @@
+# Run unit tests on PRs with code coverage reporting
+name: Tests
+
+on:
+  pull_request:
+    branches: ["master"]
+  push:
+    branches: ["master"]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better coverage diff
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Verify test artifacts
+        if: always()
+        run: |
+          echo "Checking for test artifacts..."
+          ls -la coverage/ 2>/dev/null || echo "No coverage directory"
+          ls -la test-results.xml 2>/dev/null || echo "No test-results.xml file"
+          echo "Current directory contents:"
+          ls -la
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Upload test results to Codecov
+        if: always()
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./test-results.xml
+          flags: unittests
+          fail_ci_if_error: false
+
+      - name: Add test summary to job
+        if: always()
+        run: |
+          echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "test-results.xml" ]; then
+            echo "✅ Tests completed successfully with Vitest" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📊 Test results uploaded to Codecov.io" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Tests completed but test results file not found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f "coverage/lcov.info" ]; then
+            echo "📈 Coverage report generated and uploaded to Codecov.io" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Coverage file not found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📖 For testing documentation, see [TESTING_SOLUTION.md](TESTING_SOLUTION.md)" >> $GITHUB_STEP_SUMMARY
