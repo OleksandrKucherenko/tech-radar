@@ -480,17 +480,17 @@ function radar_visualization(config) {
       if (entries.length === 0) continue;
 
       // Calculate segment area
-      var base_inner_radius = ring === 0 ? 30 : rings[ring - 1].radius;
-      var base_outer_radius = rings[ring].radius;
-      var inner_radius = base_inner_radius + config.segment_radial_padding;
-      var outer_radius = base_outer_radius - config.segment_radial_padding;
+      var seg_base_inner_radius = ring === 0 ? 30 : rings[ring - 1].radius;
+      var seg_base_outer_radius = rings[ring].radius;
+      var seg_inner_radius = seg_base_inner_radius + config.segment_radial_padding;
+      var seg_outer_radius = seg_base_outer_radius - config.segment_radial_padding;
 
-      var angle_range = (quadrants[quadrant].radial_max - quadrants[quadrant].radial_min) * Math.PI;
-      var ring_center = (inner_radius + outer_radius) / 2;
-      var radial_thickness = outer_radius - inner_radius;
+      var seg_angle_range = (quadrants[quadrant].radial_max - quadrants[quadrant].radial_min) * Math.PI;
+      var seg_ring_center = (seg_inner_radius + seg_outer_radius) / 2;
+      var seg_radial_thickness = seg_outer_radius - seg_inner_radius;
 
       // Approximate segment area (sector area)
-      var segment_area = angle_range * ring_center * radial_thickness;
+      var segment_area = seg_angle_range * seg_ring_center * seg_radial_thickness;
 
       // Calculate area per entry
       var area_per_entry = segment_area / entries.length;
