@@ -1,9 +1,10 @@
 // Build script to minify radar.js using Bun + terser
 // Usage: bun run build.ts
+// Can override version via RELEASE_VERSION environment variable
 import { $ } from 'bun';
 import { readFileSync } from 'fs';
 
-const version = '0.13'; // Update this when creating new releases
+const version = process.env.RELEASE_VERSION || '0.13'; // Update this when creating new releases
 
 async function buildRadar() {
   console.log(`Building radar.js version ${version}...`);
