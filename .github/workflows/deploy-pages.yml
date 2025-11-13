@@ -87,3 +87,18 @@ jobs:
             git push origin gh-pages
             echo "✅ Main site deployed successfully"
           fi
+
+      - name: Add deployment status to job summary
+        run: |
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+
+          echo "## 🚀 Main Site Deployed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Site URL:** [$SITE_URL]($SITE_URL)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Commit:** \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
+          echo "🌿 **Branch:** \`master\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ The main site has been deployed to GitHub Pages." >> $GITHUB_STEP_SUMMARY

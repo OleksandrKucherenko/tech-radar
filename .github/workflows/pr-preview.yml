@@ -76,6 +76,22 @@ jobs:
           git commit -m "Deploy preview for PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
           git push origin gh-pages
 
+      - name: Add preview URL to job summary
+        run: |
+          PREVIEW_URL="${{ steps.preview.outputs.preview_url }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          echo "## 🚀 PR Preview Deployed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Preview URL:** [$PREVIEW_URL]($PREVIEW_URL)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📝 **PR:** #$PR_NUMBER" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Commit:** \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ The preview site has been deployed and will be automatically removed when the PR is closed." >> $GITHUB_STEP_SUMMARY
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
