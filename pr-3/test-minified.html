@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Test Minified radar.js</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="release/radar-0.13.js"></script>
+<link rel="stylesheet" href="radar.css">
+</head>
+<body>
+
+<h1>Testing Minified radar-0.13.js</h1>
+<p>This page tests the minified version of radar.js to ensure it works correctly.</p>
+
+<svg id="radar"></svg>
+
+<script>
+radar_visualization({
+  svg_id: "radar",
+  width: 1000,
+  height: 800,
+  title: "Test Minified Version (0.13)",
+  date: "2025-11",
+  quadrants: [
+    { name: "Languages" },
+    { name: "Infrastructure" },
+    { name: "Datastores" },
+    { name: "Data Management" }
+  ],
+  rings: [
+    { name: "ADOPT", color: "#5ba300" },
+    { name: "TRIAL", color: "#009eb0" },
+    { name: "ASSESS", color: "#c7ba00" },
+    { name: "HOLD", color: "#e09b96" }
+  ],
+  entries: [
+    { label: "Python", quadrant: 0, ring: 0, moved: 0, active: true },
+    { label: "JavaScript", quadrant: 0, ring: 0, moved: 1, active: true },
+    { label: "TypeScript", quadrant: 0, ring: 0, moved: 0, active: true },
+    { label: "Kubernetes", quadrant: 1, ring: 0, moved: 0, active: true },
+    { label: "Docker", quadrant: 1, ring: 0, moved: 0, active: true },
+    { label: "PostgreSQL", quadrant: 2, ring: 0, moved: 0, active: true },
+    { label: "Elasticsearch", quadrant: 2, ring: 1, moved: 0, active: true },
+    { label: "Kafka", quadrant: 3, ring: 0, moved: 0, active: true },
+    { label: "Spark", quadrant: 3, ring: 1, moved: 2, active: true }
+  ]
+});
+</script>
+
+<div style="margin: 20px; padding: 20px; background: #f0f0f0; border-radius: 5px;">
+  <h2>Test Results</h2>
+  <p>If you can see the radar visualization above, the minified version is working correctly!</p>
+  <p><strong>Version:</strong> 0.13</p>
+  <p><strong>Size Reduction:</strong> ~56.6% (25,137 bytes → 10,899 bytes)</p>
+</div>
+
+</body>
+</html>
