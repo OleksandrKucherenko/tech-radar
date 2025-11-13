@@ -36,19 +36,50 @@ function radar_visualization(config) {
   config.repo_url = config.repo_url || '#';
   config.print_ring_descriptions_table = ("print_ring_descriptions_table" in config) ? config.print_ring_descriptions_table : false;
 
+  config.legend_column_width = config.legend_column_width || 140
+  config.legend_line_height = config.legend_line_height || 10
+
+  // Calculate space for title and footer
+  var title_height = config.print_layout && config.title ? 60 : 0;  // Title + date + padding
+  var footer_height = config.print_layout ? 40 : 0;  // Footer + padding
+  var available_height = config.height - title_height - footer_height;
+  var available_width = config.width;
+
+  // Adjust title and footer positions to reserve proper space
+  config.title_offset = config.title_offset || {
+    x: -available_width / 2 + 20,
+    y: -config.height / 2 + 30
+  };
+  config.footer_offset = config.footer_offset || {
+    x: -200,
+    y: config.height / 2 - 20
+  };
+
   // Generate legend positions dynamically based on number of quadrants
   if (!config.legend_offset) {
     config.legend_offset = [];
     var num_quads = config.quadrants.length;
-    var legend_radius = 500; // Distance from center for legend placement
+    // Use slightly less than half of available space for legend radius
+    var legend_radius = Math.min(available_width, available_height) / 2 - 100;
 
-    if (num_quads === 4) {
-      // Use original positions for 4 quadrants for backward compatibility
+    if (num_quads === 2) {
+      // For 2 quadrants, place legends on left and right sides
+      var legend_x = available_width / 2 - 200;
       config.legend_offset = [
-        { x: 450, y: 90 },
-        { x: -675, y: 90 },
-        { x: -675, y: -310 },
-        { x: 450, y: -310 }
+        { x: -legend_x - 25, y: -available_height / 2 + 110 },
+        { x: legend_x, y: -available_height / 2 + 110 }
+      ];
+    } else if (num_quads === 4) {
+      // Use relative positions for 4 quadrants
+      var legend_x = legend_radius - 50;
+      var legend_y_top = -available_height / 2 + 110;
+      var legend_y_bottom = available_height / 2 - 290;
+
+      config.legend_offset = [
+        { x: legend_x, y: legend_y_top },
+        { x: -legend_x - 225, y: legend_y_top },
+        { x: -legend_x - 225, y: legend_y_bottom },
+        { x: legend_x, y: legend_y_bottom }
       ];
     } else {
       // Calculate positions in circular arrangement
@@ -61,10 +92,6 @@ function radar_visualization(config) {
       }
     }
   }
-  config.title_offset = config.title_offset || { x: -675, y: -420 };
-  config.footer_offset = config.footer_offset || { x: -155, y: 450 };
-  config.legend_column_width = config.legend_column_width || 140
-  config.legend_line_height = config.legend_line_height || 10
 
   // Validate configuration
   if (!config.quadrants || config.quadrants.length < 2 || config.quadrants.length > 8) {
@@ -305,7 +332,9 @@ function radar_visualization(config) {
   if ("zoomed_quadrant" in config) {
     svg.attr("viewBox", viewbox(config.zoomed_quadrant));
   } else {
-    radar.attr("transform", translate(scaled_width / 2, scaled_height / 2).concat(`scale(${config.scale})`));
+    // Center radar in available space (accounting for title and footer)
+    var radar_center_y = (scaled_height / 2) + ((title_height - footer_height) / 2);
+    radar.attr("transform", translate(scaled_width / 2, radar_center_y).concat(`scale(${config.scale})`));
   }
 
   var grid = radar.append("g");
@@ -364,21 +393,24 @@ function radar_visualization(config) {
     }
   }
 
-  function legend_transform(quadrant, ring, legendColumnWidth, index=null, previousHeight = null) {
+  function legend_transform(quadrant, ring, legendColumnWidth, index=null, currentHeight = 0) {
     // Determine number of columns based on ring count
     // 4-6 rings: 2 columns, 7-8 rings: 3 columns
     var num_columns = num_rings >= 7 ? 3 : 2;
     var rings_per_column = Math.ceil(num_rings / num_columns);
 
     var column = Math.floor(ring / rings_per_column);
-    var row_in_column = ring % rings_per_column;
 
     const dx = column * legendColumnWidth;
-    let dy = (index == null ? -16 : index * config.legend_line_height);
-
-    // Add offset for rows after the first in each column
-    if (row_in_column > 0) {
-      dy = dy + 36 + previousHeight;
+    // For ring header (index==null), just use currentHeight
+    // For entries, add line height * index to currentHeight
+    let dy;
+    if (index == null) {
+      // Ring header - use currentHeight directly with small adjustment
+      dy = currentHeight;
+    } else {
+      // Entry - add line spacing
+      dy = currentHeight + (index * config.legend_line_height);
     }
 
     return translate(
@@ -430,23 +462,38 @@ function radar_visualization(config) {
         .style("font-size", "18px")
         .style("font-weight", "bold");
 
-      let previousLegendHeight = 0;
       var num_columns = num_rings >= 7 ? 3 : 2;
       var rings_per_column = Math.ceil(num_rings / num_columns);
 
+      // Track height separately for each column
+      var columnHeights = new Array(num_columns).fill(0);
+
       for (let ring = 0; ring < num_rings; ring++) {
-        // Reset previousLegendHeight at the start of each column
-        if (ring % rings_per_column === 0) {
-          previousLegendHeight = 0;
+        var column = Math.floor(ring / rings_per_column);
+        var row_in_column = ring % rings_per_column;
+
+        // Get current height for this column
+        var currentHeight = columnHeights[column];
+
+        // Add spacing between rings (but not before the first ring in column)
+        if (row_in_column > 0) {
+          currentHeight += 36; // Space between rings
         }
 
+        // Add ring name header
         legend.append("text")
-          .attr("transform", legend_transform(quadrant, ring, config.legend_column_width, null, previousLegendHeight))
+          .attr("transform", legend_transform(quadrant, ring, config.legend_column_width, null, currentHeight))
           .text(config.rings[ring].name)
           .style("font-family", config.font_family)
           .style("font-size", "12px")
           .style("font-weight", "bold")
           .style("fill", config.rings[ring].color);
+
+        // Add space for the ring header itself
+        currentHeight += 20; // Height of ring name text + padding
+
+        // Add entries for this ring
+        var entryStartHeight = currentHeight;
         legend.selectAll(".legend" + quadrant + ring)
           .data(segmented[quadrant][ring])
           .enter()
@@ -459,7 +506,7 @@ function radar_visualization(config) {
                  return (d.link && config.links_in_new_tabs) ? "_blank" : null;
               })
             .append("text")
-              .attr("transform", function(d, i) { return legend_transform(quadrant, ring, config.legend_column_width, i, previousLegendHeight); })
+              .attr("transform", function(d, i) { return legend_transform(quadrant, ring, config.legend_column_width, i, entryStartHeight); })
               .attr("class", "legend" + quadrant + ring)
               .attr("id", function(d, i) { return "legendItem" + d.id; })
               .text(function(d) { return d.id + ". " + d.label; })
@@ -469,8 +516,11 @@ function radar_visualization(config) {
               .on("mouseout", function(event, d) { hideBubble(d); unhighlightLegendItem(d); })
               .call(wrap_text)
               .each(function() {
-                previousLegendHeight += d3.select(this).node().getBBox().height;
+                currentHeight += d3.select(this).node().getBBox().height;
               });
+
+        // Update column height tracker with accumulated height
+        columnHeights[column] = currentHeight;
       }
     }
   }

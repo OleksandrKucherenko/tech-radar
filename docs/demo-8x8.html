@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Demo: 8 Quadrants × 8 Rings</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="radar.js"></script>
+<link rel="stylesheet" href="radar.css">
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    background: white;
+  }
+</style>
+</head>
+<body>
+
+<svg id="radar"></svg>
+
+<script>
+radar_visualization({
+  svg_id: "radar",
+  width: 1400,
+  height: 1200,
+  title: "8 Quadrants × 8 Rings (Maximum)",
+  quadrants: [
+    { name: "Languages" },
+    { name: "Frameworks" },
+    { name: "Platforms" },
+    { name: "Tools" },
+    { name: "Techniques" },
+    { name: "Infrastructure" },
+    { name: "Data" },
+    { name: "Security" }
+  ],
+  rings: [
+    { name: "ADOPT", color: "#00ff00" },
+    { name: "TRIAL", color: "#00dd00" },
+    { name: "ASSESS", color: "#00bb00" },
+    { name: "EXPERIMENT", color: "#009900" },
+    { name: "WATCH", color: "#007700" },
+    { name: "HOLD", color: "#cc8800" },
+    { name: "AVOID", color: "#dd4400" },
+    { name: "DEPRECATED", color: "#ff0000" }
+  ],
+  entries: [
+    { label: "Python", quadrant: 0, ring: 0, moved: 0, active: true },
+    { label: "Rust", quadrant: 0, ring: 1, moved: 1, active: true },
+    { label: "React", quadrant: 1, ring: 0, moved: 0, active: true },
+    { label: "Svelte", quadrant: 1, ring: 2, moved: 2, active: true },
+    { label: "AWS", quadrant: 2, ring: 0, moved: 0, active: true },
+    { label: "GCP", quadrant: 2, ring: 1, moved: 0, active: true },
+    { label: "Git", quadrant: 3, ring: 0, moved: 0, active: true },
+    { label: "Linear", quadrant: 3, ring: 2, moved: 2, active: true },
+    { label: "TDD", quadrant: 4, ring: 0, moved: 0, active: true },
+    { label: "DDD", quadrant: 4, ring: 1, moved: 0, active: true },
+    { label: "Docker", quadrant: 5, ring: 0, moved: 0, active: true },
+    { label: "Kubernetes", quadrant: 5, ring: 1, moved: 0, active: true },
+    { label: "PostgreSQL", quadrant: 6, ring: 0, moved: 0, active: true },
+    { label: "Redis", quadrant: 6, ring: 1, moved: 0, active: true },
+    { label: "OAuth2", quadrant: 7, ring: 0, moved: 0, active: true },
+    { label: "JWT", quadrant: 7, ring: 1, moved: 0, active: true }
+  ]
+});
+</script>
+
+</body>
+</html>

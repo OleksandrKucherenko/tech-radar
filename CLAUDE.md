@@ -131,7 +131,21 @@ Test files are available in the `docs/` directory:
 - Confirms `radar_visualization` function is accessible
 - Uses the same configuration as the main radar
 
+**Demo files** - Individual configuration examples:
+- `demo-2x4.html` - 2 Quadrants × 4 Rings
+- `index.html` - 4 Quadrants × 4 Rings (default)
+- `demo-6x5.html` - 6 Quadrants × 5 Rings
+- `demo-8x8.html` - 8 Quadrants × 8 Rings (maximum)
+
 Open these files in a browser to visually verify functionality.
+
+### Generating Screenshots
+
+```bash
+bun run screenshot    # Generate screenshots (requires Playwright + system deps)
+```
+
+Alternatively, open the demo files in a browser and take manual screenshots. See `docs/screenshots/README.md` for detailed instructions.
 
 ### Validation Rules
 The radar.js automatically validates:

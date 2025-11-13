@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Demo: 2 Quadrants × 4 Rings</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="radar.js"></script>
+<link rel="stylesheet" href="radar.css">
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    background: white;
+  }
+</style>
+</head>
+<body>
+
+<svg id="radar"></svg>
+
+<script>
+radar_visualization({
+  svg_id: "radar",
+  width: 900,
+  height: 700,
+  title: "2 Quadrants × 4 Rings",
+  quadrants: [
+    { name: "Frontend" },
+    { name: "Backend" }
+  ],
+  rings: [
+    { name: "ADOPT", color: "#5ba300" },
+    { name: "TRIAL", color: "#009eb0" },
+    { name: "ASSESS", color: "#c7ba00" },
+    { name: "HOLD", color: "#e09b96" }
+  ],
+  entries: [
+    { label: "React", quadrant: 0, ring: 0, moved: 1, active: true },
+    { label: "Vue", quadrant: 0, ring: 1, moved: 0, active: true },
+    { label: "Angular", quadrant: 0, ring: 2, moved: 0, active: true },
+    { label: "Svelte", quadrant: 0, ring: 2, moved: 2, active: true },
+    { label: "Node.js", quadrant: 1, ring: 0, moved: 0, active: true },
+    { label: "Django", quadrant: 1, ring: 1, moved: 0, active: true },
+    { label: "Flask", quadrant: 1, ring: 1, moved: 0, active: true },
+    { label: "Rails", quadrant: 1, ring: 3, moved: -1, active: true }
+  ]
+});
+</script>
+
+</body>
+</html>

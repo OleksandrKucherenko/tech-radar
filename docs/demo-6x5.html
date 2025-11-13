@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Demo: 6 Quadrants × 5 Rings</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="radar.js"></script>
+<link rel="stylesheet" href="radar.css">
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    background: white;
+  }
+</style>
+</head>
+<body>
+
+<svg id="radar"></svg>
+
+<script>
+radar_visualization({
+  svg_id: "radar",
+  width: 1200,
+  height: 1000,
+  title: "6 Quadrants × 5 Rings",
+  quadrants: [
+    { name: "Languages" },
+    { name: "Frameworks" },
+    { name: "Platforms" },
+    { name: "Tools" },
+    { name: "Techniques" },
+    { name: "Infrastructure" }
+  ],
+  rings: [
+    { name: "ADOPT", color: "#5ba300" },
+    { name: "TRIAL", color: "#009eb0" },
+    { name: "ASSESS", color: "#c7ba00" },
+    { name: "HOLD", color: "#e09b96" },
+    { name: "DEPRECATED", color: "#cc0000" }
+  ],
+  entries: [
+    { label: "Python", quadrant: 0, ring: 0, moved: 0, active: true },
+    { label: "Go", quadrant: 0, ring: 1, moved: 1, active: true },
+    { label: "Rust", quadrant: 0, ring: 2, moved: 2, active: true },
+    { label: "React", quadrant: 1, ring: 0, moved: 0, active: true },
+    { label: "Next.js", quadrant: 1, ring: 1, moved: 2, active: true },
+    { label: "Vue", quadrant: 1, ring: 1, moved: 0, active: true },
+    { label: "AWS", quadrant: 2, ring: 0, moved: 0, active: true },
+    { label: "Vercel", quadrant: 2, ring: 1, moved: 0, active: true },
+    { label: "Heroku", quadrant: 2, ring: 3, moved: -1, active: true },
+    { label: "Git", quadrant: 3, ring: 0, moved: 0, active: true },
+    { label: "Figma", quadrant: 3, ring: 0, moved: 0, active: true },
+    { label: "Jira", quadrant: 3, ring: 2, moved: 0, active: true },
+    { label: "TDD", quadrant: 4, ring: 0, moved: 0, active: true },
+    { label: "Microservices", quadrant: 4, ring: 1, moved: 0, active: true },
+    { label: "Event Sourcing", quadrant: 4, ring: 2, moved: 0, active: true },
+    { label: "Docker", quadrant: 5, ring: 0, moved: 0, active: true },
+    { label: "Kubernetes", quadrant: 5, ring: 1, moved: 0, active: true },
+    { label: "Terraform", quadrant: 5, ring: 1, moved: 1, active: true }
+  ]
+});
+</script>
+
+</body>
+</html>

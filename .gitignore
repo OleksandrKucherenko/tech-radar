@@ -4,3 +4,7 @@ node_modules/
 
 # yarn
 yarn-error.log
+
+# AI Coding
+.mcp.json
+CLAUDE.md
