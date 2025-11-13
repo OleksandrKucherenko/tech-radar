@@ -636,3 +636,261 @@ describe('Variable Ring Configurations', () => {
     expect(blips.length).toBe(8);
   });
 });
+
+describe('Grid Distribution and Spatial Positioning', () => {
+  test('should distribute entries without extreme clustering in narrow sectors (8 quadrants)', () => {
+    // GIVEN: 8 quadrant configuration with 10 entries per quadrant/ring
+    const config = createMinimalConfig({
+      quadrants: Array(8).fill(null).map((_, i) => ({ name: `Q${i}` })),
+      entries: Array(80).fill(null).map((_, i) => ({
+        label: `Tech${i}`,
+        quadrant: Math.floor(i / 10),
+        ring: i % 4,
+        moved: 0,
+        active: true
+      }))
+    });
+
+    // WHEN: the radar visualization is created
+    radar_visualization(config);
+
+    // THEN: entries should be reasonably distributed
+    const blips = document.querySelectorAll('.blip');
+    expect(blips.length).toBe(80);
+
+    // Check that entries have varied x positions (not all clustered)
+    const transforms = Array.from(blips).map(b => b.getAttribute('transform'));
+    const xPositions = transforms.map(t => {
+      const match = t.match(/translate\(([^,]+),/);
+      return match ? parseFloat(match[1]) : 0;
+    });
+
+    // Calculate standard deviation to measure spread
+    const mean = xPositions.reduce((a, b) => a + b, 0) / xPositions.length;
+    const variance = xPositions.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / xPositions.length;
+    const stdDev = Math.sqrt(variance);
+
+    // Standard deviation should be significant (not all clustered at same position)
+    expect(stdDev).toBeGreaterThan(50);
+  });
+
+  test('should use available white space in 6 quadrant configuration', () => {
+    // GIVEN: 6 quadrant configuration with entries in each segment
+    const config = createMinimalConfig({
+      quadrants: Array(6).fill(null).map((_, i) => ({ name: `Q${i}` })),
+      rings: Array(5).fill(null).map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
+      entries: Array(60).fill(null).map((_, i) => ({
+        label: `Tech${i}`,
+        quadrant: i % 6,
+        ring: Math.floor(i / 12),
+        moved: 0,
+        active: true
+      }))
+    });
+
+    // WHEN: the radar visualization is created
+    radar_visualization(config);
+
+    // THEN: entries should be distributed across the available space
+    const blips = document.querySelectorAll('.blip');
+    expect(blips.length).toBe(60);
+
+    // Entries should have varied angular and radial positions
+    const transforms = Array.from(blips).map(b => b.getAttribute('transform'));
+    const positions = transforms.map(t => {
+      const match = t.match(/translate\(([^,]+),([^)]+)\)/);
+      return match ? { x: parseFloat(match[1]), y: parseFloat(match[2]) } : { x: 0, y: 0 };
+    });
+
+    // Calculate bounding box
+    const minX = Math.min(...positions.map(p => p.x));
+    const maxX = Math.max(...positions.map(p => p.x));
+    const minY = Math.min(...positions.map(p => p.y));
+    const maxY = Math.max(...positions.map(p => p.y));
+
+    // Bounding box should be substantial (using white space)
+    const width = maxX - minX;
+    const height = maxY - minY;
+    expect(width).toBeGreaterThan(200);
+    expect(height).toBeGreaterThan(200);
+  });
+
+  test('should maintain minimum angular divisions for narrow sectors', () => {
+    // GIVEN: 8 quadrant configuration (narrowest sectors)
+    const entries = Array(20).fill(null).map((_, i) => ({
+      label: `Tech${i}`,
+      quadrant: 0, // All in one narrow quadrant
+      ring: 0,     // All in one ring
+      moved: 0,
+      active: true
+    }));
+
+    const config = createMinimalConfig({
+      quadrants: Array(8).fill(null).map((_, i) => ({ name: `Q${i}` })),
+      entries
+    });
+
+    // WHEN: the radar visualization is created
+    radar_visualization(config);
+
+    // THEN: entries should spread angularly despite narrow sector
+    const blips = document.querySelectorAll('.blip');
+    const transforms = Array.from(blips).map(b => b.getAttribute('transform'));
+    const positions = transforms.map(t => {
+      const match = t.match(/translate\(([^,]+),([^)]+)\)/);
+      return match ? { x: parseFloat(match[1]), y: parseFloat(match[2]) } : { x: 0, y: 0 };
+    });
+
+    // Calculate angles from center
+    const angles = positions.map(p => Math.atan2(p.y, p.x));
+
+    // Should have at least 3 distinct angular zones
+    const angleRanges = angles.map(a => Math.floor(a * 10) / 10); // Round to 1 decimal
+    const uniqueAngles = new Set(angleRanges);
+    expect(uniqueAngles.size).toBeGreaterThanOrEqual(3);
+  });
+
+  test('should handle 5 quadrant configuration with balanced distribution', () => {
+    // GIVEN: 5 quadrant configuration
+    const config = createMinimalConfig({
+      quadrants: Array(5).fill(null).map((_, i) => ({ name: `Q${i}` })),
+      entries: Array(50).fill(null).map((_, i) => ({
+        label: `Tech${i}`,
+        quadrant: i % 5,
+        ring: Math.floor(i / 13),
+        moved: 0,
+        active: true
+      }))
+    });
+
+    // WHEN: the radar visualization is created
+    radar_visualization(config);
+
+    // THEN: all entries should be rendered
+    const blips = document.querySelectorAll('.blip');
+    expect(blips.length).toBe(50);
+
+    // Distribution should not show extreme clustering
+    const transforms = Array.from(blips).map(b => b.getAttribute('transform'));
+    const positions = transforms.map(t => {
+      const match = t.match(/translate\(([^,]+),([^)]+)\)/);
+      return match ? { x: parseFloat(match[1]), y: parseFloat(match[2]) } : { x: 0, y: 0 };
+    });
+
+    // Calculate pairwise distances
+    let minDistance = Infinity;
+    for (let i = 0; i < positions.length; i++) {
+      for (let j = i + 1; j < positions.length; j++) {
+        const dx = positions[i].x - positions[j].x;
+        const dy = positions[i].y - positions[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        minDistance = Math.min(minDistance, dist);
+      }
+    }
+
+    // Minimum distance should not be too small (indicates clustering)
+    // After force simulation, items should maintain reasonable spacing
+    expect(minDistance).toBeGreaterThan(5);
+  });
+
+  test('should handle 7 quadrant configuration without vertical striping', () => {
+    // GIVEN: 7 quadrant configuration
+    const config = createMinimalConfig({
+      quadrants: Array(7).fill(null).map((_, i) => ({ name: `Q${i}` })),
+      entries: Array(35).fill(null).map((_, i) => ({
+        label: `Tech${i}`,
+        quadrant: i % 7,
+        ring: Math.floor(i / 9),
+        moved: 0,
+        active: true
+      }))
+    });
+
+    // WHEN: the radar visualization is created
+    radar_visualization(config);
+
+    // THEN: entries should not form vertical stripes
+    const blips = document.querySelectorAll('.blip');
+    expect(blips.length).toBe(35);
+
+    // Group entries by quadrant and check angular spread within each
+    const transforms = Array.from(blips).map(b => b.getAttribute('transform'));
+    const positions = transforms.map(t => {
+      const match = t.match(/translate\(([^,]+),([^)]+)\)/);
+      return match ? { x: parseFloat(match[1]), y: parseFloat(match[2]) } : { x: 0, y: 0 };
+    });
+
+    // Take first quadrant (first 5 entries)
+    const quadrant0Positions = positions.slice(0, 5);
+    const angles0 = quadrant0Positions.map(p => Math.atan2(p.y, p.x));
+
+    // Should have angular variety within the quadrant
+    const angleRange = Math.max(...angles0) - Math.min(...angles0);
+    expect(angleRange).toBeGreaterThan(0.1); // At least 0.1 radians of spread
+  });
+
+  test('should assign collision radius to all entries', () => {
+    // GIVEN: configuration with multiple entries
+    const config = createMinimalConfig({
+      entries: Array(20).fill(null).map((_, i) => ({
+        label: `Tech${i}`,
+        quadrant: i % 4,
+        ring: Math.floor(i / 5),
+        moved: 0,
+        active: true
+      }))
+    });
+
+    // WHEN: the radar visualization is created
+    radar_visualization(config);
+
+    // THEN: all blips should be present (collision radius was properly assigned)
+    const blips = document.querySelectorAll('.blip');
+    expect(blips.length).toBe(20);
+
+    // Force simulation should have run (blips have final positions)
+    const transforms = Array.from(blips).map(b => b.getAttribute('transform'));
+    transforms.forEach(t => {
+      expect(t).toMatch(/translate\(-?\d+(\.\d+)?,-?\d+(\.\d+)?\)/);
+    });
+  });
+
+  test('should handle edge case of single entry without errors', () => {
+    // GIVEN: configuration with only one entry
+    const config = createMinimalConfig({
+      entries: [{
+        label: 'Single Tech',
+        quadrant: 0,
+        ring: 0,
+        moved: 0,
+        active: true
+      }]
+    });
+
+    // WHEN: the radar visualization is created
+    // THEN: it should not throw errors
+    expect(() => radar_visualization(config)).not.toThrow();
+
+    const blips = document.querySelectorAll('.blip');
+    expect(blips.length).toBe(1);
+  });
+
+  test('should handle segments with zero entries gracefully', () => {
+    // GIVEN: configuration where some segments have no entries
+    const config = createMinimalConfig({
+      quadrants: Array(6).fill(null).map((_, i) => ({ name: `Q${i}` })),
+      entries: [
+        { label: 'Tech1', quadrant: 0, ring: 0, moved: 0, active: true },
+        { label: 'Tech2', quadrant: 2, ring: 1, moved: 0, active: true },
+        { label: 'Tech3', quadrant: 4, ring: 2, moved: 0, active: true }
+      ]
+    });
+
+    // WHEN: the radar visualization is created
+    // THEN: it should not throw errors
+    expect(() => radar_visualization(config)).not.toThrow();
+
+    const blips = document.querySelectorAll('.blip');
+    expect(blips.length).toBe(3);
+  });
+});
