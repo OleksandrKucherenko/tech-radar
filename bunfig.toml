@@ -21,6 +21,8 @@ coverageSkipTestFiles = true
 root = "."
 
 # Test reporters configuration
-# JUnit XML reporter for CI/CD integration
-[test.reporter]
-junit = "./test-results.xml"
+# JUnit XML reporter can be enabled via command-line:
+#   bun test --reporter=junit --reporter-outfile=./test-results.xml
+# Or configured here:
+# [test.reporter]
+# junit = "./test-results.xml"

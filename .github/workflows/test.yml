@@ -32,8 +32,21 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Run tests with coverage and JUnit reporting
-        run: bun test --coverage --coverage-reporter=lcov --reporter=junit --reporter-outfile=./test-results.xml
+      - name: Run tests with coverage
+        run: bun test --coverage --coverage-reporter=lcov
+
+      - name: Generate JUnit test results
+        if: always()
+        run: bun test --reporter=junit --reporter-outfile=./test-results.xml
+
+      - name: Verify test artifacts
+        if: always()
+        run: |
+          echo "Checking for test artifacts..."
+          ls -la coverage/ 2>/dev/null || echo "No coverage directory"
+          ls -la test-results.xml 2>/dev/null || echo "No test-results.xml file"
+          echo "Current directory contents:"
+          ls -la
 
       - name: Upload coverage to Codecov
         if: always()

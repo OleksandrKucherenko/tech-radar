@@ -21,10 +21,14 @@ The project uses GitHub Actions for CI/CD with the following workflows:
 1. Checks out the code
 2. Sets up Bun runtime
 3. Installs dependencies
-4. Runs tests with coverage and JUnit reporting (`bun test --coverage --reporter=junit`)
-5. Uploads code coverage to Codecov.io
-6. Uploads test results to Codecov.io (JUnit XML format)
-7. Codecov automatically comments on PRs with coverage diff and test results
+4. Runs tests with coverage (`bun test --coverage`)
+5. Generates JUnit test results (`bun test --reporter=junit`)
+6. Verifies test artifacts were created
+7. Uploads code coverage to Codecov.io
+8. Uploads test results to Codecov.io (JUnit XML format)
+9. Codecov automatically comments on PRs with coverage diff and test results
+
+**Note:** Tests run twice to ensure both coverage and JUnit reports are generated correctly. This is a Bun limitation where combining `--coverage` and `--reporter=junit` in a single run can cause conflicts.
 
 ### Coverage Reporting
 
@@ -104,7 +108,7 @@ Bun test runner configuration:
 - Coverage reporters: `lcov`, `text`
 - Coverage threshold: 70%
 - Skips test files from coverage
-- JUnit reporter output: `./test-results.xml`
+- JUnit reporter: Configured via command-line (commented out in config to avoid conflicts)
 
 ### `.gitignore`
 Excludes test artifacts:
@@ -123,11 +127,14 @@ bun test
 # Run tests with coverage
 bun test --coverage
 
-# Run tests with coverage and JUnit report
-bun test --coverage --reporter=junit --reporter-outfile=./test-results.xml
+# Generate JUnit report (separate from coverage)
+bun test --reporter=junit --reporter-outfile=./test-results.xml
 
 # Or use the npm script
 npm run test:junit
+
+# Run both coverage and JUnit (two commands)
+bun test --coverage && bun test --reporter=junit --reporter-outfile=./test-results.xml
 
 # Run tests in watch mode
 bun test --watch
