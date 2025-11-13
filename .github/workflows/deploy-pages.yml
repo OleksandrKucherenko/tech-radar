@@ -1,0 +1,104 @@
+# Deploy main site to GitHub Pages using gh-pages branch
+# This approach allows PR previews to coexist in subdirectories
+name: Deploy to GitHub Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["master"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Permissions needed to push to gh-pages branch
+permissions:
+  contents: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy main site
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup gh-pages branch
+        run: |
+          # Check if gh-pages branch exists on remote
+          if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            echo "gh-pages branch exists, checking it out..."
+            git fetch origin gh-pages
+            git worktree add gh-pages-branch gh-pages
+          else
+            echo "gh-pages branch doesn't exist, creating it..."
+            git worktree add --detach gh-pages-branch
+            cd gh-pages-branch
+            git checkout --orphan gh-pages
+            git rm -rf . 2>/dev/null || true
+            echo "# GitHub Pages" > README.md
+            git add README.md
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "Initialize gh-pages branch"
+            git push origin gh-pages
+            cd ..
+          fi
+
+      - name: Deploy to root of gh-pages
+        run: |
+          # Preserve PR preview directories
+          if compgen -G "gh-pages-branch/pr-*" > /dev/null; then
+            echo "Preserving PR preview directories..."
+            mkdir -p /tmp/pr-previews
+            cp -r gh-pages-branch/pr-* /tmp/pr-previews/ 2>/dev/null || true
+          fi
+
+          # Clear gh-pages root (except PR directories and .git)
+          cd gh-pages-branch
+          find . -maxdepth 1 ! -name '.git' ! -name 'pr-*' ! -name '.' -exec rm -rf {} +
+
+          # Copy docs content to root
+          cp -r ../docs/* .
+
+          # Restore PR preview directories
+          if [ -d "/tmp/pr-previews" ]; then
+            echo "Restoring PR preview directories..."
+            cp -r /tmp/pr-previews/pr-* . 2>/dev/null || true
+          fi
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Commit and push
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to deploy"
+          else
+            git commit -m "Deploy main site from master@${GITHUB_SHA:0:7}"
+            git push origin gh-pages
+            echo "✅ Main site deployed successfully"
+          fi
+
+      - name: Add deployment status to job summary
+        run: |
+          SITE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+
+          echo "## 🚀 Main Site Deployed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Site URL:** [$SITE_URL]($SITE_URL)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Commit:** \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
+          echo "🌿 **Branch:** \`master\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ The main site has been deployed to GitHub Pages." >> $GITHUB_STEP_SUMMARY

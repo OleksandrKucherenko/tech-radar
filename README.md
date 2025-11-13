@@ -83,7 +83,55 @@ Radar](http://zalando.github.io/tech-radar/).
 
 ## Deployment
 
-Tech Radar is a static page, so it can be deployed using any hosting provider of your choice offering static page hosting.
+Tech Radar is a static page that can be deployed using any hosting provider offering static page hosting.
+
+### Automatic GitHub Pages Deployment
+
+This repository includes automated GitHub Actions workflows that deploy to GitHub Pages:
+
+#### Main Site Deployment
+
+The main site is **automatically deployed** from the `master` branch to GitHub Pages:
+
+- **Trigger:** Every push to `master` branch
+- **Workflow:** `.github/workflows/deploy-pages.yml`
+- **URL:** `https://{owner}.github.io/{repo}/`
+- **Content:** Deploys all files from `/docs` directory
+
+#### PR Preview Deployments
+
+Pull requests get **automatic preview deployments** for testing before merge:
+
+- **Trigger:** When PR is opened, updated, or reopened
+- **Workflow:** `.github/workflows/pr-preview.yml`
+- **URL:** `https://{owner}.github.io/{repo}/pr-{number}/`
+- **Cleanup:** Previews are automatically removed when PR is closed/merged
+- **Features:**
+  - Preview URL posted as PR comment (auto-updated on new commits)
+  - No comment spam - same comment is reused for updates
+  - Preview URL displayed in GitHub Actions job summary
+
+#### Initial Setup (One-Time)
+
+After merging the workflow files, configure GitHub Pages in your repository:
+
+1. Go to **Repository Settings → Pages**
+2. Under "Build and deployment":
+   - **Source:** Select **"Deploy from a branch"**
+   - **Branch:** Select **`gh-pages`** and **`/ (root)`**
+3. Click **Save**
+
+The first workflow run will automatically create the `gh-pages` branch if it doesn't exist.
+
+#### Workflow Features
+
+- ✅ Automatic `gh-pages` branch creation on first run
+- ✅ Main site and PR previews coexist on same GitHub Pages site
+- ✅ Clickable deployment URLs in Actions job summaries
+- ✅ PR comments with preview links (anti-spam: updates same comment)
+- ✅ Automatic cleanup when PRs are closed or merged
+
+See [CLAUDE.md](CLAUDE.md) for detailed workflow documentation.
 
 ## Local Development
 
