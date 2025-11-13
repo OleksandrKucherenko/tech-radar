@@ -17,6 +17,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup cleanup environment
         id: cleanup
         run: |
@@ -25,13 +30,22 @@ jobs:
           echo "preview_dir=${PREVIEW_DIR}" >> $GITHUB_OUTPUT
           echo "Cleaning up preview for PR #${PR_NUMBER}"
 
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: gh-pages-branch
+      - name: Setup gh-pages branch
+        id: setup
+        run: |
+          # Check if gh-pages branch exists on remote
+          if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            echo "gh-pages branch exists, checking it out..."
+            git fetch origin gh-pages
+            git worktree add gh-pages-branch gh-pages
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "gh-pages branch doesn't exist, nothing to clean up"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Remove PR preview directory
+        if: steps.setup.outputs.exists == 'true'
         run: |
           PREVIEW_DIR="${{ steps.cleanup.outputs.preview_dir }}"
 

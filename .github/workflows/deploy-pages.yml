@@ -27,23 +27,41 @@ jobs:
     steps:
       - name: Checkout master branch
         uses: actions/checkout@v4
-
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
         with:
-          ref: gh-pages
-          path: gh-pages-branch
+          fetch-depth: 0
+
+      - name: Setup gh-pages branch
+        run: |
+          # Check if gh-pages branch exists on remote
+          if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            echo "gh-pages branch exists, checking it out..."
+            git fetch origin gh-pages
+            git worktree add gh-pages-branch gh-pages
+          else
+            echo "gh-pages branch doesn't exist, creating it..."
+            git worktree add --detach gh-pages-branch
+            cd gh-pages-branch
+            git checkout --orphan gh-pages
+            git rm -rf . 2>/dev/null || true
+            echo "# GitHub Pages" > README.md
+            git add README.md
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "Initialize gh-pages branch"
+            git push origin gh-pages
+            cd ..
+          fi
 
       - name: Deploy to root of gh-pages
         run: |
           # Preserve PR preview directories
-          if [ -d "gh-pages-branch/pr-*" ]; then
+          if compgen -G "gh-pages-branch/pr-*" > /dev/null; then
             echo "Preserving PR preview directories..."
             mkdir -p /tmp/pr-previews
             cp -r gh-pages-branch/pr-* /tmp/pr-previews/ 2>/dev/null || true
           fi
 
-          # Clear gh-pages root (except PR directories)
+          # Clear gh-pages root (except PR directories and .git)
           cd gh-pages-branch
           find . -maxdepth 1 ! -name '.git' ! -name 'pr-*' ! -name '.' -exec rm -rf {} +
 
