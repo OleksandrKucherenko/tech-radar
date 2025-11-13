@@ -404,7 +404,7 @@ function radar_visualization(config) {
     }
   }
 
-  for (quadrant of quadrant_order) {
+  for (var quadrant of quadrant_order) {
     for (var ring = 0; ring < num_rings; ring++) {
       var entries = segmented[quadrant][ring];
       entries.sort(function(a,b) { return a.label.localeCompare(b.label); })
@@ -857,4 +857,19 @@ function radar_visualization(config) {
   if (config.print_ring_descriptions_table) {
     ringDescriptionsTable();
   }
+}
+
+// Export for module systems (ES6, CommonJS) while keeping browser compatibility
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = radar_visualization;
+}
+if (typeof exports !== 'undefined') {
+  exports.radar_visualization = radar_visualization;
+}
+// Make available globally for browser use
+if (typeof window !== 'undefined') {
+  window.radar_visualization = radar_visualization;
+}
+if (typeof global !== 'undefined') {
+  global.radar_visualization = radar_visualization;
 }

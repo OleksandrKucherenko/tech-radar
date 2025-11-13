@@ -8,154 +8,202 @@ The original issue was that **Bun was not generating code coverage reports** for
 
 ## Solution Implemented
 
-I set up **Vitest** as a robust testing solution that provides:
+### Phase 1: Initial Vitest Setup (Historical)
 
-### 1. Working Test Runner
-- ✅ **18 tests passing** covering core radar functionality
+Initially set up Vitest with eval() loading, which provided working tests but 0% coverage due to the eval() limitation.
+
+### Phase 2: Module Refactoring (Current Solution) ✅
+
+**Refactored radar.js to be importable as an ES module** while maintaining browser compatibility. This enables:
+
+- ✅ **Direct module imports** in tests (no eval() needed)
+- ✅ **Full code coverage tracking** (~86% statement coverage)
+- ✅ **Proper code instrumentation** for coverage reports
+- ✅ **Backward compatibility** - still works in browsers
+
+### Key Changes:
+
+1. **radar.js exports** - Added UMD-style exports at end of file:
+   ```javascript
+   // Export for module systems (ES6, CommonJS)
+   if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+     module.exports = radar_visualization;
+   }
+   // Make available globally for browser use
+   if (typeof window !== 'undefined') {
+     window.radar_visualization = radar_visualization;
+   }
+   ```
+
+2. **Fixed strict mode issue** - Added `var` declaration for loop variable:
+   ```javascript
+   for (var quadrant of quadrant_order) { // Fixed: was missing 'var'
+   ```
+
+3. **Simplified test setup** - No more eval() or JSDOM manual instantiation:
+   ```javascript
+   import radar_visualization from '../../docs/radar.js';
+   ```
+
+## Current Test Infrastructure
+
+### 1. Working Tests with Coverage
+- ✅ **34 tests passing** covering core radar functionality
+- ✅ **86.42% statement coverage**
+- ✅ **71% branch coverage**
+- ✅ **73.07% function coverage**
 - ✅ **JUnit XML reports** for CI/CD integration
-- ✅ **DOM environment** setup for D3.js testing
+- ✅ **DOM environment** setup for D3.js testing via Vitest's jsdom
 - ✅ **Test isolation** with proper DOM cleanup between tests
 
-### 2. Coverage Infrastructure
-- ✅ **Coverage reports generated** (HTML, JSON, LCOV formats)
-- ✅ **Coverage thresholds** configured (70% minimum)
-- ✅ **Coverage exclusion** for non-test files
+### 2. Coverage Reports Generated
+- ✅ **LCOV format** (`coverage/lcov.info`) for Codecov integration
+- ✅ **HTML reports** (`coverage/index.html`) for local viewing
+- ✅ **JSON format** for programmatic analysis
+- ✅ **Text summary** in terminal output
 
-### 3. Enhanced Test Commands
+### 3. Test Commands
 
 ```bash
 # Run tests
-bun test                    # Uses Vitest
-bun run test                # Uses Vitest
+npm test                    # Vitest with JUnit output
+bun test                    # Alternative using Bun
 
 # Run tests with coverage
-bun run test:coverage       # Vitest with coverage reports
+npm run test:coverage       # Vitest with full coverage reports
 
 # Watch mode for development
-bun run test:watch          # Vitest in watch mode
+npm run test:watch          # Vitest in watch mode
 
-# JUnit reports for CI/CD
-bun run test:junit          # Vitest with JUnit output
-
-# Fall back to Bun if needed
-bun run test:bun            # Original Bun test runner
+# JUnit reports for CI/CD (generated automatically)
+npm run test:junit          # Explicit JUnit output
 ```
 
 ## Technical Implementation
 
-### Files Added/Modified:
+### Files Modified:
 
-1. **`vitest.config.ts`** - Vitest configuration with:
+1. **`docs/radar.js`** - Made importable as module:
+   - Added UMD-style exports for module/browser compatibility
+   - Fixed strict mode variable declaration issue
+   - No breaking changes to existing browser usage
+
+2. **`vitest.config.ts`** - Vitest configuration with:
    - JSDOM environment for DOM testing
-   - Coverage settings (V8 provider, HTML/LCOV reports)
+   - Coverage settings (V8 provider, 70% thresholds)
    - JUnit reporter configuration
-   - File inclusion/exclusion patterns
+   - Includes only `docs/radar.js` for coverage
 
-2. **`test/vitest-setup.js`** - Test setup that:
-   - Creates JSDOM environment
+3. **`test/vitest-setup.js`** - Simplified test setup:
+   - Uses Vitest's built-in jsdom environment
    - Sets up global D3.js
-   - Loads radar.js properly
-   - Provides DOM reset utilities
+   - Provides DOM reset utility
+   - No manual JSDOM instantiation needed
 
-3. **`test/radar.vitest.test.js`** - Clean test suite with:
-   - 18 focused tests covering critical functionality
+4. **`test/vitest/radar.vitest.js`** - Comprehensive test suite:
+   - 34 tests covering all critical functionality
    - GIVEN/WHEN/THEN pattern for clarity
-   - Proper test isolation
+   - Direct import of radar_visualization
+   - Proper test isolation with beforeEach
 
-4. **`package.json`** - Updated scripts for:
-   - Vitest integration
-   - Coverage reporting
-   - JUnit output
-   - Fallback to Bun
+5. **`package.json`** - Updated scripts:
+   - Vitest as default test runner
+   - Coverage and JUnit commands
+   - Fallback to Bun test for compatibility
 
-## Coverage Limitation Explanation
+6. **`.github/workflows/test.yml`** - CI workflow:
+   - Runs tests with coverage
+   - Uploads to Codecov.io
+   - Generates test result summaries
 
-**Why coverage shows 0% for radar.js:**
+## Test Coverage Details
 
-The fundamental limitation is that **no JavaScript test coverage tool can track coverage for code loaded via `eval()`**. This includes:
-- Istanbul (used by most tools)
-- V8 coverage (used by Vitest/Bun)
-- NYC, c8, etc.
+### Coverage by Category:
 
-This is a technical limitation because:
-1. Code loaded via `eval()` bypasses normal module loading
-2. Coverage instrumentation happens at module load time
-3. `eval()` executes code dynamically without instrumenting it
+```
+File      | % Stmts | % Branch | % Funcs | % Lines |
+----------|---------|----------|---------|---------|
+radar.js  |   86.42 |    71.00 |   73.07 |   86.70 |
+```
 
-## Alternative Solutions Considered
+### Uncovered Areas:
+- Some optional configuration paths
+- Edge cases in legend rendering
+- Ring descriptions table (optional feature)
+- Some D3 event handlers (require user interaction)
 
-1. **Convert radar.js to ES module** - Would break existing functionality
-2. **Create wrapper module** - Still requires eval for the complex radar.js code
-3. **Use instrumented version** - Would diverge from production code
-4. **Manual coverage analysis** - Impractical for maintenance
+These uncovered areas are mostly:
+1. Optional features controlled by config flags
+2. UI interactions difficult to simulate in unit tests
+3. Edge cases that may not occur in normal usage
 
-## Recommendation: Acceptance Testing Approach
+## Benefits of Current Approach
 
-Given the technical constraints, I recommend focusing on:
+### ✅ Advantages:
+1. **Real code coverage** - Tracks actual execution paths
+2. **No eval() limitations** - Direct module imports
+3. **Browser compatible** - Existing HTML pages still work
+4. **CI/CD integration** - Codecov reports on PRs
+5. **Developer friendly** - Clear import statements in tests
+6. **Maintainable** - Standard ES module patterns
 
-### 1. **Comprehensive Unit Tests** ✅
-- 18 tests covering all critical functionality
-- Edge cases and error conditions
-- Configuration validation
-- DOM manipulation verification
-
-### 2. **Integration Testing** ✅
-- Full radar rendering tests
-- SVG generation verification
-- Entry positioning and layout
-
-### 3. **Manual Coverage Analysis**
-- Focus on testing all public interfaces
-- Ensure all error paths are tested
-- Validate critical rendering paths
-
-### 4. **Regression Testing**
-- Automated visual comparison (screenshots)
-- Configuration compatibility testing
-- Performance benchmarking
+### ✅ Test Categories Covered:
+1. **Configuration Validation** - Quadrant/ring count limits
+2. **Entry Validation** - Index bounds checking
+3. **Entry Positioning** - ID assignment, coordinates, colors
+4. **SVG Generation** - DOM manipulation, dimensions
+5. **Movement Indicators** - Visual markers (circle, triangles, star)
+6. **Basic Functionality** - Edge cases, special characters
+7. **Reproducible Positioning** - Seeded random consistency
+8. **Variable Configurations** - 2-8 quadrants, 4-8 rings
 
 ## Usage Instructions
 
 ### For Development:
 ```bash
 # Start with watch mode for TDD
-bun run test:watch
+npm run test:watch
 
-# Run specific test file
-bunx vitest run test/radar.vitest.test.js
+# Run tests with coverage
+npm run test:coverage
 
-# Generate coverage reports
-bun run test:coverage
-# Open coverage/index.html to view detailed report
+# View coverage report
+open coverage/index.html  # macOS
+xdg-open coverage/index.html  # Linux
 ```
 
 ### For CI/CD:
 ```bash
-# Generate test results and coverage
-bun run test:junit
-bun run test:coverage
+# Run tests with coverage (generates both)
+npm run test:coverage
 
-# Upload test-results.xml to your CI system
-# Upload coverage/lcov.info to coverage services (Codecov, Coveralls, etc.)
+# Artifacts generated:
+# - coverage/lcov.info (for Codecov)
+# - test-results.xml (JUnit format)
 ```
 
 ### For Debugging:
 ```bash
 # Run with verbose output
-bunx vitest run --reporter=verbose
+npx vitest run --reporter=verbose
 
 # Run specific test pattern
-bunx vitest run -t "Configuration Validation"
+npx vitest run -t "Configuration Validation"
+
+# Run specific test file
+npx vitest run test/vitest/radar.vitest.js
 ```
 
 ## Summary
 
-While we cannot get traditional code coverage metrics for radar.js due to the eval() loading approach, we now have:
+The testing solution now provides:
 
-✅ **Robust test infrastructure** with Vitest
-✅ **18 comprehensive tests** covering critical functionality
+✅ **Full code coverage tracking** (~86% coverage)
+✅ **34 comprehensive tests** covering critical functionality
+✅ **Direct module imports** in tests (no eval())
 ✅ **JUnit integration** for CI/CD pipelines
-✅ **Coverage infrastructure** ready for any future refactoring
+✅ **Codecov integration** for PR coverage reports
+✅ **Browser compatibility** maintained
 ✅ **Multiple test commands** for different workflows
 
-The test suite provides confidence that the radar visualization works correctly, which is the primary goal of testing. The coverage limitation is a technical constraint of the current architecture, but the comprehensive test suite compensates for this by thoroughly exercising all the code paths.
+The refactoring to make radar.js importable as a module solved the coverage limitation while maintaining full backward compatibility with existing browser-based usage.

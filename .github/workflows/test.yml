@@ -33,11 +33,7 @@ jobs:
         run: bun install
 
       - name: Run tests with coverage
-        run: bun run test:coverage
-
-      - name: Generate JUnit test results
-        if: always()
-        run: bun run test:junit
+        run: npm run test:coverage
 
       - name: Verify test artifacts
         if: always()
@@ -84,9 +80,6 @@ jobs:
 
           if [ -f "coverage/lcov.info" ]; then
             echo "📈 Coverage report generated and uploaded to Codecov.io" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "📝 Note: Coverage shows 0% for radar.js due to eval() loading limitation" >> $GITHUB_STEP_SUMMARY
-            echo "   See TESTING_SOLUTION.md for detailed explanation" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️ Coverage file not found" >> $GITHUB_STEP_SUMMARY
           fi
