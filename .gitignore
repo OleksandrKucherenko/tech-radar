@@ -5,6 +5,10 @@ node_modules/
 # yarn
 yarn-error.log
 
+# Test coverage
+coverage/
+*.lcov
+
 # AI Coding
 .mcp.json
 CLAUDE.md
