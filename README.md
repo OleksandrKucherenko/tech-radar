@@ -87,23 +87,41 @@ Tech Radar is a static page, so it can be deployed using any hosting provider of
 
 ## Local Development
 
-1. install dependencies with yarn (or npm):
+**Requirements:** [Bun runtime](https://bun.sh) must be installed.
 
-```
-yarn 
+1. install dependencies:
+
+```bash
+bun install
 ```
 
 2. start local dev server:
 
-```
-yarn start
+```bash
+bun start
 ```
 
 3. your default browser should automatically open and show the url
- 
+
 ```
 http://localhost:3000/
 ```
+
+## Building for Production
+
+To create a minified version for production use:
+
+```bash
+bun run build
+```
+
+This will:
+- Minify `radar.js` using Bun + terser
+- Generate `docs/release/radar-0.13.js`
+- Reduce file size by ~56% (25KB → 11KB)
+- Preserve the `radar_visualization` function name for public API
+
+**Note:** The build process supports the new variable quadrants (2-8) and rings (4-8) features introduced in v0.13.
 
 ## License
 

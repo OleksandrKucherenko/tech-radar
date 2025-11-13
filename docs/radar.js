@@ -35,16 +35,55 @@ function radar_visualization(config) {
   config.links_in_new_tabs = ("links_in_new_tabs" in config) ? config.links_in_new_tabs : true;
   config.repo_url = config.repo_url || '#';
   config.print_ring_descriptions_table = ("print_ring_descriptions_table" in config) ? config.print_ring_descriptions_table : false;
-  config.legend_offset = config.legend_offset || [
-    { x: 450, y: 90 },
-    { x: -675, y: 90 },
-    { x: -675, y: -310 },
-    { x: 450, y: -310 }
-  ]
+
+  // Generate legend positions dynamically based on number of quadrants
+  if (!config.legend_offset) {
+    config.legend_offset = [];
+    var num_quads = config.quadrants.length;
+    var legend_radius = 500; // Distance from center for legend placement
+
+    if (num_quads === 4) {
+      // Use original positions for 4 quadrants for backward compatibility
+      config.legend_offset = [
+        { x: 450, y: 90 },
+        { x: -675, y: 90 },
+        { x: -675, y: -310 },
+        { x: 450, y: -310 }
+      ];
+    } else {
+      // Calculate positions in circular arrangement
+      for (var i = 0; i < num_quads; i++) {
+        var angle = -Math.PI + (i + 0.5) * (2 * Math.PI / num_quads);
+        config.legend_offset.push({
+          x: Math.round(legend_radius * Math.cos(angle)),
+          y: Math.round(legend_radius * Math.sin(angle))
+        });
+      }
+    }
+  }
   config.title_offset = config.title_offset || { x: -675, y: -420 };
   config.footer_offset = config.footer_offset || { x: -155, y: 450 };
   config.legend_column_width = config.legend_column_width || 140
   config.legend_line_height = config.legend_line_height || 10
+
+  // Validate configuration
+  if (!config.quadrants || config.quadrants.length < 2 || config.quadrants.length > 8) {
+    throw new Error("Number of quadrants must be between 2 and 8 (found: " + (config.quadrants ? config.quadrants.length : 0) + ")");
+  }
+  if (!config.rings || config.rings.length < 4 || config.rings.length > 8) {
+    throw new Error("Number of rings must be between 4 and 8 (found: " + (config.rings ? config.rings.length : 0) + ")");
+  }
+
+  // Validate entries
+  for (var i = 0; i < config.entries.length; i++) {
+    var entry = config.entries[i];
+    if (entry.quadrant < 0 || entry.quadrant >= config.quadrants.length) {
+      throw new Error("Entry '" + entry.label + "' has invalid quadrant: " + entry.quadrant + " (must be 0-" + (config.quadrants.length - 1) + ")");
+    }
+    if (entry.ring < 0 || entry.ring >= config.rings.length) {
+      throw new Error("Entry '" + entry.label + "' has invalid ring: " + entry.ring + " (must be 0-" + (config.rings.length - 1) + ")");
+    }
+  }
 
   // custom random number generator, to make random sequence reproducible
   // source: https://stackoverflow.com/questions/521295
@@ -62,20 +101,57 @@ function radar_visualization(config) {
     return min + (random() + random()) * 0.5 * (max - min);
   }
 
+  // Generate quadrants dynamically based on config.quadrants.length
   // radial_min / radial_max are multiples of PI
-  const quadrants = [
-    { radial_min: 0, radial_max: 0.5, factor_x: 1, factor_y: 1 },
-    { radial_min: 0.5, radial_max: 1, factor_x: -1, factor_y: 1 },
-    { radial_min: -1, radial_max: -0.5, factor_x: -1, factor_y: -1 },
-    { radial_min: -0.5, radial_max: 0, factor_x: 1, factor_y: -1 }
-  ];
+  const quadrants = [];
+  const num_quadrants = config.quadrants.length;
+  const angle_per_quadrant = 2 / num_quadrants; // in PI multiples
 
-  const rings = [
-    { radius: 130 },
-    { radius: 220 },
-    { radius: 310 },
-    { radius: 400 }
-  ];
+  for (let i = 0; i < num_quadrants; i++) {
+    const start_angle = -1 + (i * angle_per_quadrant);
+    const end_angle = -1 + ((i + 1) * angle_per_quadrant);
+    const mid_angle = -Math.PI + (i + 0.5) * angle_per_quadrant * Math.PI;
+
+    quadrants.push({
+      radial_min: start_angle,
+      radial_max: end_angle,
+      factor_x: Math.cos(mid_angle),
+      factor_y: Math.sin(mid_angle)
+    });
+  }
+
+  // Generate rings dynamically based on config.rings.length
+  // Scale the current pattern [130, 220, 310, 400] proportionally
+  const rings = [];
+  const num_rings = config.rings.length;
+  const base_pattern = [130, 220, 310, 400];
+  const max_radius = 400;
+
+  if (num_rings === 4) {
+    // Use original spacing for 4 rings
+    for (let i = 0; i < 4; i++) {
+      rings.push({ radius: base_pattern[i] });
+    }
+  } else {
+    // Scale proportionally for other ring counts
+    for (let i = 0; i < num_rings; i++) {
+      // Interpolate position in the base pattern
+      const pattern_position = (i / (num_rings - 1)) * 3; // Map to 0-3 range
+      const pattern_index = Math.floor(pattern_position);
+      const fraction = pattern_position - pattern_index;
+
+      let radius;
+      if (pattern_index >= 3) {
+        radius = max_radius;
+      } else {
+        // Linear interpolation between pattern points
+        radius = base_pattern[pattern_index] +
+                 (base_pattern[pattern_index + 1] - base_pattern[pattern_index]) * fraction;
+      }
+
+      rings.push({ radius: Math.round(radius) });
+    }
+  }
 
   function polar(cartesian) {
     var x = cartesian.x;
@@ -127,8 +203,8 @@ function radar_visualization(config) {
       y: 15 * quadrants[quadrant].factor_y
     };
     var cartesian_max = {
-      x: rings[3].radius * quadrants[quadrant].factor_x,
-      y: rings[3].radius * quadrants[quadrant].factor_y
+      x: rings[rings.length - 1].radius * quadrants[quadrant].factor_x,
+      y: rings[rings.length - 1].radius * quadrants[quadrant].factor_y
     };
     return {
       clipx: function(d) {
@@ -164,10 +240,10 @@ function radar_visualization(config) {
   }
 
   // partition entries according to segments
-  var segmented = new Array(4);
-  for (let quadrant = 0; quadrant < 4; quadrant++) {
-    segmented[quadrant] = new Array(4);
-    for (var ring = 0; ring < 4; ring++) {
+  var segmented = new Array(num_quadrants);
+  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
+    segmented[quadrant] = new Array(num_rings);
+    for (var ring = 0; ring < num_rings; ring++) {
       segmented[quadrant][ring] = [];
     }
   }
@@ -178,8 +254,20 @@ function radar_visualization(config) {
 
   // assign unique sequential id to each entry
   var id = 1;
-  for (quadrant of [2,3,1,0]) {
-    for (var ring = 0; ring < 4; ring++) {
+  // Generate quadrant ordering (for 4 quadrants: [2,3,1,0], otherwise sequential with wrap)
+  var quadrant_order = [];
+  if (num_quadrants === 4) {
+    quadrant_order = [2, 3, 1, 0]; // Original ordering for 4 quadrants
+  } else {
+    // For other counts, start from bottom-left and go counter-clockwise
+    var start_index = Math.floor(num_quadrants / 2);
+    for (var i = 0; i < num_quadrants; i++) {
+      quadrant_order.push((start_index + i) % num_quadrants);
+    }
+  }
+
+  for (quadrant of quadrant_order) {
+    for (var ring = 0; ring < num_rings; ring++) {
       var entries = segmented[quadrant][ring];
       entries.sort(function(a,b) { return a.label.localeCompare(b.label); })
       for (var i=0; i<entries.length; i++) {
@@ -193,11 +281,13 @@ function radar_visualization(config) {
   }
 
   function viewbox(quadrant) {
+    var outer_radius = rings[rings.length - 1].radius;
+    var padding = 20;
     return [
-      Math.max(0, quadrants[quadrant].factor_x * 400) - 420,
-      Math.max(0, quadrants[quadrant].factor_y * 400) - 420,
-      440,
-      440
+      Math.max(0, quadrants[quadrant].factor_x * outer_radius) - (outer_radius + padding),
+      Math.max(0, quadrants[quadrant].factor_y * outer_radius) - (outer_radius + padding),
+      outer_radius + 2 * padding,
+      outer_radius + 2 * padding
     ].join(" ");
   }
 
@@ -223,17 +313,18 @@ function radar_visualization(config) {
   // define default font-family
   config.font_family = config.font_family || "Arial, Helvetica";
 
-  // draw grid lines
-  grid.append("line")
-    .attr("x1", 0).attr("y1", -400)
-    .attr("x2", 0).attr("y2", 400)
-    .style("stroke", config.colors.grid)
-    .style("stroke-width", 1);
-  grid.append("line")
-    .attr("x1", -400).attr("y1", 0)
-    .attr("x2", 400).attr("y2", 0)
-    .style("stroke", config.colors.grid)
-    .style("stroke-width", 1);
+  // draw grid lines - N radial lines for N quadrants
+  var outer_radius = rings[rings.length - 1].radius;
+  for (var i = 0; i < num_quadrants; i++) {
+    var angle = -Math.PI + (i * 2 * Math.PI / num_quadrants);
+    grid.append("line")
+      .attr("x1", 0)
+      .attr("y1", 0)
+      .attr("x2", outer_radius * Math.cos(angle))
+      .attr("y2", outer_radius * Math.sin(angle))
+      .style("stroke", config.colors.grid)
+      .style("stroke-width", 1);
+  }
 
   // background color. Usage `.attr("filter", "url(#solid)")`
   // SOURCE: https://stackoverflow.com/a/31013492/2609980
@@ -274,10 +365,19 @@ function radar_visualization(config) {
   }
 
   function legend_transform(quadrant, ring, legendColumnWidth, index=null, previousHeight = null) {
-    const dx = ring < 2 ? 0 : legendColumnWidth;
+    // Determine number of columns based on ring count
+    // 4-6 rings: 2 columns, 7-8 rings: 3 columns
+    var num_columns = num_rings >= 7 ? 3 : 2;
+    var rings_per_column = Math.ceil(num_rings / num_columns);
+
+    var column = Math.floor(ring / rings_per_column);
+    var row_in_column = ring % rings_per_column;
+
+    const dx = column * legendColumnWidth;
     let dy = (index == null ? -16 : index * config.legend_line_height);
 
-    if (ring % 2 === 1) {
+    // Add offset for rows after the first in each column
+    if (row_in_column > 0) {
       dy = dy + 36 + previousHeight;
     }
 
@@ -319,7 +419,7 @@ function radar_visualization(config) {
 
     // legend
     const legend = radar.append("g");
-    for (let quadrant = 0; quadrant < 4; quadrant++) {
+    for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
       legend.append("text")
         .attr("transform", translate(
           config.legend_offset[quadrant].x,
@@ -329,11 +429,17 @@ function radar_visualization(config) {
         .style("font-family", config.font_family)
         .style("font-size", "18px")
         .style("font-weight", "bold");
-      let previousLegendHeight = 0
-      for (let ring = 0; ring < 4; ring++) {
-        if (ring % 2 === 0) {
-          previousLegendHeight = 0
+
+      let previousLegendHeight = 0;
+      var num_columns = num_rings >= 7 ? 3 : 2;
+      var rings_per_column = Math.ceil(num_rings / num_columns);
+
+      for (let ring = 0; ring < num_rings; ring++) {
+        // Reset previousLegendHeight at the start of each column
+        if (ring % rings_per_column === 0) {
+          previousLegendHeight = 0;
         }
+
         legend.append("text")
           .attr("transform", legend_transform(quadrant, ring, config.legend_column_width, null, previousLegendHeight))
           .text(config.rings[ring].name)
