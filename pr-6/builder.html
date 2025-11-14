@@ -6,6 +6,7 @@
     <title>Tech Radar Builder</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="radar.js"></script>
     <link rel="stylesheet" href="radar.css">
     <style>
@@ -1050,8 +1051,8 @@
                 return;
             }
 
-            const svgElement = document.querySelector('#radar');
-            if (!svgElement) {
+            const radarContainer = document.getElementById('radarContainer');
+            if (!radarContainer) {
                 alert('Radar not rendered. Please add entries first.');
                 return;
             }
@@ -1060,26 +1061,12 @@
             btn.textContent = 'Generating...';
             btn.disabled = true;
 
-            // Clone the SVG and serialize it
-            const clonedSvg = svgElement.cloneNode(true);
-            const svgData = new XMLSerializer().serializeToString(clonedSvg);
-            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(svgBlob);
-
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = 1000;
-                canvas.height = 800;
-                const ctx = canvas.getContext('2d');
-
-                // Fill white background
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Draw the SVG image
-                ctx.drawImage(img, 0, 0);
-
+            // Use html2canvas to capture the entire radar including legend
+            html2canvas(radarContainer, {
+                backgroundColor: '#ffffff',
+                scale: 2, // Higher quality
+                logging: false
+            }).then(function(canvas) {
                 // Convert to PNG and download
                 canvas.toBlob(function(blob) {
                     const link = document.createElement('a');
@@ -1089,18 +1076,13 @@
 
                     btn.textContent = 'Download as PNG';
                     btn.disabled = false;
-                    URL.revokeObjectURL(url);
                 });
-            };
-
-            img.onerror = function() {
+            }).catch(function(error) {
+                console.error('Export error:', error);
                 alert('Failed to export PNG. Please try again.');
                 btn.textContent = 'Download as PNG';
                 btn.disabled = false;
-                URL.revokeObjectURL(url);
-            };
-
-            img.src = url;
+            });
         }
 
         function exportToPDF() {
@@ -1109,8 +1091,8 @@
                 return;
             }
 
-            const svgElement = document.querySelector('#radar');
-            if (!svgElement) {
+            const radarContainer = document.getElementById('radarContainer');
+            if (!radarContainer) {
                 alert('Radar not rendered. Please add entries first.');
                 return;
             }
@@ -1119,53 +1101,38 @@
             btn.textContent = 'Generating...';
             btn.disabled = true;
 
-            // Clone the SVG and serialize it
-            const clonedSvg = svgElement.cloneNode(true);
-            const svgData = new XMLSerializer().serializeToString(clonedSvg);
-            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(svgBlob);
-
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = 1000;
-                canvas.height = 800;
-                const ctx = canvas.getContext('2d');
-
-                // Fill white background
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Draw the SVG image
-                ctx.drawImage(img, 0, 0);
-
+            // Use html2canvas to capture the entire radar including legend
+            html2canvas(radarContainer, {
+                backgroundColor: '#ffffff',
+                scale: 2, // Higher quality
+                logging: false
+            }).then(function(canvas) {
                 // Convert to data URL
                 const imgData = canvas.toDataURL('image/png');
+
+                // Calculate PDF dimensions based on canvas
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
 
                 // Create PDF using jsPDF
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({
-                    orientation: 'landscape',
+                    orientation: imgWidth > imgHeight ? 'landscape' : 'portrait',
                     unit: 'px',
-                    format: [1000, 800]
+                    format: [imgWidth, imgHeight]
                 });
 
-                pdf.addImage(imgData, 'PNG', 0, 0, 1000, 800);
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
                 pdf.save('tech-radar.pdf');
 
                 btn.textContent = 'Download as PDF';
                 btn.disabled = false;
-                URL.revokeObjectURL(url);
-            };
-
-            img.onerror = function() {
+            }).catch(function(error) {
+                console.error('Export error:', error);
                 alert('Failed to export PDF. Please try again.');
                 btn.textContent = 'Download as PDF';
                 btn.disabled = false;
-                URL.revokeObjectURL(url);
-            };
-
-            img.src = url;
+            });
         }
 
         function exportToJSON() {
