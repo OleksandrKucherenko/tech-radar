@@ -277,26 +277,26 @@ class EntryProcessor {
     this.numRings = rings.length;
   }
   processEntries(entries) {
-    const segmented2 = this.segmentEntries(entries);
+    const segmented = this.segmentEntries(entries);
     this.assignSegmentsAndColors(entries);
-    this.positionEntries(segmented2);
-    this.assignIds(segmented2);
-    this.calculateCollisionRadii(segmented2);
+    this.positionEntries(segmented);
+    this.assignIds(segmented);
+    this.calculateCollisionRadii(segmented);
     return entries;
   }
   segmentEntries(entries) {
-    const segmented2 = new Array(this.numQuadrants);
+    const segmented = new Array(this.numQuadrants);
     for (let quadrant = 0;quadrant < this.numQuadrants; quadrant++) {
-      segmented2[quadrant] = new Array(this.numRings);
+      segmented[quadrant] = new Array(this.numRings);
       for (let ring = 0;ring < this.numRings; ring++) {
-        segmented2[quadrant][ring] = [];
+        segmented[quadrant][ring] = [];
       }
     }
     for (let i = 0;i < entries.length; i++) {
       const entry = entries[i];
-      segmented2[entry.quadrant][entry.ring].push(entry);
+      segmented[entry.quadrant][entry.ring].push(entry);
     }
-    return segmented2;
+    return segmented;
   }
   assignSegmentsAndColors(entries) {
     for (let i = 0;i < entries.length; i++) {
@@ -305,10 +305,10 @@ class EntryProcessor {
       entry.color = entry.active || this.config.print_layout ? this.config.rings[entry.ring].color : this.config.colors.inactive;
     }
   }
-  positionEntries(segmented2) {
+  positionEntries(segmented) {
     for (let quadrant = 0;quadrant < this.numQuadrants; quadrant++) {
       for (let ring = 0;ring < this.numRings; ring++) {
-        this.gridPosition(segmented2[quadrant][ring], quadrant, ring);
+        this.gridPosition(segmented[quadrant][ring], quadrant, ring);
       }
     }
   }
@@ -388,12 +388,12 @@ class EntryProcessor {
       entry.y = point.y;
     }
   }
-  assignIds(segmented2) {
+  assignIds(segmented) {
     let id = 1;
     const quadrant_order = generateQuadrantOrder(this.numQuadrants);
     for (const quadrant of quadrant_order) {
       for (let ring = 0;ring < this.numRings; ring++) {
-        const entries = segmented2[quadrant][ring];
+        const entries = segmented[quadrant][ring];
         entries.sort(function(a, b) {
           return a.label.localeCompare(b.label);
         });
@@ -403,10 +403,10 @@ class EntryProcessor {
       }
     }
   }
-  calculateCollisionRadii(segmented2) {
+  calculateCollisionRadii(segmented) {
     for (let quadrant = 0;quadrant < this.numQuadrants; quadrant++) {
       for (let ring = 0;ring < this.numRings; ring++) {
-        const entries = segmented2[quadrant][ring];
+        const entries = segmented[quadrant][ring];
         if (entries.length === 0)
           continue;
         const seg_base_inner_radius = ring === 0 ? 30 : this.rings[ring - 1].radius;
@@ -439,6 +439,113 @@ class EntryProcessor {
         }
       }
     }
+  }
+}
+
+// src/rendering/helpers.js
+function translate(x, y) {
+  return "translate(" + x + "," + y + ")";
+}
+function viewbox(quadrantIndex, quadrants, rings) {
+  const outer_radius = rings[rings.length - 1].radius;
+  const padding = 20;
+  return [
+    Math.max(0, quadrants[quadrantIndex].factor_x * outer_radius) - (outer_radius + padding),
+    Math.max(0, quadrants[quadrantIndex].factor_y * outer_radius) - (outer_radius + padding),
+    outer_radius + 2 * padding,
+    outer_radius + 2 * padding
+  ].join(" ");
+}
+function computeLegendOffsets(numQuadrants, outerRadius, config) {
+  if (config.legend_offset) {
+    return config.legend_offset;
+  }
+  const offsets = new Array(numQuadrants);
+  const legend_overlap = outerRadius * 0.08;
+  const left_x = -outerRadius - config.legend_column_width + legend_overlap;
+  const right_x = outerRadius - legend_overlap;
+  const left_column = [];
+  const right_column = [];
+  for (let i = 0;i < numQuadrants; i++) {
+    const targetColumn = i % 2 === 0 ? right_column : left_column;
+    targetColumn.push(i);
+  }
+  const baseY = -outerRadius + 80;
+  const verticalAvailable = 2 * outerRadius - 160;
+  function stepFor(count) {
+    if (count <= 1) {
+      return 0;
+    }
+    return Math.max(config.legend_vertical_spacing, verticalAvailable / (count - 1));
+  }
+  function assignOffsets(column, xPosition) {
+    const step = stepFor(column.length);
+    for (let idx = 0;idx < column.length; idx++) {
+      const qIndex = column[idx];
+      offsets[qIndex] = {
+        x: xPosition,
+        y: baseY + idx * step
+      };
+    }
+  }
+  assignOffsets(left_column, left_x);
+  assignOffsets(right_column, right_x);
+  return offsets;
+}
+function ensureLayoutStructure(svgSelection) {
+  const existing = svgSelection.node().closest(".radar-layout");
+  if (existing) {
+    return svgSelection.select(function() {
+      return existing;
+    });
+  }
+  const svgNode = svgSelection.node();
+  const parent = svgNode.parentNode;
+  const wrapper = document.createElement("div");
+  wrapper.className = "radar-layout";
+  const leftColumn = document.createElement("div");
+  leftColumn.className = "radar-legend-column left";
+  const svgContainer = document.createElement("div");
+  svgContainer.className = "radar-svg-container";
+  const rightColumn = document.createElement("div");
+  rightColumn.className = "radar-legend-column right";
+  parent.insertBefore(wrapper, svgNode);
+  svgContainer.appendChild(svgNode);
+  wrapper.appendChild(leftColumn);
+  wrapper.appendChild(svgContainer);
+  wrapper.appendChild(rightColumn);
+  return svgSelection.select(function() {
+    return wrapper;
+  });
+}
+
+// src/rendering/interactions.js
+function showBubble(d, config) {
+  if (d.active || config.print_layout) {
+    const d32 = window.d3;
+    const tooltip = d32.select("#bubble text").text(d.label);
+    const bbox = tooltip.node().getBBox();
+    const x = d.rendered_x !== undefined ? d.rendered_x : d.x;
+    const y = d.rendered_y !== undefined ? d.rendered_y : d.y;
+    d32.select("#bubble").attr("transform", translate(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
+    d32.select("#bubble rect").attr("x", -5).attr("y", -bbox.height).attr("width", bbox.width + 10).attr("height", bbox.height + 4);
+    d32.select("#bubble path").attr("transform", translate(bbox.width / 2 - 5, 3));
+  }
+}
+function hideBubble() {
+  const d32 = window.d3;
+  d32.select("#bubble").attr("transform", translate(0, 0)).style("opacity", 0);
+}
+function highlightLegendItem(d) {
+  const legendItem = document.getElementById("legendItem" + d.id);
+  if (legendItem) {
+    legendItem.classList.add("legend-highlight");
+  }
+}
+function unhighlightLegendItem(d) {
+  const legendItem = document.getElementById("legendItem" + d.id);
+  if (legendItem) {
+    legendItem.classList.remove("legend-highlight");
   }
 }
 
@@ -517,44 +624,7 @@ function radar_visualization(config) {
       y: outer_radius + 60
     };
   }
-  function computeLegendOffsets2() {
-    if (config.legend_offset) {
-      return config.legend_offset;
-    }
-    var num_quads = config.quadrants.length;
-    var offsets = new Array(num_quads);
-    var legend_overlap = outer_radius * 0.08;
-    var left_x = -outer_radius - config.legend_column_width + legend_overlap;
-    var right_x = outer_radius - legend_overlap;
-    var left_column = [];
-    var right_column = [];
-    for (var i2 = 0;i2 < num_quads; i2++) {
-      var targetColumn = i2 % 2 === 0 ? right_column : left_column;
-      targetColumn.push(i2);
-    }
-    var baseY = -outer_radius + 80;
-    var verticalAvailable = 2 * outer_radius - 160;
-    function stepFor(count) {
-      if (count <= 1) {
-        return 0;
-      }
-      return Math.max(config.legend_vertical_spacing, verticalAvailable / (count - 1));
-    }
-    function assignOffsets(column, xPosition) {
-      var step = stepFor(column.length);
-      for (var idx = 0;idx < column.length; idx++) {
-        var qIndex = column[idx];
-        offsets[qIndex] = {
-          x: xPosition,
-          y: baseY + idx * step
-        };
-      }
-    }
-    assignOffsets(left_column, left_x);
-    assignOffsets(right_column, right_x);
-    return offsets;
-  }
-  config.legend_offset = computeLegendOffsets2();
+  config.legend_offset = computeLegendOffsets(num_quadrants, outer_radius, config);
   const bounded_interval = boundedInterval;
   const bounded_ring = boundedRing;
   const bounded_box = boundedBox;
@@ -563,46 +633,22 @@ function radar_visualization(config) {
   }
   const entryProcessor = new EntryProcessor(config, quadrants, rings, random, random_between);
   entryProcessor.processEntries(config.entries);
-  function translate2(x, y) {
-    return "translate(" + x + "," + y + ")";
+  const segmented = new Array(num_quadrants);
+  for (let quadrant = 0;quadrant < num_quadrants; quadrant++) {
+    segmented[quadrant] = new Array(num_rings);
+    for (let ring = 0;ring < num_rings; ring++) {
+      segmented[quadrant][ring] = [];
+    }
   }
-  function viewbox2(quadrant) {
-    var outer_radius2 = rings[rings.length - 1].radius;
-    var padding = 20;
-    return [
-      Math.max(0, quadrants[quadrant].factor_x * outer_radius2) - (outer_radius2 + padding),
-      Math.max(0, quadrants[quadrant].factor_y * outer_radius2) - (outer_radius2 + padding),
-      outer_radius2 + 2 * padding,
-      outer_radius2 + 2 * padding
-    ].join(" ");
+  for (let i2 = 0;i2 < config.entries.length; i2++) {
+    const entry = config.entries[i2];
+    segmented[entry.quadrant][entry.ring].push(entry);
   }
   config.scale = config.scale || 1;
   var scaled_width = config.width * config.scale;
   var scaled_height = config.height * config.scale;
   var svg = d3.select("svg#" + config.svg_id).style("background-color", config.colors.background).attr("width", scaled_width).attr("height", scaled_height);
-  function ensureLayoutStructure2(svgSelection) {
-    var existing = svgSelection.node().closest(".radar-layout");
-    if (existing) {
-      return d3.select(existing);
-    }
-    var svgNode = svgSelection.node();
-    var parent = svgNode.parentNode;
-    var wrapper = document.createElement("div");
-    wrapper.className = "radar-layout";
-    var leftColumn = document.createElement("div");
-    leftColumn.className = "radar-legend-column left";
-    var svgContainer = document.createElement("div");
-    svgContainer.className = "radar-svg-container";
-    var rightColumn = document.createElement("div");
-    rightColumn.className = "radar-legend-column right";
-    parent.insertBefore(wrapper, svgNode);
-    svgContainer.appendChild(svgNode);
-    wrapper.appendChild(leftColumn);
-    wrapper.appendChild(svgContainer);
-    wrapper.appendChild(rightColumn);
-    return d3.select(wrapper);
-  }
-  var layoutWrapper = ensureLayoutStructure2(svg);
+  var layoutWrapper = ensureLayoutStructure(svg);
   var legendLeftColumn = layoutWrapper.select(".radar-legend-column.left");
   var legendRightColumn = layoutWrapper.select(".radar-legend-column.right");
   var layoutWidth = layoutWrapper.node().getBoundingClientRect().width || config.width;
@@ -614,11 +660,11 @@ function radar_visualization(config) {
   legendRightColumn.style("gap", config.legend_vertical_spacing + "px").style("width", targetLegendColumnWidth + "px");
   var radar = svg.append("g");
   if ("zoomed_quadrant" in config) {
-    svg.attr("viewBox", viewbox2(config.zoomed_quadrant));
+    svg.attr("viewBox", viewbox(config.zoomed_quadrant, quadrants, rings));
   } else {
     var radar_center_y = scaled_height / 2 + (title_height - footer_height) / 2;
     var radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
-    radar.attr("transform", translate2(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
+    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
   }
   var grid = radar.append("g");
   config.font_family = config.font_family || "Arial, Helvetica";
@@ -655,12 +701,12 @@ function radar_visualization(config) {
     } else {
       dy = currentHeight + index * config.legend_line_height;
     }
-    return translate2(config.legend_offset[quadrant].x + dx, config.legend_offset[quadrant].y + dy);
+    return translate(config.legend_offset[quadrant].x + dx, config.legend_offset[quadrant].y + dy);
   }
   if (config.print_layout) {
-    radar.append("a").attr("href", config.repo_url).attr("transform", translate2(config.title_offset.x, config.title_offset.y)).append("text").attr("class", "hover-underline").text(config.title).style("font-family", config.font_family).style("font-size", "30").style("font-weight", "bold");
-    radar.append("text").attr("transform", translate2(config.title_offset.x, config.title_offset.y + 20)).text(config.date || "").style("font-family", config.font_family).style("font-size", "14").style("fill", "#999");
-    radar.append("text").attr("transform", translate2(config.footer_offset.x, config.footer_offset.y)).text("▲ moved up     ▼ moved down     ★ new     ⬤ no change").attr("xml:space", "preserve").style("font-family", config.font_family).style("font-size", "12px");
+    radar.append("a").attr("href", config.repo_url).attr("transform", translate(config.title_offset.x, config.title_offset.y)).append("text").attr("class", "hover-underline").text(config.title).style("font-family", config.font_family).style("font-size", "30").style("font-weight", "bold");
+    radar.append("text").attr("transform", translate(config.title_offset.x, config.title_offset.y + 20)).text(config.date || "").style("font-family", config.font_family).style("font-size", "14").style("fill", "#999");
+    radar.append("text").attr("transform", translate(config.footer_offset.x, config.footer_offset.y)).text("▲ moved up     ▼ moved down     ★ new     ⬤ no change").attr("xml:space", "preserve").style("font-family", config.font_family).style("font-size", "12px");
     if (config.print_layout) {
       legendLeftColumn.style("display", "flex");
       legendRightColumn.style("display", "flex");
@@ -709,11 +755,11 @@ function radar_visualization(config) {
         }).attr("class", "legend-entry").text(function(d) {
           return d.id + ". " + d.label;
         }).on("mouseover", function(event, d) {
-          showBubble2(d);
-          highlightLegendItem2(d);
+          showBubble(d, config);
+          highlightLegendItem(d);
         }).on("mouseout", function(event, d) {
-          hideBubble2(d);
-          unhighlightLegendItem2(d);
+          hideBubble();
+          unhighlightLegendItem(d);
         });
       }
     }
@@ -723,40 +769,14 @@ function radar_visualization(config) {
   bubble.append("rect").attr("rx", 4).attr("ry", 4).style("fill", "#333");
   bubble.append("text").style("font-family", config.font_family).style("font-size", "10px").style("fill", "#fff");
   bubble.append("path").attr("d", "M 0,0 10,0 5,8 z").style("fill", "#333");
-  function showBubble2(d) {
-    if (d.active || config.print_layout) {
-      var tooltip = d3.select("#bubble text").text(d.label);
-      var bbox = tooltip.node().getBBox();
-      var x = d.rendered_x !== undefined ? d.rendered_x : d.x;
-      var y = d.rendered_y !== undefined ? d.rendered_y : d.y;
-      d3.select("#bubble").attr("transform", translate2(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
-      d3.select("#bubble rect").attr("x", -5).attr("y", -bbox.height).attr("width", bbox.width + 10).attr("height", bbox.height + 4);
-      d3.select("#bubble path").attr("transform", translate2(bbox.width / 2 - 5, 3));
-    }
-  }
-  function hideBubble2(d) {
-    var bubble2 = d3.select("#bubble").attr("transform", translate2(0, 0)).style("opacity", 0);
-  }
-  function highlightLegendItem2(d) {
-    var legendItem = document.getElementById("legendItem" + d.id);
-    if (legendItem) {
-      legendItem.classList.add("legend-highlight");
-    }
-  }
-  function unhighlightLegendItem2(d) {
-    var legendItem = document.getElementById("legendItem" + d.id);
-    if (legendItem) {
-      legendItem.classList.remove("legend-highlight");
-    }
-  }
   var blips = rink.selectAll(".blip").data(config.entries).enter().append("g").attr("class", "blip").attr("transform", function(d, i2) {
     return legend_transform2(d.quadrant, d.ring, config.legend_column_width, i2);
   }).on("mouseover", function(event, d) {
-    showBubble2(d);
-    highlightLegendItem2(d);
+    showBubble(d, config);
+    highlightLegendItem(d);
   }).on("mouseout", function(event, d) {
-    hideBubble2(d);
-    unhighlightLegendItem2(d);
+    hideBubble();
+    unhighlightLegendItem(d);
   });
   blips.each(function(d) {
     var blip = d3.select(this);
@@ -787,7 +807,7 @@ function radar_visualization(config) {
       var clipped = d.segment.clip(d);
       d.rendered_x = clipped.x;
       d.rendered_y = clipped.y;
-      return translate2(clipped.x, clipped.y);
+      return translate(clipped.x, clipped.y);
     });
     if (config.debug_geometry) {
       d3.select("#debug-collision-radii").selectAll("circle").attr("cx", function(d) {
@@ -853,7 +873,7 @@ function radar_visualization(config) {
       var grid_angle = -Math.PI + i * 2 * Math.PI / num_quadrants;
       debugLayer.append("line").attr("x1", 0).attr("y1", 0).attr("x2", debug_outer_radius * Math.cos(grid_angle)).attr("y2", debug_outer_radius * Math.sin(grid_angle)).attr("stroke", "#ff00ff").attr("stroke-width", 2).attr("opacity", 0.6).attr("stroke-dasharray", "10,5");
     }
-    var debugLegend = debugLayer.append("g").attr("transform", translate2(-debug_outer_radius + 10, -debug_outer_radius + 10));
+    var debugLegend = debugLayer.append("g").attr("transform", translate(-debug_outer_radius + 10, -debug_outer_radius + 10));
     debugLegend.append("text").attr("x", 0).attr("y", 0).attr("font-size", "11px").attr("font-weight", "bold").attr("fill", "#000").text("DEBUG MODE");
     debugLegend.append("text").attr("x", 0).attr("y", 15).attr("font-size", "9px").attr("fill", "#ff0000").text("━━ Ring 0 polar sector");
     debugLegend.append("text").attr("x", 0).attr("y", 28).attr("font-size", "9px").attr("fill", "#00ffff").text("━━ Other rings polar sector");
