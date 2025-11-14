@@ -56,6 +56,13 @@ import {
   createBlipInteractions
 } from './rendering/interactions.js';
 
+// ============================================================================
+// Phase 4 Refactoring: Import blip rendering, simulation, and debug modules
+// ============================================================================
+import { renderBlips } from './rendering/blip-renderer.js';
+import { runForceSimulation } from './rendering/force-simulation.js';
+import { renderDebugVisualization } from './rendering/debug-renderer.js';
+
 function radar_visualization(config) {
 
   config.svg_id = config.svg || "radar";
@@ -334,287 +341,37 @@ function radar_visualization(config) {
   var bubble = createBubble(radar, config.font_family);
 
   // ============================================================================
-  // Phase 3 Refactoring: Interaction functions now imported from rendering/interactions.js
-  // (showBubble, hideBubble, highlightLegendItem, unhighlightLegendItem, createBubble)
+  // Phase 4 Refactoring: Blip rendering now uses imported module
   // ============================================================================
+  var blips = renderBlips(
+    rink,
+    config.entries,
+    config,
+    legend_transform,
+    showBubble,
+    hideBubble,
+    highlightLegendItem,
+    unhighlightLegendItem
+  );
 
-  // draw blips on radar
-  var blips = rink.selectAll(".blip")
-    .data(config.entries)
-    .enter()
-    .append("g")
-    .attr("class", "blip")
-    .attr("transform", function (d, i) { return legend_transform(d.quadrant, d.ring, config.legend_column_width, i); })
-    .on("mouseover", function (event, d) { showBubble(d, config); highlightLegendItem(d); })
-    .on("mouseout", function (event, d) { hideBubble(); unhighlightLegendItem(d); });
+  // ============================================================================
+  // Phase 4 Refactoring: Force simulation now uses imported module
+  // ============================================================================
+  runForceSimulation(config.entries, blips, config);
 
-  // configure each blip
-  blips.each(function (d) {
-    var blip = d3.select(this);
-
-    // blip link
-    if (d.active && Object.prototype.hasOwnProperty.call(d, "link") && d.link) {
-      blip = blip.append("a")
-        .attr("xlink:href", d.link);
-
-      if (config.links_in_new_tabs) {
-        blip.attr("target", "_blank");
-      }
-    }
-
-    // blip shape
-    if (d.moved == 1) {
-      blip.append("path")
-        .attr("d", "M -11,5 11,5 0,-13 z") // triangle pointing up
-        .style("fill", d.color);
-    } else if (d.moved == -1) {
-      blip.append("path")
-        .attr("d", "M -11,-5 11,-5 0,13 z") // triangle pointing down
-        .style("fill", d.color);
-    } else if (d.moved == 2) {
-      blip.append("path")
-        .attr("d", d3.symbol().type(d3.symbolStar).size(200))
-        .style("fill", d.color);
-    } else {
-      blip.append("circle")
-        .attr("r", 9)
-        .attr("fill", d.color);
-    }
-
-    // blip text
-    if (d.active || config.print_layout) {
-      var blip_text = config.print_layout ? d.id : d.label.match(/[a-z]/i);
-      blip.append("text")
-        .text(blip_text)
-        .attr("y", 3)
-        .attr("text-anchor", "middle")
-        .style("fill", "#fff")
-        .style("font-family", config.font_family)
-        .style("font-size", function (d) { return blip_text.length > 2 ? "8px" : "9px"; })
-        .style("pointer-events", "none")
-        .style("user-select", "none");
-    }
-  });
-
-  // make sure that blips stay inside their segment
-  // FIX #5: Use single clip() instead of clipx/clipy to avoid double-clipping
-  function ticked() {
-    blips.attr("transform", function (d) {
-      var clipped = d.segment.clip(d);
-      // Store rendered position for stable tooltip positioning and to prevent jumping on hover
-      d.rendered_x = clipped.x;
-      d.rendered_y = clipped.y;
-      return translate(clipped.x, clipped.y);
-    });
-
-    // Update debug collision circles if debug mode is enabled
-    if (config.debug_geometry) {
-      d3.select("#debug-collision-radii").selectAll("circle")
-        .attr("cx", function (d) { return d.x; })
-        .attr("cy", function (d) { return d.y; });
-    }
-  }
-
-  // distribute blips, while avoiding collisions
-  // FIX #6: Enhanced force simulation with better convergence
-  d3.forceSimulation()
-    .nodes(config.entries)
-    .velocityDecay(0.15) // More movement freedom for better spreading
-    .alphaDecay(0.008) // Slower cooling for longer convergence time
-    .alphaMin(0.00005) // Lower minimum for thorough settlement
-    .force("collision", d3.forceCollide()
-      .radius(function (d) {
-        return d.collision_radius || config.blip_collision_radius;
-      })
-      .strength(1.0) // Maximum collision strength for strict enforcement
-      .iterations(6)) // More iterations per tick for better collision resolution
-    .on("tick", ticked)
-    .tick(400); // Increased pre-run iterations for better stabilization
-
-  // DEBUG VISUALIZATIONS: Show segment boundaries, grids, and collision radii
+  // ============================================================================
+  // Phase 4 Refactoring: Debug visualization now uses imported module
+  // ============================================================================
   if (config.debug_geometry) {
-    var debugLayer = radar.append("g")
-      .attr("id", "debug-layer");
-
-    // Get outer radius for coordinate system
-    var debug_outer_radius = rings[rings.length - 1].radius;
-
-    // Draw segment boundaries for each quadrant/ring combination
-    for (let q = 0; q < num_quadrants; q++) {
-      for (let r = 0; r < num_rings; r++) {
-        var seg_base_inner = r === 0 ? 30 : rings[r - 1].radius;
-        var seg_base_outer = rings[r].radius;
-        var seg_inner = seg_base_inner + config.segment_radial_padding;
-        var seg_outer = seg_base_outer - config.segment_radial_padding;
-
-        // FIX: Use same angular padding calculation as segment() function
-        // segment_angular_padding is in PIXELS, convert to radians based on ring_center
-        var seg_ring_center = (seg_inner + seg_outer) / 2;
-        var seg_angular_padding = config.segment_angular_padding / Math.max(seg_ring_center, 1);
-
-        var min_angle = quadrants[q].radial_min * Math.PI;
-        var max_angle = quadrants[q].radial_max * Math.PI;
-        var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
-        seg_angular_padding = Math.min(seg_angular_padding, angular_limit);
-
-        var angle_min = min_angle + seg_angular_padding;
-        var angle_max = max_angle - seg_angular_padding;
-        if (angle_max <= angle_min) {
-          angle_min = min_angle;
-          angle_max = max_angle;
-        }
-
-        // Draw polar sector boundary (actual segment shape)
-        // NOTE: d3.arc() uses clockwise angle convention, but our angles are counter-clockwise
-        // So we negate the angles to flip direction, plus apply offset to align with coordinate system
-        // Pattern: offset sign alternates based on num_quadrants mod 4
-        // - num_quadrants ≡ 1 (mod 4): positive offset (e.g., 5, 9, 13...)
-        // - num_quadrants ≡ 3 (mod 4): negative offset (e.g., 3, 7, 11...)
-        var offset_magnitude = Math.PI / (2 * num_quadrants);
-        var arc_offset = (num_quadrants % 4 === 1) ? offset_magnitude : -offset_magnitude;
-        
-        var arcPath = d3.arc()
-          .innerRadius(seg_inner)
-          .outerRadius(seg_outer)
-          .startAngle(-angle_max + arc_offset)
-          .endAngle(-angle_min + arc_offset);
-
-        debugLayer.append("path")
-          .attr("d", arcPath)
-          .attr("fill", "none")
-          .attr("stroke", r === 0 ? "#ff0000" : "#00ffff")
-          .attr("stroke-width", r === 0 ? 2 : 1)
-          .attr("stroke-dasharray", "5,5")
-          .attr("opacity", 0.5);
-
-        // Draw Cartesian bounding box (rectangular approximation)
-        var bounds = computeQuadrantBounds(
-          quadrants[q].radial_min * Math.PI,
-          quadrants[q].radial_max * Math.PI,
-          seg_outer
-        );
-
-        debugLayer.append("rect")
-          .attr("x", bounds.min.x)
-          .attr("y", bounds.min.y)
-          .attr("width", bounds.max.x - bounds.min.x)
-          .attr("height", bounds.max.y - bounds.min.y)
-          .attr("fill", "none")
-          .attr("stroke", "#ffff00")
-          .attr("stroke-width", 1)
-          .attr("stroke-dasharray", "3,3")
-          .attr("opacity", 0.3);
-
-        // Add text labels for segment info (Ring 0 only for clarity)
-        if (r === 0) {
-          var mid_angle = (angle_min + angle_max) / 2;
-          var label_radius = (seg_inner + seg_outer) / 2;
-          var label_x = Math.cos(mid_angle) * label_radius;
-          var label_y = Math.sin(mid_angle) * label_radius;
-
-          var entries_count = segmented[q][r].length;
-          var arc_length = (angle_max - angle_min) * seg_inner;
-
-          debugLayer.append("text")
-            .attr("x", label_x)
-            .attr("y", label_y)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "10px")
-            .attr("fill", "#ff0000")
-            .attr("font-weight", "bold")
-            .text(`Q${q}R${r}: ${entries_count} items, arc=${arc_length.toFixed(0)}px`);
-        }
-      }
-    }
-
-    // Draw collision radius circles for each blip
-    debugLayer.append("g")
-      .attr("id", "debug-collision-radii")
-      .selectAll("circle")
-      .data(config.entries)
-      .enter()
-      .append("circle")
-      .attr("cx", function (d) { return d.x; })
-      .attr("cy", function (d) { return d.y; })
-      .attr("r", function (d) { return d.collision_radius || config.blip_collision_radius; })
-      .attr("fill", "none")
-      .attr("stroke", function (d) { return d.ring === 0 ? "#00ff00" : "#0000ff"; })
-      .attr("stroke-width", 1)
-      .attr("stroke-dasharray", "2,2")
-      .attr("opacity", 0.4);
-
-    // Draw coordinate system axes
-    debugLayer.append("line")
-      .attr("x1", -debug_outer_radius)
-      .attr("y1", 0)
-      .attr("x2", debug_outer_radius)
-      .attr("y2", 0)
-      .attr("stroke", "#666")
-      .attr("stroke-width", 0.5)
-      .attr("opacity", 0.3);
-
-    debugLayer.append("line")
-      .attr("x1", 0)
-      .attr("y1", -debug_outer_radius)
-      .attr("x2", 0)
-      .attr("y2", debug_outer_radius)
-      .attr("stroke", "#666")
-      .attr("stroke-width", 0.5)
-      .attr("opacity", 0.3);
-
-    // Draw quadrant boundary lines (should match grid lines)
-    for (var i = 0; i < num_quadrants; i++) {
-      var grid_angle = -Math.PI + (i * 2 * Math.PI / num_quadrants);
-      debugLayer.append("line")
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", debug_outer_radius * Math.cos(grid_angle))
-        .attr("y2", debug_outer_radius * Math.sin(grid_angle))
-        .attr("stroke", "#ff00ff") // Magenta to distinguish from other lines
-        .attr("stroke-width", 2)
-        .attr("opacity", 0.6)
-        .attr("stroke-dasharray", "10,5");
-    }
-
-    // Add legend for debug colors
-    var debugLegend = debugLayer.append("g")
-      .attr("transform", translate(-debug_outer_radius + 10, -debug_outer_radius + 10));
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("font-size", "11px")
-      .attr("font-weight", "bold")
-      .attr("fill", "#000")
-      .text("DEBUG MODE");
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 15)
-      .attr("font-size", "9px")
-      .attr("fill", "#ff0000")
-      .text("━━ Ring 0 polar sector");
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 28)
-      .attr("font-size", "9px")
-      .attr("fill", "#00ffff")
-      .text("━━ Other rings polar sector");
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 41)
-      .attr("font-size", "9px")
-      .attr("fill", "#ffff00")
-      .text("━━ Cartesian bounding box");
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 54)
-      .attr("font-size", "9px")
-      .attr("fill", "#00ff00")
-      .text("○ Collision radius (Ring 0)");
+    renderDebugVisualization(
+      radar,
+      config,
+      quadrants,
+      rings,
+      num_quadrants,
+      num_rings,
+      segmented
+    );
   }
 
   function ringDescriptionsTable() {
