@@ -98,13 +98,15 @@
     <h1>🔍 DEBUG MODE: 3 Quadrants × 4 Rings</h1>
     <p><strong>Purpose:</strong> Visualize segment boundaries, collision radii, and geometric calculations</p>
     <ul>
-      <li><strong style="color:#ff0000;">Red dashed lines:</strong> Ring 0 (ADOPT) polar sector boundaries</li>
-      <li><strong style="color:#00ffff;">Cyan dashed lines:</strong> Other rings polar sector boundaries</li>
-      <li><strong style="color:#ffff00;">Yellow dashed lines:</strong> Cartesian bounding boxes (rectangular approximation)</li>
+      <li><strong style="color:#ff0000;">Red dashed arcs:</strong> Ring 0 (ADOPT) polar sector boundaries (with angular padding)</li>
+      <li><strong style="color:#00ffff;">Cyan dashed arcs:</strong> Other rings polar sector boundaries (with angular padding)</li>
+      <li><strong style="color:#ff00ff;">Magenta dashed rays:</strong> Quadrant boundaries (NO padding) - should align with grid lines</li>
+      <li><strong style="color:#ffff00;">Yellow dashed boxes:</strong> Cartesian bounding boxes (rectangular approximation)</li>
       <li><strong style="color:#00ff00;">Green dotted circles:</strong> Collision radii for Ring 0 items</li>
+      <li><strong style="color:#0000ff;">Blue dotted circles:</strong> Collision radii for Ring 1+ items</li>
       <li><strong>Red text labels:</strong> Segment info (items count, arc length in pixels)</li>
     </ul>
-    <p><strong>Problem to observe:</strong> Items clustering in circled area despite having room in the segment</p>
+    <p><strong>Status:</strong> Fix #7 applied - items stay within segments! Collision circles now update with force simulation.</p>
   </div>
 
   <nav class="demo-links">
