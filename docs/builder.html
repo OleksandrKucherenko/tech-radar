@@ -1182,14 +1182,15 @@
                 return clean;
             });
 
+            // Export in radar_visualization API format
             const config = {
-                version: '1.0',
-                ringCount: state.ringCount,
-                quadrantCount: state.quadrantCount,
-                quadrantNames: state.quadrantNames,
-                ringNames: state.ringNames,
-                entries: cleanEntries,
-                exportDate: new Date().toISOString()
+                title: "Technology Radar",
+                quadrants: state.quadrantNames.map(name => ({ name })),
+                rings: state.ringNames.map((name, index) => ({
+                    name,
+                    color: RING_CONFIGS[state.ringCount].colors[index]
+                })),
+                entries: cleanEntries
             };
 
             const json = JSON.stringify(config, null, 2);
@@ -1225,17 +1226,49 @@
                     try {
                         const config = JSON.parse(event.target.result);
 
-                        // Validate configuration
-                        if (!config.ringCount || !config.quadrantCount || !config.quadrantNames || !config.entries) {
+                        // Support both old and new format
+                        let ringCount, quadrantCount, quadrantNames, ringNames, entries;
+
+                        if (config.quadrants && Array.isArray(config.quadrants)) {
+                            // New format: { quadrants: [{name: "..."}], rings: [{name: "...", color: "..."}], entries: [] }
+                            quadrantCount = config.quadrants.length;
+                            quadrantNames = config.quadrants.map(q => q.name);
+
+                            if (config.rings && Array.isArray(config.rings)) {
+                                ringCount = config.rings.length;
+                                ringNames = config.rings.map(r => r.name);
+
+                                // Validate ring count (4 or 7 supported)
+                                if (ringCount !== 4 && ringCount !== 7) {
+                                    throw new Error('Only 4 or 7 rings are supported');
+                                }
+                            } else {
+                                throw new Error('Invalid format: missing rings array');
+                            }
+
+                            entries = config.entries || [];
+                        } else if (config.ringCount && config.quadrantCount && config.quadrantNames) {
+                            // Old format: { ringCount: 4, quadrantCount: 4, quadrantNames: [...], ringNames: [...], entries: [] }
+                            ringCount = config.ringCount;
+                            quadrantCount = config.quadrantCount;
+                            quadrantNames = config.quadrantNames;
+                            ringNames = config.ringNames || RING_CONFIGS[ringCount].names;
+                            entries = config.entries || [];
+                        } else {
                             throw new Error('Invalid configuration file format');
                         }
 
+                        // Validate
+                        if (quadrantCount < 2 || quadrantCount > 8) {
+                            throw new Error('Quadrant count must be between 2 and 8');
+                        }
+
                         // Load configuration
-                        state.ringCount = config.ringCount;
-                        state.quadrantCount = config.quadrantCount;
-                        state.quadrantNames = config.quadrantNames;
-                        state.ringNames = config.ringNames || RING_CONFIGS[config.ringCount].names;
-                        state.entries = config.entries;
+                        state.ringCount = ringCount;
+                        state.quadrantCount = quadrantCount;
+                        state.quadrantNames = quadrantNames;
+                        state.ringNames = ringNames;
+                        state.entries = entries;
                         state.editingIndex = -1;
 
                         // Update UI
