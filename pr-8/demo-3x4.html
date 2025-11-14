@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Primary Meta Tags -->
+  <title>Tech Radar Demo - 3 Quadrants × 4 Rings</title>
+  <meta name="title" content="Tech Radar Demo - 3 Quadrants × 4 Rings">
+  <meta name="description"
+    content="Interactive Tech Radar demo with 3 quadrants and 4 rings configuration. Explore technology choices with custom quadrant layouts.">
+  <meta name="keywords" content="tech radar, technology radar, demo, 3 quadrants, 4 rings, visualization">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://oleksandrkucherenko.github.io/tech-radar/demo-3x4.html">
+  <meta property="og:title" content="Tech Radar Demo - 3 Quadrants × 4 Rings">
+  <meta property="og:description"
+    content="Interactive Tech Radar demo with 3 quadrants and 4 rings configuration. Explore technology choices with custom quadrant layouts.">
+  <meta property="og:image"
+    content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/3x4-quadrants-rings.jpg">
+  <meta property="og:site_name" content="Tech Radar">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://oleksandrkucherenko.github.io/tech-radar/demo-3x4.html">
+  <meta name="twitter:title" content="Tech Radar Demo - 3 Quadrants × 4 Rings">
+  <meta name="twitter:description"
+    content="Interactive Tech Radar demo with 3 quadrants and 4 rings configuration. Explore technology choices with custom quadrant layouts.">
+  <meta name="twitter:image"
+    content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/3x4-quadrants-rings.jpg">
+
+  <!-- Repository & Links -->
+  <link rel="canonical" href="https://oleksandrkucherenko.github.io/tech-radar/demo-3x4.html">
+  <link rel="repository" href="https://github.com/OleksandrKucherenko/tech-radar">
+  <meta name="theme-color" content="#1976d2">
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="radar.js"></script>
+  <link rel="stylesheet" href="radar.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    nav.demo-links {
+      padding: 15px 20px;
+      background: #f8f8f8;
+      border-bottom: 1px solid #e0e0e0;
+      margin: 0;
+    }
+
+    .radar-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    #radar {
+      max-width: 100%;
+      height: auto;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px 20px;
+      margin: 0;
+      border-top: 1px solid #e0e0e0;
+      background: #f8f8f8;
+      color: #666;
+      font-size: 12px;
+    }
+
+    footer code {
+      background: #e8e8e8;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="demo-links">
+    <strong>Demo pages:</strong>
+    <a href="./index.html">Default</a>
+    <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
+    <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
+    <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
+    <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
+    <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
+    <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
+    <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
+    <span class="separator">|</span>
+    <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
+  </nav>
+
+  <div class="radar-container">
+    <svg id="radar"></svg>
+  </div>
+
+  <script>
+    radar_visualization({
+      svg_id: "radar",
+      title: "3 Quadrants × 4 Rings",
+      quadrants: [
+        { name: "Tools" },
+        { name: "Techniques" },
+        { name: "Platforms" }
+      ],
+      rings: [
+        { name: "ADOPT", color: "#5ba300" },
+        { name: "TRIAL", color: "#009eb0" },
+        { name: "ASSESS", color: "#c7ba00" },
+        { name: "HOLD", color: "#e09b96" }
+      ],
+      entries: [
+        // Tools - ADOPT
+        { label: "Git", quadrant: 0, ring: 0, moved: 0, active: true },
+        { label: "VS Code", quadrant: 0, ring: 0, moved: 1, active: true },
+        { label: "Docker", quadrant: 0, ring: 0, moved: 0, active: true },
+        { label: "Kubernetes", quadrant: 0, ring: 0, moved: 2, active: true },
+        { label: "Terraform", quadrant: 0, ring: 0, moved: 0, active: true },
+        { label: "GitHub Actions", quadrant: 0, ring: 0, moved: 1, active: true },
+        // Tools - TRIAL
+        { label: "Copilot", quadrant: 0, ring: 1, moved: 2, active: true },
+        { label: "Bun", quadrant: 0, ring: 1, moved: 1, active: true },
+        { label: "Deno", quadrant: 0, ring: 1, moved: 0, active: true },
+        { label: "Podman", quadrant: 0, ring: 1, moved: 1, active: true },
+        { label: "BuildKit", quadrant: 0, ring: 1, moved: 2, active: true },
+        { label: "Tilt", quadrant: 0, ring: 1, moved: 1, active: true },
+        // Tools - ASSESS
+        { label: "Nix", quadrant: 0, ring: 2, moved: 2, active: true },
+        { label: "Devbox", quadrant: 0, ring: 2, moved: 1, active: true },
+        { label: "Cursor", quadrant: 0, ring: 2, moved: 2, active: true },
+        { label: "Zed", quadrant: 0, ring: 2, moved: 1, active: true },
+        { label: "Fleet", quadrant: 0, ring: 2, moved: 0, active: true },
+        { label: "Rancher Desktop", quadrant: 0, ring: 2, moved: 1, active: true },
+        // Tools - HOLD
+        { label: "Bower", quadrant: 0, ring: 3, moved: 0, active: true },
+        { label: "Grunt", quadrant: 0, ring: 3, moved: -1, active: true },
+        { label: "Gulp", quadrant: 0, ring: 3, moved: 0, active: true },
+        { label: "Vagrant", quadrant: 0, ring: 3, moved: -1, active: true },
+
+        // Techniques - ADOPT
+        { label: "CI/CD", quadrant: 1, ring: 0, moved: 0, active: true },
+        { label: "GitOps", quadrant: 1, ring: 0, moved: 1, active: true },
+        { label: "TDD", quadrant: 1, ring: 0, moved: 0, active: true },
+        { label: "Code Review", quadrant: 1, ring: 0, moved: 0, active: true },
+        { label: "IaC", quadrant: 1, ring: 0, moved: 1, active: true },
+        { label: "Observability", quadrant: 1, ring: 0, moved: 2, active: true },
+        // Techniques - TRIAL
+        { label: "Trunk-Based Dev", quadrant: 1, ring: 1, moved: 1, active: true },
+        { label: "Feature Flags", quadrant: 1, ring: 1, moved: 2, active: true },
+        { label: "Chaos Engineering", quadrant: 1, ring: 1, moved: 1, active: true },
+        { label: "A/B Testing", quadrant: 1, ring: 1, moved: 0, active: true },
+        { label: "Blue-Green Deploy", quadrant: 1, ring: 1, moved: 1, active: true },
+        { label: "Canary Releases", quadrant: 1, ring: 1, moved: 2, active: true },
+        // Techniques - ASSESS
+        { label: "AI-Assisted Dev", quadrant: 1, ring: 2, moved: 2, active: true },
+        { label: "Prompt Engineering", quadrant: 1, ring: 2, moved: 2, active: true },
+        { label: "Shadow Deployments", quadrant: 1, ring: 2, moved: 1, active: true },
+        { label: "Dark Launches", quadrant: 1, ring: 2, moved: 0, active: true },
+        { label: "Progressive Delivery", quadrant: 1, ring: 2, moved: 1, active: true },
+        { label: "DORA Metrics", quadrant: 1, ring: 2, moved: 2, active: true },
+        // Techniques - HOLD
+        { label: "Waterfall", quadrant: 1, ring: 3, moved: -1, active: true },
+        { label: "Manual Testing Only", quadrant: 1, ring: 3, moved: 0, active: true },
+        { label: "Big Bang Releases", quadrant: 1, ring: 3, moved: -1, active: true },
+        { label: "Monolithic Repos", quadrant: 1, ring: 3, moved: 0, active: true },
+
+        // Platforms - ADOPT
+        { label: "AWS", quadrant: 2, ring: 0, moved: 0, active: true },
+        { label: "GitHub", quadrant: 2, ring: 0, moved: 0, active: true },
+        { label: "Datadog", quadrant: 2, ring: 0, moved: 1, active: true },
+        { label: "Slack", quadrant: 2, ring: 0, moved: 0, active: true },
+        { label: "Terraform Cloud", quadrant: 2, ring: 0, moved: 2, active: true },
+        { label: "ArgoCD", quadrant: 2, ring: 0, moved: 1, active: true },
+        // Platforms - TRIAL
+        { label: "Azure", quadrant: 2, ring: 1, moved: 1, active: true },
+        { label: "GCP", quadrant: 2, ring: 1, moved: 0, active: true },
+        { label: "Vercel", quadrant: 2, ring: 1, moved: 2, active: true },
+        { label: "Cloudflare Workers", quadrant: 2, ring: 1, moved: 1, active: true },
+        { label: "Railway", quadrant: 2, ring: 1, moved: 2, active: true },
+        { label: "Fly.io", quadrant: 2, ring: 1, moved: 1, active: true },
+        // Platforms - ASSESS
+        { label: "Supabase", quadrant: 2, ring: 2, moved: 2, active: true },
+        { label: "PlanetScale", quadrant: 2, ring: 2, moved: 1, active: true },
+        { label: "Neon", quadrant: 2, ring: 2, moved: 2, active: true },
+        { label: "Turso", quadrant: 2, ring: 2, moved: 2, active: true },
+        { label: "Deno Deploy", quadrant: 2, ring: 2, moved: 1, active: true },
+        { label: "Render", quadrant: 2, ring: 2, moved: 0, active: true },
+        // Platforms - HOLD
+        { label: "Heroku", quadrant: 2, ring: 3, moved: -1, active: true },
+        { label: "Parse", quadrant: 2, ring: 3, moved: -1, active: true },
+        { label: "Cloud9", quadrant: 2, ring: 3, moved: 0, active: true },
+        { label: "Nitrous", quadrant: 2, ring: 3, moved: -1, active: true }
+      ]
+    });
+  </script>
+
+  <footer>
+    Build: <code>3b4de14</code>
+  </footer>
+
+</body>
+
+</html>
