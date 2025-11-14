@@ -142,7 +142,8 @@ jobs:
           RELEASE_FILE="docs/release/radar-$VERSION.js"
 
           # Generate release notes
-          RELEASE_NOTES="## Tech Radar Release $TAG_NAME
+          RELEASE_NOTES=$(cat <<EOF
+## Tech Radar Release $TAG_NAME
 
 ### 📦 Release Artifact
 
@@ -154,29 +155,29 @@ jobs:
 ### 🚀 Usage
 
 \`\`\`html
-<script src=\"https://d3js.org/d3.v7.min.js\"></script>
-<script src=\"https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/radar-$VERSION.js\"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/radar-$VERSION.js"></script>
 <script>
   radar_visualization({
-    svg_id: \"radar\",
+    svg_id: "radar",
     width: 1450,
     height: 1000,
     colors: {
-      background: \"#fff\",
-      grid: \"#dddde0\",
-      inactive: \"#ddd\"
+      background: "#fff",
+      grid: "#dddde0",
+      inactive: "#ddd"
     },
     quadrants: [
-      { name: \"Languages\" },
-      { name: \"Infrastructure\" },
-      { name: \"Datastores\" },
-      { name: \"Data Management\" }
+      { name: "Languages" },
+      { name: "Infrastructure" },
+      { name: "Datastores" },
+      { name: "Data Management" }
     ],
     rings: [
-      { name: \"ADOPT\", color: \"#5ba300\" },
-      { name: \"TRIAL\", color: \"#009eb0\" },
-      { name: \"ASSESS\", color: \"#c7ba00\" },
-      { name: \"HOLD\", color: \"#e09b96\" }
+      { name: "ADOPT", color: "#5ba300" },
+      { name: "TRIAL", color: "#009eb0" },
+      { name: "ASSESS", color: "#c7ba00" },
+      { name: "HOLD", color: "#e09b96" }
     ],
     entries: [
       // Your technology entries here
@@ -188,7 +189,8 @@ jobs:
 ### 📝 Commit
 
 **SHA:** \`${GITHUB_SHA:0:7}\`
-"
+EOF
+)
 
           # Create release
           gh release create "$TAG_NAME" \
