@@ -47,6 +47,7 @@ describe('Entry Processor', () => {
 
   describe('EntryProcessor', () => {
     test('processes entries with all required properties', () => {
+      // GIVEN: a configured entry processor
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -60,9 +61,11 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: processing test entries
       const entries = createTestEntries();
       processor.processEntries(entries);
 
+      // THEN: all entries should have required properties
       for (const entry of entries) {
         expect(entry).toHaveProperty('segment');
         expect(entry).toHaveProperty('color');
@@ -74,6 +77,7 @@ describe('Entry Processor', () => {
     });
 
     test('assigns correct colors to active entries', () => {
+      // GIVEN: a configured entry processor
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -87,16 +91,18 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: processing test entries
       const entries = createTestEntries();
       processor.processEntries(entries);
 
-      // Active entries should use ring colors
+      // THEN: active entries should use ring colors
       expect(entries[0].color).toBe('#93c47d'); // ring 0 color
       expect(entries[1].color).toBe('#93d2c2'); // ring 1 color
       expect(entries[4].color).toBe('#fbdb84'); // ring 2 color
     });
 
     test('assigns inactive color to inactive entries', () => {
+      // GIVEN: a configured entry processor with print layout disabled
       const config = createTestConfig();
       config.print_layout = false; // Disable print layout to show inactive color
       const quadrants = generateQuadrants(4);
@@ -111,14 +117,16 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: processing test entries
       const entries = createTestEntries();
       processor.processEntries(entries);
 
-      // Inactive entry should use inactive color
+      // THEN: inactive entry should use inactive color
       expect(entries[3].color).toBe('#ddd');
     });
 
     test('assigns sequential IDs in correct order', () => {
+      // GIVEN: a configured entry processor
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -132,10 +140,11 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: processing test entries
       const entries = createTestEntries();
       processor.processEntries(entries);
 
-      // IDs should be sequential starting from 1
+      // THEN: IDs should be sequential starting from 1 with no duplicates
       const ids = entries.map(e => parseInt(e.id));
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(entries.length);
@@ -144,6 +153,7 @@ describe('Entry Processor', () => {
     });
 
     test('positions entries with valid coordinates', () => {
+      // GIVEN: a configured entry processor
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -157,9 +167,11 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: processing test entries
       const entries = createTestEntries();
       processor.processEntries(entries);
 
+      // THEN: all entries should have finite coordinates within reasonable bounds
       for (const entry of entries) {
         expect(isFinite(entry.x)).toBe(true);
         expect(isFinite(entry.y)).toBe(true);
@@ -169,6 +181,7 @@ describe('Entry Processor', () => {
     });
 
     test('produces deterministic results with seeded random', () => {
+      // GIVEN: two entry processors with the same seed
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -191,12 +204,14 @@ describe('Entry Processor', () => {
         (min, max) => rng2.between(min, max)
       );
 
+      // WHEN: processing identical entries with both processors
       const entries1 = createTestEntries();
       const entries2 = createTestEntries();
 
       processor1.processEntries(entries1);
       processor2.processEntries(entries2);
 
+      // THEN: results should be identical for both processors
       for (let i = 0; i < entries1.length; i++) {
         expect(entries1[i].x).toBeCloseTo(entries2[i].x);
         expect(entries1[i].y).toBeCloseTo(entries2[i].y);
@@ -206,6 +221,7 @@ describe('Entry Processor', () => {
     });
 
     test('assigns collision radii to all entries', () => {
+      // GIVEN: a configured entry processor
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -219,9 +235,11 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: processing test entries
       const entries = createTestEntries();
       processor.processEntries(entries);
 
+      // THEN: all entries should have collision radii within valid bounds
       for (const entry of entries) {
         expect(entry.collision_radius).toBeGreaterThanOrEqual(10);
         expect(entry.collision_radius).toBeLessThan(100); // Allow for larger radii when area permits
@@ -229,6 +247,7 @@ describe('Entry Processor', () => {
     });
 
     test('calculates smaller collision radii for dense segments', () => {
+      // GIVEN: a configured entry processor and many entries in the same segment
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -242,7 +261,7 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
-      // Create many entries in the same segment
+      // WHEN: processing 20 entries in the same quadrant and ring
       const denseEntries = [];
       for (let i = 0; i < 20; i++) {
         denseEntries.push({
@@ -256,13 +275,14 @@ describe('Entry Processor', () => {
 
       processor.processEntries(denseEntries);
 
-      // All should have collision radius (may be smaller for density)
+      // THEN: all entries should have collision radii (may be smaller for density)
       for (const entry of denseEntries) {
         expect(entry.collision_radius).toBeGreaterThanOrEqual(10);
       }
     });
 
     test('segments entries correctly by quadrant and ring', () => {
+      // GIVEN: a configured entry processor
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -276,9 +296,11 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: segmenting test entries
       const entries = createTestEntries();
       const segmented = processor.segmentEntries(entries);
 
+      // THEN: entries should be organized correctly by quadrant and ring
       expect(segmented).toHaveLength(4); // 4 quadrants
       expect(segmented[0]).toHaveLength(4); // 4 rings
 
@@ -290,6 +312,7 @@ describe('Entry Processor', () => {
     });
 
     test('sorts entries alphabetically within segments', () => {
+      // GIVEN: a configured entry processor and unsorted entries
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -309,9 +332,10 @@ describe('Entry Processor', () => {
         { label: 'Mango', quadrant: 0, ring: 0, active: true, moved: 0 }
       ];
 
+      // WHEN: processing entries
       processor.processEntries(entries);
 
-      // After processing, IDs should reflect alphabetical order
+      // THEN: IDs should reflect alphabetical order
       const sorted = [...entries].sort((a, b) => parseInt(a.id) - parseInt(b.id));
       expect(sorted[0].label).toBe('Apple');
       expect(sorted[1].label).toBe('Mango');
@@ -319,6 +343,7 @@ describe('Entry Processor', () => {
     });
 
     test('works with 6 quadrants and 5 rings', () => {
+      // GIVEN: a configured entry processor with 6 quadrants and 5 rings
       const config = createTestConfig();
       config.quadrants = Array(6).fill({ name: 'Q' });
       config.rings = Array(5).fill({ name: 'R', color: '#000' });
@@ -335,6 +360,7 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: processing entries with extended ranges
       const entries = [
         { label: 'Tech A', quadrant: 0, ring: 0, active: true, moved: 0 },
         { label: 'Tech B', quadrant: 5, ring: 4, active: true, moved: 0 }
@@ -342,6 +368,7 @@ describe('Entry Processor', () => {
 
       processor.processEntries(entries);
 
+      // THEN: entries should be processed successfully with extended configuration
       for (const entry of entries) {
         expect(entry).toHaveProperty('x');
         expect(entry).toHaveProperty('y');
@@ -350,6 +377,7 @@ describe('Entry Processor', () => {
     });
 
     test('handles empty entry list gracefully', () => {
+      // GIVEN: a configured entry processor and an empty entry list
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -363,13 +391,16 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: processing empty entries
       const entries = [];
       processor.processEntries(entries);
 
+      // THEN: list should remain empty
       expect(entries).toHaveLength(0);
     });
 
     test('handles single entry correctly', () => {
+      // GIVEN: a configured entry processor and a single entry
       const config = createTestConfig();
       const quadrants = generateQuadrants(4);
       const rings = generateRings(4, 400);
@@ -383,12 +414,14 @@ describe('Entry Processor', () => {
         (min, max) => rng.between(min, max)
       );
 
+      // WHEN: processing a single entry
       const entries = [
         { label: 'Sole Tech', quadrant: 0, ring: 0, active: true, moved: 0 }
       ];
 
       processor.processEntries(entries);
 
+      // THEN: entry should be processed with ID and valid coordinates
       expect(entries[0].id).toBe('1');
       expect(isFinite(entries[0].x)).toBe(true);
       expect(isFinite(entries[0].y)).toBe(true);
