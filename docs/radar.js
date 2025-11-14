@@ -48,8 +48,6 @@ function radar_visualization(config) {
     : Math.round(config.legend_column_width * 0.25);
 
   // Responsive sizing based on viewport and grid complexity
-  var num_quadrants = config.quadrants.length;
-  var num_rings = config.rings.length;
   var viewport_width = window.innerWidth || document.documentElement.clientWidth;
   var viewport_height = window.innerHeight || document.documentElement.clientHeight;
 
@@ -61,9 +59,11 @@ function radar_visualization(config) {
   }
 
   // Adjust sizing based on grid complexity (for 5+ quadrants)
-  if (num_quadrants >= 5 || num_rings >= 6) {
+  var grid_quadrants = config.quadrants.length;
+  var grid_rings = config.rings.length;
+  if (grid_quadrants >= 5 || grid_rings >= 6) {
     // Increase base size for complex grids to prevent overcrowding
-    var complexity_multiplier = 1 + ((num_quadrants - 4) * 0.05) + ((num_rings - 4) * 0.03);
+    var complexity_multiplier = 1 + ((grid_quadrants - 4) * 0.05) + ((grid_rings - 4) * 0.03);
     if (!config.width_override) {
       config.width = Math.round(config.width * Math.min(complexity_multiplier, 1.3));
     }
@@ -72,7 +72,7 @@ function radar_visualization(config) {
     }
 
     // Slightly reduce collision radius for high-complexity grids
-    if (num_quadrants >= 7 || num_rings >= 7) {
+    if (grid_quadrants >= 7 || grid_rings >= 7) {
       config.blip_collision_radius = Math.max(10, config.blip_collision_radius * 0.9);
     }
   }
