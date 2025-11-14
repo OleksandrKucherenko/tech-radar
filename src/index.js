@@ -171,52 +171,7 @@ function radar_visualization(config) {
     };
   }
 
-  function computeLegendOffsets() {
-    if (config.legend_offset) {
-      return config.legend_offset;
-    }
-
-    var num_quads = config.quadrants.length;
-    var offsets = new Array(num_quads);
-    var legend_overlap = outer_radius * 0.08;
-    var left_x = -outer_radius - config.legend_column_width + legend_overlap;
-    var right_x = outer_radius - legend_overlap;
-
-    var left_column = [];
-    var right_column = [];
-    for (var i = 0; i < num_quads; i++) {
-      var targetColumn = (i % 2 === 0) ? right_column : left_column;
-      targetColumn.push(i);
-    }
-
-    var baseY = -outer_radius + 80;
-    var verticalAvailable = (2 * outer_radius) - 160;
-
-    function stepFor(count) {
-      if (count <= 1) {
-        return 0;
-      }
-      return Math.max(config.legend_vertical_spacing, verticalAvailable / (count - 1));
-    }
-
-    function assignOffsets(column, xPosition) {
-      var step = stepFor(column.length);
-      for (var idx = 0; idx < column.length; idx++) {
-        var qIndex = column[idx];
-        offsets[qIndex] = {
-          x: xPosition,
-          y: baseY + idx * step
-        };
-      }
-    }
-
-    assignOffsets(left_column, left_x);
-    assignOffsets(right_column, right_x);
-
-    return offsets;
-  }
-
-  config.legend_offset = computeLegendOffsets();
+  config.legend_offset = computeLegendOffsets(num_quadrants, outer_radius, config);
 
   // ============================================================================
   // Phase 1 Refactoring: Coordinate transformation functions now imported
@@ -244,20 +199,23 @@ function radar_visualization(config) {
   const entryProcessor = new EntryProcessor(config, quadrants, rings, random, random_between);
   entryProcessor.processEntries(config.entries);
 
-  function translate(x, y) {
-    return "translate(" + x + "," + y + ")";
+  // Create segmented array for legend rendering (entries grouped by quadrant/ring)
+  const segmented = new Array(num_quadrants);
+  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
+    segmented[quadrant] = new Array(num_rings);
+    for (let ring = 0; ring < num_rings; ring++) {
+      segmented[quadrant][ring] = [];
+    }
+  }
+  for (let i = 0; i < config.entries.length; i++) {
+    const entry = config.entries[i];
+    segmented[entry.quadrant][entry.ring].push(entry);
   }
 
-  function viewbox(quadrant) {
-    var outer_radius = rings[rings.length - 1].radius;
-    var padding = 20;
-    return [
-      Math.max(0, quadrants[quadrant].factor_x * outer_radius) - (outer_radius + padding),
-      Math.max(0, quadrants[quadrant].factor_y * outer_radius) - (outer_radius + padding),
-      outer_radius + 2 * padding,
-      outer_radius + 2 * padding
-    ].join(" ");
-  }
+  // ============================================================================
+  // Phase 3 Refactoring: Helper functions now imported from rendering/helpers.js
+  // (translate, viewbox, computeLegendOffsets, ensureLayoutStructure, legend_transform)
+  // ============================================================================
 
   // adjust with config.scale.
   config.scale = config.scale || 1;
@@ -268,32 +226,6 @@ function radar_visualization(config) {
     .style("background-color", config.colors.background)
     .attr("width", scaled_width)
     .attr("height", scaled_height);
-
-  function ensureLayoutStructure(svgSelection) {
-    var existing = svgSelection.node().closest('.radar-layout');
-    if (existing) {
-      return d3.select(existing);
-    }
-
-    var svgNode = svgSelection.node();
-    var parent = svgNode.parentNode;
-    var wrapper = document.createElement('div');
-    wrapper.className = 'radar-layout';
-    var leftColumn = document.createElement('div');
-    leftColumn.className = 'radar-legend-column left';
-    var svgContainer = document.createElement('div');
-    svgContainer.className = 'radar-svg-container';
-    var rightColumn = document.createElement('div');
-    rightColumn.className = 'radar-legend-column right';
-
-    parent.insertBefore(wrapper, svgNode);
-    svgContainer.appendChild(svgNode);
-    wrapper.appendChild(leftColumn);
-    wrapper.appendChild(svgContainer);
-    wrapper.appendChild(rightColumn);
-
-    return d3.select(wrapper);
-  }
 
   var layoutWrapper = ensureLayoutStructure(svg);
   var legendLeftColumn = layoutWrapper.select('.radar-legend-column.left');
@@ -316,7 +248,7 @@ function radar_visualization(config) {
 
   var radar = svg.append("g");
   if ("zoomed_quadrant" in config) {
-    svg.attr("viewBox", viewbox(config.zoomed_quadrant));
+    svg.attr("viewBox", viewbox(config.zoomed_quadrant, quadrants, rings));
   } else {
     // Center radar in available space (accounting for title and footer)
     var radar_center_y = (scaled_height / 2) + ((title_height - footer_height) / 2);
@@ -531,8 +463,8 @@ function radar_visualization(config) {
           .attr('id', function (d) { return 'legendItem' + d.id; })
           .attr('class', 'legend-entry')
           .text(function (d) { return d.id + '. ' + d.label; })
-          .on('mouseover', function (event, d) { showBubble(d); highlightLegendItem(d); })
-          .on('mouseout', function (event, d) { hideBubble(d); unhighlightLegendItem(d); });
+          .on('mouseover', function (event, d) { showBubble(d, config); highlightLegendItem(d); })
+          .on('mouseout', function (event, d) { hideBubble(); unhighlightLegendItem(d); });
       }
     }
   }
@@ -561,46 +493,10 @@ function radar_visualization(config) {
     .attr("d", "M 0,0 10,0 5,8 z")
     .style("fill", "#333");
 
-  function showBubble(d) {
-    if (d.active || config.print_layout) {
-      var tooltip = d3.select("#bubble text")
-        .text(d.label);
-      var bbox = tooltip.node().getBBox();
-      // Use rendered (clamped) position for stable tooltip positioning
-      var x = d.rendered_x !== undefined ? d.rendered_x : d.x;
-      var y = d.rendered_y !== undefined ? d.rendered_y : d.y;
-      d3.select("#bubble")
-        .attr("transform", translate(x - bbox.width / 2, y - 16))
-        .style("opacity", 0.8);
-      d3.select("#bubble rect")
-        .attr("x", -5)
-        .attr("y", -bbox.height)
-        .attr("width", bbox.width + 10)
-        .attr("height", bbox.height + 4);
-      d3.select("#bubble path")
-        .attr("transform", translate(bbox.width / 2 - 5, 3));
-    }
-  }
-
-  function hideBubble(d) {
-    var bubble = d3.select("#bubble")
-      .attr("transform", translate(0, 0))
-      .style("opacity", 0);
-  }
-
-  function highlightLegendItem(d) {
-    var legendItem = document.getElementById("legendItem" + d.id);
-    if (legendItem) {
-      legendItem.classList.add('legend-highlight');
-    }
-  }
-
-  function unhighlightLegendItem(d) {
-    var legendItem = document.getElementById("legendItem" + d.id);
-    if (legendItem) {
-      legendItem.classList.remove('legend-highlight');
-    }
-  }
+  // ============================================================================
+  // Phase 3 Refactoring: Interaction functions now imported from rendering/interactions.js
+  // (showBubble, hideBubble, highlightLegendItem, unhighlightLegendItem, createBubble)
+  // ============================================================================
 
   // draw blips on radar
   var blips = rink.selectAll(".blip")
@@ -609,8 +505,8 @@ function radar_visualization(config) {
     .append("g")
     .attr("class", "blip")
     .attr("transform", function (d, i) { return legend_transform(d.quadrant, d.ring, config.legend_column_width, i); })
-    .on("mouseover", function (event, d) { showBubble(d); highlightLegendItem(d); })
-    .on("mouseout", function (event, d) { hideBubble(d); unhighlightLegendItem(d); });
+    .on("mouseover", function (event, d) { showBubble(d, config); highlightLegendItem(d); })
+    .on("mouseout", function (event, d) { hideBubble(); unhighlightLegendItem(d); });
 
   // configure each blip
   blips.each(function (d) {
