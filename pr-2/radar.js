@@ -47,6 +47,36 @@ function radar_visualization(config) {
     ? config.radar_horizontal_offset
     : Math.round(config.legend_column_width * 0.25);
 
+  // Responsive sizing based on viewport and grid complexity
+  var num_quadrants = config.quadrants.length;
+  var num_rings = config.rings.length;
+  var viewport_width = window.innerWidth || document.documentElement.clientWidth;
+  var viewport_height = window.innerHeight || document.documentElement.clientHeight;
+
+  // Apply responsive scaling for smaller viewports
+  if (viewport_width < 1024 && !config.scale) {
+    // Mobile/tablet scaling
+    var scale_factor = Math.min(viewport_width / 1450, viewport_height / 1000);
+    config.scale = Math.max(0.5, Math.min(1, scale_factor));
+  }
+
+  // Adjust sizing based on grid complexity (for 5+ quadrants)
+  if (num_quadrants >= 5 || num_rings >= 6) {
+    // Increase base size for complex grids to prevent overcrowding
+    var complexity_multiplier = 1 + ((num_quadrants - 4) * 0.05) + ((num_rings - 4) * 0.03);
+    if (!config.width_override) {
+      config.width = Math.round(config.width * Math.min(complexity_multiplier, 1.3));
+    }
+    if (!config.height_override) {
+      config.height = Math.round(config.height * Math.min(complexity_multiplier, 1.3));
+    }
+
+    // Slightly reduce collision radius for high-complexity grids
+    if (num_quadrants >= 7 || num_rings >= 7) {
+      config.blip_collision_radius = Math.max(10, config.blip_collision_radius * 0.9);
+    }
+  }
+
   // Calculate space for title and footer
   var title_height = config.print_layout && config.title ? 60 : 0;  // Title + date + padding
   var footer_height = config.print_layout ? 40 : 0;  // Footer + padding
@@ -657,8 +687,10 @@ function radar_visualization(config) {
       .attr("y1", 0)
       .attr("x2", outer_radius * Math.cos(angle))
       .attr("y2", outer_radius * Math.sin(angle))
+      .attr("class", "quadrant-line quadrant-line-" + i)
       .style("stroke", config.colors.grid)
-      .style("stroke-width", 1);
+      .style("stroke-width", 1.5)
+      .style("stroke-opacity", 0.3);
   }
 
   // background color. Usage `.attr("filter", "url(#solid)")`
@@ -683,13 +715,28 @@ function radar_visualization(config) {
     var labelRadius = outer - (thickness / 2);
     var labelFontSize = Math.max(12, Math.min(32, thickness * 0.45));
 
+    // Add subtle alternating background fills for better visual separation
+    if (i > 0) {
+      grid.append("circle")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", outer)
+        .attr("class", "ring ring-" + i)
+        .style("fill", i % 2 === 0 ? "rgba(0, 0, 0, 0.01)" : "rgba(0, 0, 0, 0.015)")
+        .style("stroke", "none")
+        .style("pointer-events", "none");
+    }
+
+    // Draw ring boundary with enhanced styling
     grid.append("circle")
       .attr("cx", 0)
       .attr("cy", 0)
       .attr("r", outer)
+      .attr("class", "ring-border ring-border-" + i)
       .style("fill", "none")
       .style("stroke", config.colors.grid)
-      .style("stroke-width", 1);
+      .style("stroke-width", i === 0 ? 2 : 1)
+      .style("stroke-opacity", i === 0 ? 0.4 : 0.25);
     if (config.print_layout) {
       grid.append("text")
         .text(config.rings[i].name)
