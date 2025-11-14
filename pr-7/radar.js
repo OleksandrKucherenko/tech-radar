@@ -1005,7 +1005,7 @@ function radar_visualization(config) {
     .enter()
     .append("g")
     .attr("class", "blip")
-    .attr("transform", function (d, i) { return legend_transform(d.quadrant, d.ring, config.legend_column_width, i); })
+    .attr("transform", function (d) { return translate(d.x, d.y); })
     .on("mouseover", function (event, d) { showBubble(d); highlightLegendItem(d); })
     .on("mouseout", function (event, d) { hideBubble(d); unhighlightLegendItem(d); });
 
