@@ -74,7 +74,7 @@ build_release() {
   fi
   
   echo "🔨 Building radar.js version $version..."
-  bun run build
+  RELEASE_VERSION="$version" bun run build
   
   local release_file="docs/release/radar-$version.js"
   if [ ! -f "$release_file" ]; then
