@@ -136,4 +136,119 @@ td {
 
 .demo-links a {
   margin-left: 12px;
+  transition: color 0.2s ease;
+}
+
+.demo-links a:hover {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+/* Enhanced SVG element styling */
+.blip {
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.blip:hover {
+  transform: scale(1.4);
+  filter: brightness(1.15) drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+}
+
+.blip:active {
+  transform: scale(1.2);
+}
+
+/* Improved ring visibility */
+.ring {
+  stroke-opacity: 0.3;
+  transition: stroke-opacity 0.2s ease;
+}
+
+.ring:hover {
+  stroke-opacity: 0.6;
+}
+
+/* Quadrant line styling */
+.quadrant-line {
+  stroke-opacity: 0.25;
+  transition: stroke-opacity 0.2s ease;
+}
+
+/* Legend hover effects */
+.legend-entry:hover {
+  background: rgba(0, 102, 204, 0.1);
+  border-radius: 4px;
+}
+
+/* Tooltip improvements */
+#bubble {
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+#bubble text {
+  text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;
+  font-weight: 500;
+}
+
+/* Responsive text sizing */
+@media (max-width: 1024px) {
+  .demo-links {
+    font-size: 13px;
+  }
+
+  .legend-quadrant-name {
+    font-size: 14px;
+  }
+
+  .legend-ring-name {
+    font-size: 10px;
+  }
+
+  .legend-entry {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .demo-links {
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+
+  .demo-links a {
+    margin: 4px 8px;
+  }
+
+  .legend-section {
+    padding: 4px;
+  }
+}
+
+/* Accessibility improvements */
+.blip:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+.legend-entry:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 1px;
+}
+
+/* Print styles */
+@media print {
+  .demo-links {
+    display: none;
+  }
+
+  .blip:hover {
+    transform: none;
+    filter: none;
+  }
+
+  nav, footer {
+    page-break-inside: avoid;
+  }
 }

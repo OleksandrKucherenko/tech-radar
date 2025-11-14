@@ -68,6 +68,11 @@ jobs:
           # Copy docs content to root
           cp -r ../docs/* .
 
+          # Inject commit hash into HTML files
+          COMMIT_HASH="${GITHUB_SHA:0:7}"
+          echo "Injecting commit hash: ${COMMIT_HASH}"
+          find . -maxdepth 1 -name "*.html" -type f -exec sed -i "s/{{BUILD_COMMIT_HASH}}/${COMMIT_HASH}/g" {} \;
+
           # Restore PR preview directories
           if [ -d "/tmp/pr-previews" ]; then
             echo "Restoring PR preview directories..."

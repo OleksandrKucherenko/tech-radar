@@ -27,10 +27,10 @@ function radar_visualization(config) {
   config.width = config.width || 1450;
   config.height = config.height || 1000;
   config.colors = ("colors" in config) ? config.colors : {
-      background: "#fff",
-      grid: '#dddde0',
-      inactive: "#ddd"
-    };
+    background: "#fff",
+    grid: '#dddde0',
+    inactive: "#ddd"
+  };
   config.print_layout = ("print_layout" in config) ? config.print_layout : true;
   config.links_in_new_tabs = ("links_in_new_tabs" in config) ? config.links_in_new_tabs : true;
   config.repo_url = config.repo_url || '#';
@@ -46,6 +46,39 @@ function radar_visualization(config) {
   config.radar_horizontal_offset = ("radar_horizontal_offset" in config)
     ? config.radar_horizontal_offset
     : Math.round(config.legend_column_width * 0.25);
+
+  // DEBUG MODE: Enable geometric visualizations
+  config.debug_geometry = ("debug_geometry" in config) ? config.debug_geometry : false;
+
+  // Responsive sizing based on viewport and grid complexity
+  var viewport_width = window.innerWidth || document.documentElement.clientWidth;
+  var viewport_height = window.innerHeight || document.documentElement.clientHeight;
+
+  // Apply responsive scaling for smaller viewports
+  if (viewport_width < 1024 && !config.scale) {
+    // Mobile/tablet scaling
+    var scale_factor = Math.min(viewport_width / 1450, viewport_height / 1000);
+    config.scale = Math.max(0.5, Math.min(1, scale_factor));
+  }
+
+  // Adjust sizing based on grid complexity (for 5+ quadrants)
+  var grid_quadrants = config.quadrants.length;
+  var grid_rings = config.rings.length;
+  if (grid_quadrants >= 5 || grid_rings >= 6) {
+    // Increase base size for complex grids to prevent overcrowding
+    var complexity_multiplier = 1 + ((grid_quadrants - 4) * 0.05) + ((grid_rings - 4) * 0.03);
+    if (!config.width_override) {
+      config.width = Math.round(config.width * Math.min(complexity_multiplier, 1.3));
+    }
+    if (!config.height_override) {
+      config.height = Math.round(config.height * Math.min(complexity_multiplier, 1.3));
+    }
+
+    // Slightly reduce collision radius for high-complexity grids
+    if (grid_quadrants >= 7 || grid_rings >= 7) {
+      config.blip_collision_radius = Math.max(10, config.blip_collision_radius * 0.9);
+    }
+  }
 
   // Calculate space for title and footer
   var title_height = config.print_layout && config.title ? 60 : 0;  // Title + date + padding
@@ -134,7 +167,7 @@ function radar_visualization(config) {
         radius = max_base_radius;
       } else {
         radius = base_pattern[pattern_index] +
-                 (base_pattern[pattern_index + 1] - base_pattern[pattern_index]) * fraction;
+          (base_pattern[pattern_index + 1] - base_pattern[pattern_index]) * fraction;
       }
 
       ring_template.push(radius);
@@ -142,11 +175,11 @@ function radar_visualization(config) {
   }
 
   const radius_scale = target_outer_radius / max_base_radius;
-  const rings = ring_template.map(function(r) {
+  const rings = ring_template.map(function (r) {
     return { radius: Math.max(10, Math.round(r * radius_scale)) };
   });
   const outer_radius = rings[rings.length - 1].radius;
-  const quadrant_bounds = quadrants.map(function(q) {
+  const quadrant_bounds = quadrants.map(function (q) {
     return computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius);
   });
 
@@ -267,7 +300,7 @@ function radar_visualization(config) {
 
     var candidates = [normalizedStart, normalizedEnd];
 
-    axisAngles.forEach(function(axisAngle) {
+    axisAngles.forEach(function (axisAngle) {
       var candidate = axisAngle;
       while (candidate < normalizedStart) {
         candidate += twoPi;
@@ -282,7 +315,7 @@ function radar_visualization(config) {
     var min_y = Infinity;
     var max_y = -Infinity;
 
-    candidates.forEach(function(angle) {
+    candidates.forEach(function (angle) {
       var cosA = Math.cos(angle);
       var sinA = Math.sin(angle);
       min_x = Math.min(min_x, cosA);
@@ -330,8 +363,11 @@ function radar_visualization(config) {
       angle_max = max_angle;
     }
 
-    var cartesian_min = quadrant_bounds[quadrant].min;
-    var cartesian_max = quadrant_bounds[quadrant].max;
+    // FIX #7: Calculate bounding box PER SEGMENT, not per quadrant
+    // Use segment's actual angles and outer_radius, not the full quadrant
+    var segment_bounds = computeQuadrantBounds(angle_min, angle_max, outer_radius);
+    var cartesian_min = segment_bounds.min;
+    var cartesian_max = segment_bounds.max;
 
     function clampPoint(point) {
       var c = bounded_box(point, cartesian_min, cartesian_max);
@@ -349,35 +385,153 @@ function radar_visualization(config) {
     }
 
     return {
-      clipx: function(d) {
+      clipx: function (d) {
         var clipped = clampAndAssign(d);
         return clipped.x;
       },
-      clipy: function(d) {
+      clipy: function (d) {
         var clipped = clampAndAssign(d);
         return clipped.y;
       },
-      random: function() {
+      // FIX #5: Single clip operation that doesn't double-clip
+      clip: function (d) {
+        var clipped = clampPoint({ x: d.x, y: d.y });
+        d.x = clipped.x;
+        d.y = clipped.y;
+        return clipped;
+      },
+      random: function () {
         return cartesian({
           t: random_between(angle_min, angle_max),
-          r: normal_between(inner_radius, outer_radius)
+          r: random_between(inner_radius, outer_radius)
         });
       }
     }
   }
 
-  // position each entry randomly in its segment
-  for (var i = 0; i < config.entries.length; i++) {
-    var entry = config.entries[i];
-    entry.segment = segment(entry.quadrant, entry.ring);
-    var point = entry.segment.random();
-    entry.x = point.x;
-    entry.y = point.y;
-    entry.color = entry.active || config.print_layout ?
-      config.rings[entry.ring].color : config.colors.inactive;
+  // Helper function to distribute entries in a grid pattern within their segment
+  function gridPosition(entries, segmentInfo) {
+    if (entries.length === 0) return;
+
+    var min_angle = quadrants[segmentInfo.quadrant].radial_min * Math.PI;
+    var max_angle = quadrants[segmentInfo.quadrant].radial_max * Math.PI;
+    var base_inner_radius = segmentInfo.ring === 0 ? 30 : rings[segmentInfo.ring - 1].radius;
+    var base_outer_radius = rings[segmentInfo.ring].radius;
+
+    var inner_radius = base_inner_radius + config.segment_radial_padding;
+    var outer_radius = base_outer_radius - config.segment_radial_padding;
+    if (outer_radius <= inner_radius) {
+      var midpoint = (base_inner_radius + base_outer_radius) / 2;
+      inner_radius = Math.max(0, midpoint - 1);
+      outer_radius = midpoint + 1;
+    }
+
+    var ring_center = (inner_radius + outer_radius) / 2;
+    var angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
+    var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
+    angular_padding = Math.min(angular_padding, angular_limit);
+
+    var angle_min = min_angle + angular_padding;
+    var angle_max = max_angle - angular_padding;
+
+    // Calculate optimal grid dimensions to maximize spatial distribution
+    var angle_range = angle_max - angle_min;
+    var radius_range = outer_radius - inner_radius;
+    var count = entries.length;
+
+    // Calculate segment dimensions in pixels (approximate)
+    // FIX #1: Use inner_radius for ring 0 to avoid overestimating angular capacity
+    // Ring 0 has smallest inner arc, using center radius overestimates by ~74%
+    var effective_radius = (segmentInfo.ring === 0) ? inner_radius : ring_center;
+    var segment_arc_length = angle_range * effective_radius;
+    var segment_radial_depth = radius_range;
+
+    // Estimate item size (based on collision radius)
+    var item_size = config.blip_collision_radius || 14;
+
+    // Calculate maximum items that could fit in each dimension
+    // Use a more generous calculation since force simulation will adjust spacing
+    // Divide by 70% of item size to allow for better initial distribution
+    var max_angular_items = Math.max(3, Math.floor(segment_arc_length / (item_size * 0.7)));
+    var max_radial_items = Math.max(3, Math.floor(segment_radial_depth / (item_size * 0.7)));
+
+    // Calculate balanced grid that uses both dimensions effectively
+    var angular_divisions, radial_divisions;
+
+    // Start with square root distribution
+    var base = Math.ceil(Math.sqrt(count));
+
+    // Calculate aspect ratio
+    var aspect_ratio = segment_arc_length / Math.max(segment_radial_depth, 1);
+
+    if (count === 1) {
+      angular_divisions = 1;
+      radial_divisions = 1;
+    } else if (count <= 4) {
+      // For small counts, spread evenly
+      angular_divisions = Math.min(count, max_angular_items);
+      radial_divisions = Math.ceil(count / angular_divisions);
+    } else {
+      // For larger counts, balance based on aspect ratio but enforce minimums
+      if (aspect_ratio > 2) {
+        // Much wider than tall - strongly prefer angular spread
+        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.5));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      } else if (aspect_ratio > 1) {
+        // Moderately wider - prefer angular spread
+        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.2));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      } else if (aspect_ratio < 0.5) {
+        // FIX #2: Much taller than wide - but don't over-favor radial in narrow segments
+        // For ring 0 with many quadrants, radial depth is limited, so balance better
+        var radial_bias = (segmentInfo.ring === 0) ? 0.85 : 0.7;
+        angular_divisions = Math.min(max_angular_items, Math.max(3, Math.floor(base * radial_bias)));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      } else {
+        // Moderately tall or square - balanced approach
+        angular_divisions = Math.min(max_angular_items, Math.max(3, base));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      }
+
+      // Ensure we don't exceed capacity in either dimension
+      angular_divisions = Math.max(2, Math.min(angular_divisions, max_angular_items));
+      radial_divisions = Math.max(2, Math.min(radial_divisions, max_radial_items));
+    }
+
+    // Distribute entries in grid with better spacing
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+
+      // Grid cell indices
+      var angular_index = i % angular_divisions;
+      var radial_index = Math.floor(i / angular_divisions);
+
+      // FIX #3: Better handling when entries exceed grid capacity
+      // Instead of simple wrapping, detect overcrowding for collision radius adjustment
+      var is_overcrowded = radial_index >= radial_divisions;
+      if (is_overcrowded) {
+        // Wrap excess entries back into the grid using modulo
+        var total_cells = angular_divisions * radial_divisions;
+        var cell_index = i % total_cells;
+        angular_index = cell_index % angular_divisions;
+        radial_index = Math.floor(cell_index / angular_divisions);
+      }
+
+      // Position within grid cell with increased jitter for better spread
+      // Use 0.15-0.85 range instead of 0.3-0.7 to fill more of each cell
+      var angular_fraction = (angular_index + 0.15 + random() * 0.7) / angular_divisions;
+      var radial_fraction = (radial_index + 0.15 + random() * 0.7) / radial_divisions;
+
+      var angle = angle_min + angular_fraction * angle_range;
+      var radius = inner_radius + radial_fraction * radius_range;
+
+      var point = cartesian({ t: angle, r: radius });
+      entry.x = point.x;
+      entry.y = point.y;
+    }
   }
 
-  // partition entries according to segments
+  // partition entries according to segments first
   var segmented = new Array(num_quadrants);
   for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
     segmented[quadrant] = new Array(num_rings);
@@ -385,9 +539,24 @@ function radar_visualization(config) {
       segmented[quadrant][ring] = [];
     }
   }
-  for (var i=0; i<config.entries.length; i++) {
+  for (var i = 0; i < config.entries.length; i++) {
     var entry = config.entries[i];
     segmented[entry.quadrant][entry.ring].push(entry);
+  }
+
+  // position each entry using grid-based distribution
+  for (var i = 0; i < config.entries.length; i++) {
+    var entry = config.entries[i];
+    entry.segment = segment(entry.quadrant, entry.ring);
+    entry.color = entry.active || config.print_layout ?
+      config.rings[entry.ring].color : config.colors.inactive;
+  }
+
+  // Apply grid positioning to each segment
+  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
+    for (let ring = 0; ring < num_rings; ring++) {
+      gridPosition(segmented[quadrant][ring], { quadrant: quadrant, ring: ring });
+    }
   }
 
   // assign unique sequential id to each entry
@@ -407,9 +576,67 @@ function radar_visualization(config) {
   for (var quadrant of quadrant_order) {
     for (var ring = 0; ring < num_rings; ring++) {
       var entries = segmented[quadrant][ring];
-      entries.sort(function(a,b) { return a.label.localeCompare(b.label); })
-      for (var i=0; i<entries.length; i++) {
+      entries.sort(function (a, b) { return a.label.localeCompare(b.label); })
+      for (var i = 0; i < entries.length; i++) {
         entries[i].id = "" + id++;
+      }
+    }
+  }
+
+  // Calculate adaptive collision radius based on segment density
+  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
+    for (let ring = 0; ring < num_rings; ring++) {
+      var entries = segmented[quadrant][ring];
+      if (entries.length === 0) continue;
+
+      // Calculate segment area
+      var seg_base_inner_radius = ring === 0 ? 30 : rings[ring - 1].radius;
+      var seg_base_outer_radius = rings[ring].radius;
+      var seg_inner_radius = seg_base_inner_radius + config.segment_radial_padding;
+      var seg_outer_radius = seg_base_outer_radius - config.segment_radial_padding;
+
+      // Guard against zero-width or negative-width segments
+      if (seg_outer_radius <= seg_inner_radius) {
+        var midpoint = (seg_base_inner_radius + seg_base_outer_radius) / 2;
+        seg_inner_radius = Math.max(0, midpoint - 1);
+        seg_outer_radius = midpoint + 1;
+      }
+
+      var seg_angle_range = (quadrants[quadrant].radial_max - quadrants[quadrant].radial_min) * Math.PI;
+      var seg_ring_center = (seg_inner_radius + seg_outer_radius) / 2;
+      var seg_radial_thickness = seg_outer_radius - seg_inner_radius;
+
+      // Approximate segment area (sector area)
+      var segment_area = seg_angle_range * seg_ring_center * seg_radial_thickness;
+
+      // Calculate area per entry
+      var area_per_entry = segment_area / entries.length;
+
+      // Collision radius based on available area (with safety factor)
+      // Increased safety factor from 0.45 to 0.55 for better spacing
+      var ideal_radius = Math.sqrt(area_per_entry / Math.PI) * 0.55;
+
+      // Allow adaptive radius to exceed default when there's room
+      // Use minimum of 12px to ensure reasonable spacing
+      var adaptive_radius = Math.max(12, ideal_radius);
+
+      // For very dense segments, ensure minimum spacing
+      if (entries.length > 10) {
+        adaptive_radius = Math.max(adaptive_radius, 13);
+      }
+      if (entries.length > 15) {
+        adaptive_radius = Math.max(adaptive_radius, 14);
+      }
+
+      // FIX #4: Reduce collision radius for narrow segments (many quadrants in ring 0)
+      // Narrow segments with small inner arc need tighter packing
+      if (ring === 0 && num_quadrants >= 6) {
+        adaptive_radius = Math.max(10, adaptive_radius * 0.9);
+      }
+
+      // Assign collision radius to each entry
+      for (var i = 0; i < entries.length; i++) {
+        entries[i].collision_radius = adaptive_radius;
       }
     }
   }
@@ -507,8 +734,10 @@ function radar_visualization(config) {
       .attr("y1", 0)
       .attr("x2", outer_radius * Math.cos(angle))
       .attr("y2", outer_radius * Math.sin(angle))
+      .attr("class", "quadrant-line quadrant-line-" + i)
       .style("stroke", config.colors.grid)
-      .style("stroke-width", 1);
+      .style("stroke-width", 1.5)
+      .style("stroke-opacity", 0.3);
   }
 
   // background color. Usage `.attr("filter", "url(#solid)")`
@@ -533,13 +762,28 @@ function radar_visualization(config) {
     var labelRadius = outer - (thickness / 2);
     var labelFontSize = Math.max(12, Math.min(32, thickness * 0.45));
 
+    // Add subtle alternating background fills for better visual separation
+    if (i > 0) {
+      grid.append("circle")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", outer)
+        .attr("class", "ring ring-" + i)
+        .style("fill", i % 2 === 0 ? "rgba(0, 0, 0, 0.01)" : "rgba(0, 0, 0, 0.015)")
+        .style("stroke", "none")
+        .style("pointer-events", "none");
+    }
+
+    // Draw ring boundary with enhanced styling
     grid.append("circle")
       .attr("cx", 0)
       .attr("cy", 0)
       .attr("r", outer)
+      .attr("class", "ring-border ring-border-" + i)
       .style("fill", "none")
       .style("stroke", config.colors.grid)
-      .style("stroke-width", 1);
+      .style("stroke-width", i === 0 ? 2 : 1)
+      .style("stroke-opacity", i === 0 ? 0.4 : 0.25);
     if (config.print_layout) {
       grid.append("text")
         .text(config.rings[i].name)
@@ -556,7 +800,7 @@ function radar_visualization(config) {
     }
   }
 
-  function legend_transform(quadrant, ring, legendColumnWidth, index=null, currentHeight = 0) {
+  function legend_transform(quadrant, ring, legendColumnWidth, index = null, currentHeight = 0) {
     // Determine number of columns based on ring count
     // 4-6 rings: 2 columns, 7-8 rings: 3 columns
     var num_columns = num_rings >= 7 ? 3 : 2;
@@ -626,8 +870,29 @@ function radar_visualization(config) {
     legendLeftColumn.html('');
     legendRightColumn.html('');
 
+    // Calculate which quadrants go in which column for clockwise ordering
+    // Right column: clockwise from position (num_quadrants - 2)
+    // Left column: remaining quadrants in reverse order (counter-clockwise visually)
+    // This ensures legends are visually close to their radar sectors
+    var right_count = Math.ceil(num_quadrants / 2);
+    var left_count = Math.floor(num_quadrants / 2);
+    var right_start = num_quadrants - 2;
+
+    var leftQuadrants = [];
+    var rightQuadrants = [];
+
+    // Fill right column quadrants (clockwise from right_start)
+    for (var i = 0; i < right_count; i++) {
+      rightQuadrants.push((right_start + i) % num_quadrants);
+    }
+
+    // Fill left column quadrants (backward from right_start - 1)
+    for (var i = 0; i < left_count; i++) {
+      leftQuadrants.push((right_start - 1 - i + num_quadrants) % num_quadrants);
+    }
+
     function targetColumn(quadrant) {
-      return (quadrant % 2 === 0) ? legendRightColumn : legendLeftColumn;
+      return leftQuadrants.includes(quadrant) ? legendLeftColumn : legendRightColumn;
     }
 
     for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
@@ -658,13 +923,13 @@ function radar_visualization(config) {
           .data(entriesInRing)
           .enter()
           .append('a')
-            .attr('href', function(d) { return d.link ? d.link : '#'; })
-            .attr('target', function(d) { return (d.link && config.links_in_new_tabs) ? '_blank' : null; })
-            .attr('id', function(d) { return 'legendItem' + d.id; })
-            .attr('class', 'legend-entry')
-            .text(function(d) { return d.id + '. ' + d.label; })
-            .on('mouseover', function(event, d) { showBubble(d); highlightLegendItem(d); })
-            .on('mouseout', function(event, d) { hideBubble(d); unhighlightLegendItem(d); });
+          .attr('href', function (d) { return d.link ? d.link : '#'; })
+          .attr('target', function (d) { return (d.link && config.links_in_new_tabs) ? '_blank' : null; })
+          .attr('id', function (d) { return 'legendItem' + d.id; })
+          .attr('class', 'legend-entry')
+          .text(function (d) { return d.id + '. ' + d.label; })
+          .on('mouseover', function (event, d) { showBubble(d); highlightLegendItem(d); })
+          .on('mouseout', function (event, d) { hideBubble(d); unhighlightLegendItem(d); });
       }
     }
   }
@@ -698,8 +963,11 @@ function radar_visualization(config) {
       var tooltip = d3.select("#bubble text")
         .text(d.label);
       var bbox = tooltip.node().getBBox();
+      // Use rendered (clamped) position for stable tooltip positioning
+      var x = d.rendered_x !== undefined ? d.rendered_x : d.x;
+      var y = d.rendered_y !== undefined ? d.rendered_y : d.y;
       d3.select("#bubble")
-        .attr("transform", translate(d.x - bbox.width / 2, d.y - 16))
+        .attr("transform", translate(x - bbox.width / 2, y - 16))
         .style("opacity", 0.8);
       d3.select("#bubble rect")
         .attr("x", -5)
@@ -713,7 +981,7 @@ function radar_visualization(config) {
 
   function hideBubble(d) {
     var bubble = d3.select("#bubble")
-      .attr("transform", translate(0,0))
+      .attr("transform", translate(0, 0))
       .style("opacity", 0);
   }
 
@@ -735,14 +1003,14 @@ function radar_visualization(config) {
   var blips = rink.selectAll(".blip")
     .data(config.entries)
     .enter()
-      .append("g")
-        .attr("class", "blip")
-        .attr("transform", function(d, i) { return legend_transform(d.quadrant, d.ring, config.legend_column_width, i); })
-        .on("mouseover", function(event, d) { showBubble(d); highlightLegendItem(d); })
-        .on("mouseout", function(event, d) { hideBubble(d); unhighlightLegendItem(d); });
+    .append("g")
+    .attr("class", "blip")
+    .attr("transform", function (d, i) { return legend_transform(d.quadrant, d.ring, config.legend_column_width, i); })
+    .on("mouseover", function (event, d) { showBubble(d); highlightLegendItem(d); })
+    .on("mouseout", function (event, d) { hideBubble(d); unhighlightLegendItem(d); });
 
   // configure each blip
-  blips.each(function(d) {
+  blips.each(function (d) {
     var blip = d3.select(this);
 
     // blip link
@@ -783,29 +1051,229 @@ function radar_visualization(config) {
         .attr("text-anchor", "middle")
         .style("fill", "#fff")
         .style("font-family", config.font_family)
-        .style("font-size", function(d) { return blip_text.length > 2 ? "8px" : "9px"; })
+        .style("font-size", function (d) { return blip_text.length > 2 ? "8px" : "9px"; })
         .style("pointer-events", "none")
         .style("user-select", "none");
     }
   });
 
   // make sure that blips stay inside their segment
+  // FIX #5: Use single clip() instead of clipx/clipy to avoid double-clipping
   function ticked() {
-    blips.attr("transform", function(d) {
-      return translate(d.segment.clipx(d), d.segment.clipy(d));
-    })
+    blips.attr("transform", function (d) {
+      var clipped = d.segment.clip(d);
+      return translate(clipped.x, clipped.y);
+    });
+
+    // Update debug collision circles if debug mode is enabled
+    if (config.debug_geometry) {
+      d3.select("#debug-collision-radii").selectAll("circle")
+        .attr("cx", function (d) { return d.x; })
+        .attr("cy", function (d) { return d.y; });
+    }
   }
 
   // distribute blips, while avoiding collisions
+  // FIX #6: Enhanced force simulation with better convergence
   d3.forceSimulation()
     .nodes(config.entries)
-    .velocityDecay(0.19) // magic number (found by experimentation)
+    .velocityDecay(0.15) // More movement freedom for better spreading
+    .alphaDecay(0.008) // Slower cooling for longer convergence time
+    .alphaMin(0.00005) // Lower minimum for thorough settlement
     .force("collision", d3.forceCollide()
-      .radius(function(d) {
+      .radius(function (d) {
         return d.collision_radius || config.blip_collision_radius;
       })
-      .strength(0.85))
-    .on("tick", ticked);
+      .strength(1.0) // Maximum collision strength for strict enforcement
+      .iterations(6)) // More iterations per tick for better collision resolution
+    .on("tick", ticked)
+    .tick(400); // Increased pre-run iterations for better stabilization
+
+  // DEBUG VISUALIZATIONS: Show segment boundaries, grids, and collision radii
+  if (config.debug_geometry) {
+    var debugLayer = radar.append("g")
+      .attr("id", "debug-layer");
+
+    // Get outer radius for coordinate system
+    var debug_outer_radius = rings[rings.length - 1].radius;
+
+    // Draw segment boundaries for each quadrant/ring combination
+    for (let q = 0; q < num_quadrants; q++) {
+      for (let r = 0; r < num_rings; r++) {
+        var seg_base_inner = r === 0 ? 30 : rings[r - 1].radius;
+        var seg_base_outer = rings[r].radius;
+        var seg_inner = seg_base_inner + config.segment_radial_padding;
+        var seg_outer = seg_base_outer - config.segment_radial_padding;
+
+        // FIX: Use same angular padding calculation as segment() function
+        // segment_angular_padding is in PIXELS, convert to radians based on ring_center
+        var seg_ring_center = (seg_inner + seg_outer) / 2;
+        var seg_angular_padding = config.segment_angular_padding / Math.max(seg_ring_center, 1);
+
+        var min_angle = quadrants[q].radial_min * Math.PI;
+        var max_angle = quadrants[q].radial_max * Math.PI;
+        var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
+        seg_angular_padding = Math.min(seg_angular_padding, angular_limit);
+
+        var angle_min = min_angle + seg_angular_padding;
+        var angle_max = max_angle - seg_angular_padding;
+        if (angle_max <= angle_min) {
+          angle_min = min_angle;
+          angle_max = max_angle;
+        }
+
+        // Draw polar sector boundary (actual segment shape)
+        // NOTE: d3.arc() uses clockwise angle convention, but our angles are counter-clockwise
+        // So we negate the angles to flip direction, plus apply offset to align with coordinate system
+        // Pattern: offset sign alternates based on num_quadrants mod 4
+        // - num_quadrants ≡ 1 (mod 4): positive offset (e.g., 5, 9, 13...)
+        // - num_quadrants ≡ 3 (mod 4): negative offset (e.g., 3, 7, 11...)
+        var offset_magnitude = Math.PI / (2 * num_quadrants);
+        var arc_offset = (num_quadrants % 4 === 1) ? offset_magnitude : -offset_magnitude;
+        
+        var arcPath = d3.arc()
+          .innerRadius(seg_inner)
+          .outerRadius(seg_outer)
+          .startAngle(-angle_max + arc_offset)
+          .endAngle(-angle_min + arc_offset);
+
+        debugLayer.append("path")
+          .attr("d", arcPath)
+          .attr("fill", "none")
+          .attr("stroke", r === 0 ? "#ff0000" : "#00ffff")
+          .attr("stroke-width", r === 0 ? 2 : 1)
+          .attr("stroke-dasharray", "5,5")
+          .attr("opacity", 0.5);
+
+        // Draw Cartesian bounding box (rectangular approximation)
+        var bounds = computeQuadrantBounds(
+          quadrants[q].radial_min * Math.PI,
+          quadrants[q].radial_max * Math.PI,
+          seg_outer
+        );
+
+        debugLayer.append("rect")
+          .attr("x", bounds.min.x)
+          .attr("y", bounds.min.y)
+          .attr("width", bounds.max.x - bounds.min.x)
+          .attr("height", bounds.max.y - bounds.min.y)
+          .attr("fill", "none")
+          .attr("stroke", "#ffff00")
+          .attr("stroke-width", 1)
+          .attr("stroke-dasharray", "3,3")
+          .attr("opacity", 0.3);
+
+        // Add text labels for segment info (Ring 0 only for clarity)
+        if (r === 0) {
+          var mid_angle = (angle_min + angle_max) / 2;
+          var label_radius = (seg_inner + seg_outer) / 2;
+          var label_x = Math.cos(mid_angle) * label_radius;
+          var label_y = Math.sin(mid_angle) * label_radius;
+
+          var entries_count = segmented[q][r].length;
+          var arc_length = (angle_max - angle_min) * seg_inner;
+
+          debugLayer.append("text")
+            .attr("x", label_x)
+            .attr("y", label_y)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "10px")
+            .attr("fill", "#ff0000")
+            .attr("font-weight", "bold")
+            .text(`Q${q}R${r}: ${entries_count} items, arc=${arc_length.toFixed(0)}px`);
+        }
+      }
+    }
+
+    // Draw collision radius circles for each blip
+    debugLayer.append("g")
+      .attr("id", "debug-collision-radii")
+      .selectAll("circle")
+      .data(config.entries)
+      .enter()
+      .append("circle")
+      .attr("cx", function (d) { return d.x; })
+      .attr("cy", function (d) { return d.y; })
+      .attr("r", function (d) { return d.collision_radius || config.blip_collision_radius; })
+      .attr("fill", "none")
+      .attr("stroke", function (d) { return d.ring === 0 ? "#00ff00" : "#0000ff"; })
+      .attr("stroke-width", 1)
+      .attr("stroke-dasharray", "2,2")
+      .attr("opacity", 0.4);
+
+    // Draw coordinate system axes
+    debugLayer.append("line")
+      .attr("x1", -debug_outer_radius)
+      .attr("y1", 0)
+      .attr("x2", debug_outer_radius)
+      .attr("y2", 0)
+      .attr("stroke", "#666")
+      .attr("stroke-width", 0.5)
+      .attr("opacity", 0.3);
+
+    debugLayer.append("line")
+      .attr("x1", 0)
+      .attr("y1", -debug_outer_radius)
+      .attr("x2", 0)
+      .attr("y2", debug_outer_radius)
+      .attr("stroke", "#666")
+      .attr("stroke-width", 0.5)
+      .attr("opacity", 0.3);
+
+    // Draw quadrant boundary lines (should match grid lines)
+    for (var i = 0; i < num_quadrants; i++) {
+      var grid_angle = -Math.PI + (i * 2 * Math.PI / num_quadrants);
+      debugLayer.append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", debug_outer_radius * Math.cos(grid_angle))
+        .attr("y2", debug_outer_radius * Math.sin(grid_angle))
+        .attr("stroke", "#ff00ff") // Magenta to distinguish from other lines
+        .attr("stroke-width", 2)
+        .attr("opacity", 0.6)
+        .attr("stroke-dasharray", "10,5");
+    }
+
+    // Add legend for debug colors
+    var debugLegend = debugLayer.append("g")
+      .attr("transform", translate(-debug_outer_radius + 10, -debug_outer_radius + 10));
+
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("font-size", "11px")
+      .attr("font-weight", "bold")
+      .attr("fill", "#000")
+      .text("DEBUG MODE");
+
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 15)
+      .attr("font-size", "9px")
+      .attr("fill", "#ff0000")
+      .text("━━ Ring 0 polar sector");
+
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 28)
+      .attr("font-size", "9px")
+      .attr("fill", "#00ffff")
+      .text("━━ Other rings polar sector");
+
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 41)
+      .attr("font-size", "9px")
+      .attr("fill", "#ffff00")
+      .text("━━ Cartesian bounding box");
+
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 54)
+      .attr("font-size", "9px")
+      .attr("fill", "#00ff00")
+      .text("○ Collision radius (Ring 0)");
+  }
 
   function ringDescriptionsTable() {
     var table = d3.select("body").append("table")
