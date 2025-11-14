@@ -898,11 +898,24 @@
         }
 
         function encodeStateToURL() {
+            // Clean entries - only include data properties
+            const cleanEntries = state.entries.map(entry => {
+                const clean = {
+                    label: entry.label,
+                    quadrant: entry.quadrant,
+                    ring: entry.ring,
+                    moved: entry.moved,
+                    active: entry.active
+                };
+                if (entry.link) clean.link = entry.link;
+                return clean;
+            });
+
             const config = {
                 r: state.ringCount,
                 q: state.quadrantCount,
                 qn: state.quadrantNames,
-                e: state.entries
+                e: cleanEntries
             };
             const encoded = btoa(JSON.stringify(config));
             return `${window.location.origin}${window.location.pathname}#${encoded}`;
@@ -955,6 +968,21 @@
                 color: RING_CONFIGS[state.ringCount].colors[index]
             }));
 
+            // Clean entries - only include data properties, not computed D3.js properties
+            const cleanEntries = state.entries.map(entry => {
+                const clean = {
+                    label: entry.label,
+                    quadrant: entry.quadrant,
+                    ring: entry.ring,
+                    moved: entry.moved,
+                    active: entry.active
+                };
+                if (entry.link) {
+                    clean.link = entry.link;
+                }
+                return clean;
+            });
+
             const config = {
                 svg_id: 'radar',
                 width: 1000,
@@ -967,7 +995,7 @@
                     inactive: '#ddd'
                 },
                 title: 'Technology Radar',
-                entries: state.entries
+                entries: cleanEntries
             };
 
             const code = `<!DOCTYPE html>
@@ -1141,13 +1169,26 @@
         }
 
         function exportToJSON() {
+            // Clean entries - only include data properties
+            const cleanEntries = state.entries.map(entry => {
+                const clean = {
+                    label: entry.label,
+                    quadrant: entry.quadrant,
+                    ring: entry.ring,
+                    moved: entry.moved,
+                    active: entry.active
+                };
+                if (entry.link) clean.link = entry.link;
+                return clean;
+            });
+
             const config = {
                 version: '1.0',
                 ringCount: state.ringCount,
                 quadrantCount: state.quadrantCount,
                 quadrantNames: state.quadrantNames,
                 ringNames: state.ringNames,
-                entries: state.entries,
+                entries: cleanEntries,
                 exportDate: new Date().toISOString()
             };
 
