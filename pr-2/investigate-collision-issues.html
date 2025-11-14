@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Investigation: Entity Positioning in First Ring</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="radar.js"></script>
+  <link rel="stylesheet" href="radar.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f5f5;
+    }
+    .investigation-container {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+    .test-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+    .test-stats {
+      display: flex;
+      gap: 15px;
+    }
+    .stat {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .stat.pass {
+      background: #d4edda;
+      color: #155724;
+    }
+    .stat.warn {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .stat.fail {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .stat.info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+    .radar-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+    .debug-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-left: 4px solid #007bff;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .debug-section {
+      margin: 10px 0;
+    }
+    .debug-title {
+      font-weight: bold;
+      color: #007bff;
+      margin-bottom: 5px;
+    }
+    .collision-details {
+      background: #fff3cd;
+      padding: 10px;
+      margin: 5px 0;
+      border-left: 3px solid #ffc107;
+    }
+    .segment-analysis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .segment-box {
+      padding: 10px;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+    }
+    .segment-box.problematic {
+      border-color: #dc3545;
+      background: #fff5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .summary {
+      background: #e7f3ff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 4px solid #2196F3;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🔍 Investigation: Entity Positioning & Collision in First Ring (ADOPT)</h1>
+
+<div class="summary">
+  <h3>Problem Statement:</h3>
+  <ul>
+    <li><strong>3 Quadrants:</strong> Technologies segment, adopt ring - collision issues</li>
+    <li><strong>5 Quadrants:</strong> Adopt ring in ALL segments has bad placement</li>
+    <li><strong>6 Quadrants:</strong> Adopt ring only - collision problems</li>
+    <li><strong>7 Quadrants:</strong> Adopt ring, partly on trial ring - collision issues</li>
+  </ul>
+  <h3>Hypotheses:</h3>
+  <ol>
+    <li>Badly calculated space available in a ring for placing entities (wrong shape, wrong math)</li>
+    <li>Collision detection not working well with provided area shape</li>
+  </ol>
+</div>
+
+<div id="investigation-suite"></div>
+
+<script>
+// Collision detection utility with detailed reporting
+function detectCollisions(entries, minDistance) {
+  const collisions = [];
+
+  for (let i = 0; i < entries.length; i++) {
+    for (let j = i + 1; j < entries.length; j++) {
+      const e1 = entries[i];
+      const e2 = entries[j];
+
+      // Only check collisions within same segment
+      if (e1.quadrant !== e2.quadrant || e1.ring !== e2.ring) {
+        continue;
+      }
+
+      const dx = e1.x - e2.x;
+      const dy = e1.y - e2.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      const r1 = e1.collision_radius || minDistance;
+      const r2 = e2.collision_radius || minDistance;
+      const requiredDistance = r1 + r2;
+
+      if (distance < requiredDistance) {
+        collisions.push({
+          entry1: e1.label,
+          entry2: e2.label,
+          distance: distance.toFixed(2),
+          required: requiredDistance.toFixed(2),
+          overlap: (requiredDistance - distance).toFixed(2),
+          quadrant: e1.quadrant,
+          ring: e1.ring,
+          e1_pos: { x: e1.x.toFixed(2), y: e1.y.toFixed(2) },
+          e2_pos: { x: e2.x.toFixed(2), y: e2.y.toFixed(2) }
+        });
+      }
+    }
+  }
+
+  return collisions;
+}
+
+// Analyze segment geometry
+function analyzeSegmentGeometry(numQuadrants, numRings, ringIndex) {
+  const anglePerQuadrant = (2 * Math.PI) / numQuadrants;
+  
+  // Approximate ring radii based on radar.js logic
+  const basePattern = [130, 220, 310, 400];
+  const targetOuterRadius = 400; // typical value
+  const radiusScale = targetOuterRadius / 400;
+  
+  const innerRadius = ringIndex === 0 ? 30 : (basePattern[Math.min(ringIndex - 1, 3)] * radiusScale);
+  const outerRadius = basePattern[Math.min(ringIndex, 3)] * radiusScale;
+  
+  // Account for padding
+  const radialPadding = 16;
+  const angularPadding = 12;
+  
+  const effectiveInnerRadius = innerRadius + radialPadding;
+  const effectiveOuterRadius = outerRadius - radialPadding;
+  const ringCenter = (effectiveInnerRadius + effectiveOuterRadius) / 2;
+  const radialThickness = effectiveOuterRadius - effectiveInnerRadius;
+  
+  const angularPaddingRadians = angularPadding / Math.max(ringCenter, 1);
+  const effectiveAngleRange = anglePerQuadrant - (2 * angularPaddingRadians);
+  
+  // Calculate segment dimensions
+  const arcLength = effectiveAngleRange * ringCenter;
+  const area = effectiveAngleRange * ringCenter * radialThickness;
+  
+  return {
+    anglePerQuadrant: anglePerQuadrant,
+    innerRadius: effectiveInnerRadius,
+    outerRadius: effectiveOuterRadius,
+    ringCenter: ringCenter,
+    radialThickness: radialThickness,
+    arcLength: arcLength,
+    angleRange: effectiveAngleRange,
+    area: area,
+    areaPercentage: (area / (Math.PI * outerRadius * outerRadius)) * 100
+  };
+}
+
+// Test configurations focusing on ADOPT ring (ring 0)
+const investigations = [
+  {
+    name: "3 Quadrants × 4 Rings - Focus on ADOPT Ring",
+    quadrants: 3,
+    rings: 4,
+    // Heavy loading in first ring of each quadrant
+    entriesPerSegment: { 
+      "0-0": 10,  // Quadrant 0, Ring 0 (ADOPT)
+      "1-0": 10,  // Quadrant 1, Ring 0 (ADOPT)
+      "2-0": 10,  // Quadrant 2, Ring 0 (ADOPT) - "Technologies segment"
+      "0-1": 3,
+      "1-1": 3,
+      "2-1": 3
+    }
+  },
+  {
+    name: "5 Quadrants × 4 Rings - All ADOPT Rings Loaded",
+    quadrants: 5,
+    rings: 4,
+    // All ADOPT rings heavily loaded
+    entriesPerSegment: { 
+      "0-0": 12,
+      "1-0": 12,
+      "2-0": 12,
+      "3-0": 12,
+      "4-0": 12,
+      "0-1": 2,
+      "1-1": 2
+    }
+  },
+  {
+    name: "6 Quadrants × 4 Rings - ADOPT Ring Only",
+    quadrants: 6,
+    rings: 4,
+    // Only ADOPT ring populated
+    entriesPerSegment: { 
+      "0-0": 10,
+      "1-0": 10,
+      "2-0": 10,
+      "3-0": 10,
+      "4-0": 10,
+      "5-0": 10
+    }
+  },
+  {
+    name: "7 Quadrants × 4 Rings - ADOPT + Spillover to TRIAL",
+    quadrants: 7,
+    rings: 4,
+    // ADOPT ring + some in TRIAL
+    entriesPerSegment: { 
+      "0-0": 12,
+      "1-0": 12,
+      "2-0": 12,
+      "3-0": 12,
+      "4-0": 12,
+      "5-0": 12,
+      "6-0": 12,
+      "0-1": 5,  // Some spillover to TRIAL
+      "1-1": 5,
+      "2-1": 5
+    }
+  }
+];
+
+// Run investigations
+investigations.forEach((test, index) => {
+  const container = document.createElement('div');
+  container.className = 'investigation-container';
+  container.id = `test-${index}`;
+
+  const header = document.createElement('div');
+  header.className = 'test-header';
+  header.innerHTML = `
+    <div class="test-title">${test.name}</div>
+    <div class="test-stats" id="stats-${index}">
+      <div class="stat info">Running...</div>
+    </div>
+  `;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'radar-wrapper';
+  wrapper.innerHTML = `<svg id="radar-${index}"></svg>`;
+
+  const debugInfo = document.createElement('div');
+  debugInfo.className = 'debug-info';
+  debugInfo.id = `debug-${index}`;
+
+  container.appendChild(header);
+  container.appendChild(wrapper);
+  container.appendChild(debugInfo);
+  document.getElementById('investigation-suite').appendChild(container);
+
+  // Generate test data
+  const quadrants = [];
+  const rings = [];
+  for (let q = 0; q < test.quadrants; q++) {
+    quadrants.push({ name: `Quadrant ${q}` });
+  }
+  rings.push({ name: "ADOPT", color: "#5ba300" });
+  rings.push({ name: "TRIAL", color: "#009eb0" });
+  rings.push({ name: "ASSESS", color: "#c7ba00" });
+  rings.push({ name: "HOLD", color: "#e09b96" });
+
+  const entries = [];
+  let idCounter = 0;
+  
+  Object.keys(test.entriesPerSegment).forEach(key => {
+    const [q, r] = key.split('-').map(Number);
+    const count = test.entriesPerSegment[key];
+
+    for (let i = 0; i < count; i++) {
+      entries.push({
+        label: `E${idCounter++}`,
+        quadrant: q,
+        ring: r,
+        moved: 0,
+        active: true
+      });
+    }
+  });
+
+  // Analyze geometry before rendering
+  const geometryAnalysis = {};
+  for (let q = 0; q < test.quadrants; q++) {
+    const geom = analyzeSegmentGeometry(test.quadrants, test.rings, 0);
+    geometryAnalysis[q] = geom;
+  }
+
+  // Render radar
+  setTimeout(() => {
+    radar_visualization({
+      svg_id: `radar-${index}`,
+      width: 700,
+      height: 700,
+      quadrants: quadrants,
+      rings: rings,
+      entries: entries,
+      print_layout: false
+    });
+
+    // Wait for force simulation to complete
+    setTimeout(() => {
+      // Analyze results
+      const collisions = detectCollisions(entries, 12);
+      const statsDiv = document.getElementById(`stats-${index}`);
+      const debugDiv = document.getElementById(`debug-${index}`);
+
+      // Group collisions by segment
+      const collisionsBySegment = {};
+      collisions.forEach(c => {
+        const key = `${c.quadrant}-${c.ring}`;
+        if (!collisionsBySegment[key]) {
+          collisionsBySegment[key] = [];
+        }
+        collisionsBySegment[key].push(c);
+      });
+
+      // Count entries per segment
+      const entriesPerSeg = {};
+      entries.forEach(e => {
+        const key = `${e.quadrant}-${e.ring}`;
+        if (!entriesPerSeg[key]) {
+          entriesPerSeg[key] = { count: 0, entries: [] };
+        }
+        entriesPerSeg[key].count++;
+        entriesPerSeg[key].entries.push(e);
+      });
+
+      // Generate debug output
+      let debugHTML = `<div class="debug-section">`;
+      debugHTML += `<div class="debug-title">📊 Segment Geometry Analysis (ADOPT Ring)</div>`;
+      debugHTML += `<div class="segment-analysis">`;
+      
+      for (let q = 0; q < test.quadrants; q++) {
+        const geom = geometryAnalysis[q];
+        const key = `${q}-0`;
+        const entryCount = entriesPerSeg[key]?.count || 0;
+        const collisionCount = collisionsBySegment[key]?.length || 0;
+        const hasProblems = collisionCount > 0;
+        
+        debugHTML += `<div class="segment-box ${hasProblems ? 'problematic' : ''}">`;
+        debugHTML += `<strong>Quadrant ${q} - ADOPT</strong><br>`;
+        debugHTML += `Entries: ${entryCount}<br>`;
+        debugHTML += `Arc Length: ${geom.arcLength.toFixed(1)}px<br>`;
+        debugHTML += `Radial Depth: ${geom.radialThickness.toFixed(1)}px<br>`;
+        debugHTML += `Area: ${geom.area.toFixed(0)}px² (${geom.areaPercentage.toFixed(1)}% of ring)<br>`;
+        debugHTML += `Area/Entry: ${entryCount > 0 ? (geom.area / entryCount).toFixed(0) : 'N/A'}px²<br>`;
+        debugHTML += `Aspect Ratio: ${(geom.arcLength / geom.radialThickness).toFixed(2)}<br>`;
+        if (hasProblems) {
+          debugHTML += `<span style="color: #dc3545; font-weight: bold;">⚠ ${collisionCount} collisions</span>`;
+        } else {
+          debugHTML += `<span style="color: #28a745;">✓ No collisions</span>`;
+        }
+        debugHTML += `</div>`;
+      }
+      debugHTML += `</div></div>`;
+
+      // Collision details
+      if (collisions.length > 0) {
+        debugHTML += `<div class="debug-section">`;
+        debugHTML += `<div class="debug-title">⚠ Collision Details (First 10)</div>`;
+        
+        collisions.slice(0, 10).forEach(c => {
+          debugHTML += `<div class="collision-details">`;
+          debugHTML += `<strong>Q${c.quadrant}-R${c.ring}:</strong> ${c.entry1} ↔ ${c.entry2}<br>`;
+          debugHTML += `Distance: ${c.distance}px < Required: ${c.required}px<br>`;
+          debugHTML += `Overlap: ${c.overlap}px<br>`;
+          debugHTML += `Positions: (${c.e1_pos.x}, ${c.e1_pos.y}) vs (${c.e2_pos.x}, ${c.e2_pos.y})`;
+          debugHTML += `</div>`;
+        });
+        
+        if (collisions.length > 10) {
+          debugHTML += `<div style="padding: 10px; color: #666;">... and ${collisions.length - 10} more collisions</div>`;
+        }
+        debugHTML += `</div>`;
+      }
+
+      debugDiv.innerHTML = debugHTML;
+
+      // Update stats
+      if (collisions.length === 0) {
+        statsDiv.innerHTML = `
+          <div class="stat pass">✓ No Collisions</div>
+          <div class="stat info">${entries.length} Total Entries</div>
+        `;
+      } else {
+        const adoptCollisions = collisions.filter(c => c.ring === 0).length;
+        statsDiv.innerHTML = `
+          <div class="stat fail">✗ ${collisions.length} Collisions</div>
+          <div class="stat warn">${adoptCollisions} in ADOPT Ring</div>
+          <div class="stat info">${entries.length} Total Entries</div>
+        `;
+      }
+
+    }, 3500); // Wait for force simulation
+  }, index * 100);
+});
+</script>
+
+</body>
+</html>
