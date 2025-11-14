@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Development Build (Phase 4 Refactoring)
+// Version: 0.16.0
 // License: MIT
 // Source: https://github.com/zalando/tech-radar
 
@@ -617,19 +617,19 @@ function createBubble(radarSelection, fontFamily) {
 }
 function showBubble(d, config) {
   if (d.active || config.print_layout) {
-    const d32 = window.d3;
-    const tooltip = d32.select("#bubble text").text(d.label);
+    const d3 = window.d3;
+    const tooltip = d3.select("#bubble text").text(d.label);
     const bbox = tooltip.node().getBBox();
     const x = d.rendered_x !== undefined ? d.rendered_x : d.x;
     const y = d.rendered_y !== undefined ? d.rendered_y : d.y;
-    d32.select("#bubble").attr("transform", translate(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
-    d32.select("#bubble rect").attr("x", -5).attr("y", -bbox.height).attr("width", bbox.width + 10).attr("height", bbox.height + 4);
-    d32.select("#bubble path").attr("transform", translate(bbox.width / 2 - 5, 3));
+    d3.select("#bubble").attr("transform", translate(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
+    d3.select("#bubble rect").attr("x", -5).attr("y", -bbox.height).attr("width", bbox.width + 10).attr("height", bbox.height + 4);
+    d3.select("#bubble path").attr("transform", translate(bbox.width / 2 - 5, 3));
   }
 }
 function hideBubble() {
-  const d32 = window.d3;
-  d32.select("#bubble").attr("transform", translate(0, 0)).style("opacity", 0);
+  const d3 = window.d3;
+  d3.select("#bubble").attr("transform", translate(0, 0)).style("opacity", 0);
 }
 function highlightLegendItem(d) {
   const legendItem = document.getElementById("legendItem" + d.id);
@@ -645,10 +645,10 @@ function unhighlightLegendItem(d) {
 }
 
 // src/rendering/blip-renderer.js
-function renderBlips(rinkSelection, entries, config, legendTransform, showBubble2, hideBubble2, highlightLegendItem2, unhighlightLegendItem2) {
-  const d32 = window.d3;
-  const blips = rinkSelection.selectAll(".blip").data(entries).enter().append("g").attr("class", "blip").attr("transform", function(d, i) {
-    return legendTransform(d.quadrant, d.ring, config.legend_column_width, i);
+function renderBlips(rinkSelection, entries, config, showBubble2, hideBubble2, highlightLegendItem2, unhighlightLegendItem2) {
+  const d3 = window.d3;
+  const blips = rinkSelection.selectAll(".blip").data(entries).enter().append("g").attr("class", "blip").attr("transform", function(d) {
+    return translate(d.x, d.y);
   }).on("mouseover", function(event, d) {
     showBubble2(d, config);
     highlightLegendItem2(d);
@@ -657,7 +657,7 @@ function renderBlips(rinkSelection, entries, config, legendTransform, showBubble
     unhighlightLegendItem2(d);
   });
   blips.each(function(d) {
-    const blip = d32.select(this);
+    const blip = d3.select(this);
     let blipContainer = blip;
     if (d.active && Object.prototype.hasOwnProperty.call(d, "link") && d.link) {
       blipContainer = blip.append("a").attr("xlink:href", d.link);
@@ -671,13 +671,13 @@ function renderBlips(rinkSelection, entries, config, legendTransform, showBubble
   return blips;
 }
 function renderBlipShape(container, entry) {
-  const d32 = window.d3;
+  const d3 = window.d3;
   if (entry.moved === 1) {
     container.append("path").attr("d", "M -11,5 11,5 0,-13 z").style("fill", entry.color);
   } else if (entry.moved === -1) {
     container.append("path").attr("d", "M -11,-5 11,-5 0,13 z").style("fill", entry.color);
   } else if (entry.moved === 2) {
-    container.append("path").attr("d", d32.symbol().type(d32.symbolStar).size(200)).style("fill", entry.color);
+    container.append("path").attr("d", d3.symbol().type(d3.symbolStar).size(200)).style("fill", entry.color);
   } else {
     container.append("circle").attr("r", 9).attr("fill", entry.color);
   }
@@ -693,7 +693,7 @@ function renderBlipText(container, entry, config) {
 
 // src/rendering/force-simulation.js
 function createTickCallback(blipsSelection, config) {
-  const d32 = window.d3;
+  const d3 = window.d3;
   return function ticked() {
     blipsSelection.attr("transform", function(d) {
       const clipped = d.segment.clip(d);
@@ -702,7 +702,7 @@ function createTickCallback(blipsSelection, config) {
       return translate(clipped.x, clipped.y);
     });
     if (config.debug_geometry) {
-      d32.select("#debug-collision-radii").selectAll("circle").attr("cx", function(d) {
+      d3.select("#debug-collision-radii").selectAll("circle").attr("cx", function(d) {
         return d.x;
       }).attr("cy", function(d) {
         return d.y;
@@ -711,16 +711,16 @@ function createTickCallback(blipsSelection, config) {
   };
 }
 function runForceSimulation(entries, blipsSelection, config) {
-  const d32 = window.d3;
+  const d3 = window.d3;
   const tickCallback = createTickCallback(blipsSelection, config);
-  d32.forceSimulation().nodes(entries).velocityDecay(0.15).alphaDecay(0.008).alphaMin(0.00005).force("collision", d32.forceCollide().radius(function(d) {
+  d3.forceSimulation().nodes(entries).velocityDecay(0.15).alphaDecay(0.008).alphaMin(0.00005).force("collision", d3.forceCollide().radius(function(d) {
     return d.collision_radius || config.blip_collision_radius;
   }).strength(1).iterations(6)).on("tick", tickCallback).tick(400);
 }
 
 // src/rendering/debug-renderer.js
 function renderDebugVisualization(radarSelection, config, quadrants, rings, numQuadrants, numRings, segmented) {
-  const d32 = window.d3;
+  const d3 = window.d3;
   const debugLayer = radarSelection.append("g").attr("id", "debug-layer");
   const outerRadius = rings[rings.length - 1].radius;
   renderSegmentBoundaries(debugLayer, config, quadrants, rings, numQuadrants, numRings, segmented);
@@ -730,7 +730,7 @@ function renderDebugVisualization(radarSelection, config, quadrants, rings, numQ
   renderDebugLegend(debugLayer, outerRadius);
 }
 function renderSegmentBoundaries(debugLayer, config, quadrants, rings, numQuadrants, numRings, segmented) {
-  const d32 = window.d3;
+  const d3 = window.d3;
   for (let q = 0;q < numQuadrants; q++) {
     for (let r = 0;r < numRings; r++) {
       const segBaseInner = r === 0 ? 30 : rings[r - 1].radius;
@@ -758,10 +758,10 @@ function renderSegmentBoundaries(debugLayer, config, quadrants, rings, numQuadra
   }
 }
 function renderPolarSector(debugLayer, innerRadius, outerRadius, angleMin, angleMax, numQuadrants, ringIndex) {
-  const d32 = window.d3;
+  const d3 = window.d3;
   const offsetMagnitude = Math.PI / (2 * numQuadrants);
   const arcOffset = numQuadrants % 4 === 1 ? offsetMagnitude : -offsetMagnitude;
-  const arcPath = d32.arc().innerRadius(innerRadius).outerRadius(outerRadius).startAngle(-angleMax + arcOffset).endAngle(-angleMin + arcOffset);
+  const arcPath = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius).startAngle(-angleMax + arcOffset).endAngle(-angleMin + arcOffset);
   debugLayer.append("path").attr("d", arcPath).attr("fill", "none").attr("stroke", ringIndex === 0 ? "#ff0000" : "#00ffff").attr("stroke-width", ringIndex === 0 ? 2 : 1).attr("stroke-dasharray", "5,5").attr("opacity", 0.5);
 }
 function renderBoundingBox(debugLayer, minAngle, maxAngle, outerRadius) {
@@ -777,7 +777,7 @@ function renderSegmentLabel(debugLayer, quadrant, ring, angleMin, angleMax, segI
   debugLayer.append("text").attr("x", labelX).attr("y", labelY).attr("text-anchor", "middle").attr("font-size", "10px").attr("fill", "#ff0000").attr("font-weight", "bold").text(`Q${quadrant}R${ring}: ${entryCount} items, arc=${arcLength.toFixed(0)}px`);
 }
 function renderCollisionRadii(debugLayer, entries, defaultCollisionRadius) {
-  const d32 = window.d3;
+  const d3 = window.d3;
   debugLayer.append("g").attr("id", "debug-collision-radii").selectAll("circle").data(entries).enter().append("circle").attr("cx", function(d) {
     return d.x;
   }).attr("cy", function(d) {
@@ -812,8 +812,8 @@ function renderDebugLegend(debugLayer, outerRadius) {
   });
 }
 
-// src/index.js
-function radar_visualization(config) {
+// src/config/config-defaults.js
+function applyConfigDefaults(config) {
   config.svg_id = config.svg || "radar";
   config.width = config.width || 1450;
   config.height = config.height || 1000;
@@ -835,16 +835,16 @@ function radar_visualization(config) {
   config.legend_vertical_spacing = config.legend_vertical_spacing || 20;
   config.radar_horizontal_offset = "radar_horizontal_offset" in config ? config.radar_horizontal_offset : Math.round(config.legend_column_width * 0.25);
   config.debug_geometry = "debug_geometry" in config ? config.debug_geometry : false;
-  var viewport_width = window.innerWidth || document.documentElement.clientWidth;
-  var viewport_height = window.innerHeight || document.documentElement.clientHeight;
+  const viewport_width = window.innerWidth || document.documentElement.clientWidth;
+  const viewport_height = window.innerHeight || document.documentElement.clientHeight;
   if (viewport_width < 1024 && !config.scale) {
-    var scale_factor = Math.min(viewport_width / 1450, viewport_height / 1000);
+    const scale_factor = Math.min(viewport_width / 1450, viewport_height / 1000);
     config.scale = Math.max(0.5, Math.min(1, scale_factor));
   }
-  var grid_quadrants = config.quadrants.length;
-  var grid_rings = config.rings.length;
+  const grid_quadrants = config.quadrants.length;
+  const grid_rings = config.rings.length;
   if (grid_quadrants >= 5 || grid_rings >= 6) {
-    var complexity_multiplier = 1 + (grid_quadrants - 4) * 0.05 + (grid_rings - 4) * 0.03;
+    const complexity_multiplier = 1 + (grid_quadrants - 4) * 0.05 + (grid_rings - 4) * 0.03;
     if (!config.width_override) {
       config.width = Math.round(config.width * Math.min(complexity_multiplier, 1.3));
     }
@@ -855,13 +855,94 @@ function radar_visualization(config) {
       config.blip_collision_radius = Math.max(10, config.blip_collision_radius * 0.9);
     }
   }
-  var title_height = config.print_layout && config.title ? 60 : 0;
-  var footer_height = config.print_layout ? 40 : 0;
-  var minimum_chart_height = 2 * config.chart_padding + 40;
-  var available_height = Math.max(minimum_chart_height, config.height - title_height - footer_height);
-  var available_width = Math.max(2 * config.chart_padding + 40, config.width);
-  var raw_outer_radius = Math.min(available_width, available_height) / 2 - config.chart_padding;
-  var target_outer_radius = Math.max(10, raw_outer_radius);
+}
+function calculateDimensions(config) {
+  const title_height = config.print_layout && config.title ? 60 : 0;
+  const footer_height = config.print_layout ? 40 : 0;
+  const minimum_chart_height = 2 * config.chart_padding + 40;
+  const available_height = Math.max(minimum_chart_height, config.height - title_height - footer_height);
+  const available_width = Math.max(2 * config.chart_padding + 40, config.width);
+  const raw_outer_radius = Math.min(available_width, available_height) / 2 - config.chart_padding;
+  const target_outer_radius = Math.max(10, raw_outer_radius);
+  return {
+    title_height,
+    footer_height,
+    available_height,
+    available_width,
+    target_outer_radius
+  };
+}
+function configureOffsets(config, outerRadius, numQuadrants) {
+  if (!config.title_offset) {
+    config.title_offset = {
+      x: -outerRadius,
+      y: -outerRadius - 40
+    };
+  }
+  if (!config.footer_offset) {
+    config.footer_offset = {
+      x: -outerRadius,
+      y: outerRadius + 60
+    };
+  }
+  config.legend_offset = computeLegendOffsets(numQuadrants, outerRadius, config);
+}
+
+// src/rendering/svg-setup.js
+function setupSvg(config, quadrants, rings, dimensions) {
+  const d3 = window.d3;
+  config.scale = config.scale || 1;
+  const scaled_width = config.width * config.scale;
+  const scaled_height = config.height * config.scale;
+  const svg = d3.select("svg#" + config.svg_id).style("background-color", config.colors.background).attr("width", scaled_width).attr("height", scaled_height);
+  const layoutWrapper = ensureLayoutStructure(svg);
+  const legendLeftColumn = layoutWrapper.select(".radar-legend-column.left");
+  const legendRightColumn = layoutWrapper.select(".radar-legend-column.right");
+  const layoutWidth = layoutWrapper.node().getBoundingClientRect().width || config.width;
+  const minLegendColumnWidth = config.legend_column_width * 2 + 60;
+  const maxLegendColumnWidth = config.legend_column_width * 4 + 80;
+  const targetLegendColumnWidth = Math.min(maxLegendColumnWidth, Math.max(minLegendColumnWidth, layoutWidth * 0.3));
+  const legendSectionColumns = Math.min(4, Math.max(2, Math.floor(targetLegendColumnWidth / (config.legend_column_width + 20))));
+  legendLeftColumn.style("gap", config.legend_vertical_spacing + "px").style("width", targetLegendColumnWidth + "px");
+  legendRightColumn.style("gap", config.legend_vertical_spacing + "px").style("width", targetLegendColumnWidth + "px");
+  const radar = svg.append("g");
+  if ("zoomed_quadrant" in config) {
+    svg.attr("viewBox", viewbox(config.zoomed_quadrant, quadrants, rings));
+  } else {
+    const radar_center_y = scaled_height / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
+    const radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
+    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
+  }
+  config.font_family = config.font_family || "Arial, Helvetica";
+  const grid = radar.append("g");
+  return {
+    svg,
+    radar,
+    legendLeftColumn,
+    legendRightColumn,
+    grid,
+    legendSectionColumns
+  };
+}
+
+// src/rendering/table-renderer.js
+function renderRingDescriptionsTable(config) {
+  const d3 = window.d3;
+  const table = d3.select("body").append("table").attr("class", "radar-table").style("border-collapse", "collapse").style("position", "relative").style("top", "-70px").style("margin-left", "50px").style("margin-right", "50px").style("font-family", config.font_family).style("font-size", "13px").style("text-align", "left");
+  const thead = table.append("thead");
+  const tbody = table.append("tbody");
+  const columnWidth = `${100 / config.rings.length}%`;
+  const headerRow = thead.append("tr").style("border", "1px solid #ddd");
+  headerRow.selectAll("th").data(config.rings).enter().append("th").style("padding", "8px").style("border", "1px solid #ddd").style("background-color", (d) => d.color).style("color", "#fff").style("width", columnWidth).text((d) => d.name);
+  const descriptionRow = tbody.append("tr").style("border", "1px solid #ddd");
+  descriptionRow.selectAll("td").data(config.rings).enter().append("td").style("padding", "8px").style("border", "1px solid #ddd").style("width", columnWidth).text((d) => d.description);
+}
+
+// src/index.js
+function radar_visualization(config) {
+  applyConfigDefaults(config);
+  const dimensions = calculateDimensions(config);
+  const target_outer_radius = dimensions.target_outer_radius;
   validateConfig(config);
   const rng = new SeededRandom(42);
   const random = () => rng.next();
@@ -875,19 +956,7 @@ function radar_visualization(config) {
   const quadrant_bounds = quadrants.map(function(q) {
     return computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius);
   });
-  if (!config.title_offset) {
-    config.title_offset = {
-      x: -outer_radius,
-      y: -outer_radius - 40
-    };
-  }
-  if (!config.footer_offset) {
-    config.footer_offset = {
-      x: -outer_radius,
-      y: outer_radius + 60
-    };
-  }
-  config.legend_offset = computeLegendOffsets(num_quadrants, outer_radius, config);
+  configureOffsets(config, outer_radius, num_quadrants);
   const bounded_interval = boundedInterval;
   const bounded_ring = boundedRing;
   const bounded_box = boundedBox;
@@ -907,44 +976,9 @@ function radar_visualization(config) {
     const entry = config.entries[i];
     segmented[entry.quadrant][entry.ring].push(entry);
   }
-  config.scale = config.scale || 1;
-  var scaled_width = config.width * config.scale;
-  var scaled_height = config.height * config.scale;
-  var svg = d3.select("svg#" + config.svg_id).style("background-color", config.colors.background).attr("width", scaled_width).attr("height", scaled_height);
-  var layoutWrapper = ensureLayoutStructure(svg);
-  var legendLeftColumn = layoutWrapper.select(".radar-legend-column.left");
-  var legendRightColumn = layoutWrapper.select(".radar-legend-column.right");
-  var layoutWidth = layoutWrapper.node().getBoundingClientRect().width || config.width;
-  var minLegendColumnWidth = config.legend_column_width * 2 + 60;
-  var maxLegendColumnWidth = config.legend_column_width * 4 + 80;
-  var targetLegendColumnWidth = Math.min(maxLegendColumnWidth, Math.max(minLegendColumnWidth, layoutWidth * 0.3));
-  var legendSectionColumns = Math.min(4, Math.max(2, Math.floor(targetLegendColumnWidth / (config.legend_column_width + 20))));
-  legendLeftColumn.style("gap", config.legend_vertical_spacing + "px").style("width", targetLegendColumnWidth + "px");
-  legendRightColumn.style("gap", config.legend_vertical_spacing + "px").style("width", targetLegendColumnWidth + "px");
-  var radar = svg.append("g");
-  if ("zoomed_quadrant" in config) {
-    svg.attr("viewBox", viewbox(config.zoomed_quadrant, quadrants, rings));
-  } else {
-    var radar_center_y = scaled_height / 2 + (title_height - footer_height) / 2;
-    var radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
-    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
-  }
-  config.font_family = config.font_family || "Arial, Helvetica";
-  var grid = radar.append("g");
+  const svgElements = setupSvg(config, quadrants, rings, dimensions);
+  const { svg, radar, legendLeftColumn, legendRightColumn, grid } = svgElements;
   renderGrid(grid, config, quadrants, rings, outer_radius);
-  function legend_transform2(quadrant, ring, legendColumnWidth, index = null, currentHeight = 0) {
-    var num_columns = num_rings >= 7 ? 3 : 2;
-    var rings_per_column = Math.ceil(num_rings / num_columns);
-    var column = Math.floor(ring / rings_per_column);
-    const dx = column * legendColumnWidth;
-    let dy;
-    if (index == null) {
-      dy = currentHeight;
-    } else {
-      dy = currentHeight + index * config.legend_line_height;
-    }
-    return translate(config.legend_offset[quadrant].x + dx, config.legend_offset[quadrant].y + dy);
-  }
   if (!config.footer) {
     config.footer = "▲ moved up     ▼ moved down     ★ new     ⬤ no change";
   }
@@ -959,23 +993,13 @@ function radar_visualization(config) {
   }
   var rink = radar.append("g").attr("id", "rink");
   var bubble = createBubble(radar, config.font_family);
-  var blips = renderBlips(rink, config.entries, config, legend_transform2, showBubble, hideBubble, highlightLegendItem, unhighlightLegendItem);
+  var blips = renderBlips(rink, config.entries, config, showBubble, hideBubble, highlightLegendItem, unhighlightLegendItem);
   runForceSimulation(config.entries, blips, config);
   if (config.debug_geometry) {
     renderDebugVisualization(radar, config, quadrants, rings, num_quadrants, num_rings, segmented);
   }
-  function ringDescriptionsTable() {
-    var table = d3.select("body").append("table").attr("class", "radar-table").style("border-collapse", "collapse").style("position", "relative").style("top", "-70px").style("margin-left", "50px").style("margin-right", "50px").style("font-family", config.font_family).style("font-size", "13px").style("text-align", "left");
-    var thead = table.append("thead");
-    var tbody = table.append("tbody");
-    var columnWidth = `${100 / config.rings.length}%`;
-    var headerRow = thead.append("tr").style("border", "1px solid #ddd");
-    headerRow.selectAll("th").data(config.rings).enter().append("th").style("padding", "8px").style("border", "1px solid #ddd").style("background-color", (d) => d.color).style("color", "#fff").style("width", columnWidth).text((d) => d.name);
-    var descriptionRow = tbody.append("tr").style("border", "1px solid #ddd");
-    descriptionRow.selectAll("td").data(config.rings).enter().append("td").style("padding", "8px").style("border", "1px solid #ddd").style("width", columnWidth).text((d) => d.description);
-  }
   if (config.print_ring_descriptions_table) {
-    ringDescriptionsTable();
+    renderRingDescriptionsTable(config);
   }
 }
 var src_default = radar_visualization;

@@ -15,13 +15,14 @@
  * - Optional clickable links
  */
 
+import { translate } from './helpers.js';
+
 /**
  * Renders blips (technology entry markers) on the radar.
  *
  * @param {d3.Selection} rinkSelection - D3 selection of the rink layer (entries container)
  * @param {Array} entries - Array of processed technology entries
  * @param {Object} config - Visualization configuration
- * @param {Function} legendTransform - Function to calculate blip position
  * @param {Function} showBubble - Function to show tooltip bubble
  * @param {Function} hideBubble - Function to hide tooltip bubble
  * @param {Function} highlightLegendItem - Function to highlight legend item
@@ -32,7 +33,6 @@ export function renderBlips(
   rinkSelection,
   entries,
   config,
-  legendTransform,
   showBubble,
   hideBubble,
   highlightLegendItem,
@@ -46,8 +46,8 @@ export function renderBlips(
     .enter()
     .append("g")
     .attr("class", "blip")
-    .attr("transform", function (d, i) {
-      return legendTransform(d.quadrant, d.ring, config.legend_column_width, i);
+    .attr("transform", function (d) {
+      return translate(d.x, d.y);
     })
     .on("mouseover", function (event, d) {
       showBubble(d, config);

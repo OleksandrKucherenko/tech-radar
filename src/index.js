@@ -63,74 +63,21 @@ import { renderBlips } from './rendering/blip-renderer.js';
 import { runForceSimulation } from './rendering/force-simulation.js';
 import { renderDebugVisualization } from './rendering/debug-renderer.js';
 
+// ============================================================================
+// Phase 5 Refactoring: Import config defaults, SVG setup, and table renderer
+// ============================================================================
+import { applyConfigDefaults, calculateDimensions, configureOffsets } from './config/config-defaults.js';
+import { setupSvg } from './rendering/svg-setup.js';
+import { renderRingDescriptionsTable } from './rendering/table-renderer.js';
+
 function radar_visualization(config) {
 
-  config.svg_id = config.svg || "radar";
-  config.width = config.width || 1450;
-  config.height = config.height || 1000;
-  config.colors = ("colors" in config) ? config.colors : {
-    background: "#fff",
-    grid: '#dddde0',
-    inactive: "#ddd"
-  };
-  config.print_layout = ("print_layout" in config) ? config.print_layout : true;
-  config.links_in_new_tabs = ("links_in_new_tabs" in config) ? config.links_in_new_tabs : true;
-  config.repo_url = config.repo_url || '#';
-  config.print_ring_descriptions_table = ("print_ring_descriptions_table" in config) ? config.print_ring_descriptions_table : false;
-
-  config.legend_column_width = config.legend_column_width || 140
-  config.legend_line_height = config.legend_line_height || 10
-  config.segment_radial_padding = ("segment_radial_padding" in config) ? config.segment_radial_padding : 16;
-  config.segment_angular_padding = ("segment_angular_padding" in config) ? config.segment_angular_padding : 12;
-  config.chart_padding = ("chart_padding" in config) ? config.chart_padding : 60;
-  config.blip_collision_radius = ("blip_collision_radius" in config) ? config.blip_collision_radius : 14;
-  config.legend_vertical_spacing = config.legend_vertical_spacing || 20;
-  config.radar_horizontal_offset = ("radar_horizontal_offset" in config)
-    ? config.radar_horizontal_offset
-    : Math.round(config.legend_column_width * 0.25);
-
-  // DEBUG MODE: Enable geometric visualizations
-  config.debug_geometry = ("debug_geometry" in config) ? config.debug_geometry : false;
-
-  // Responsive sizing based on viewport and grid complexity
-  var viewport_width = window.innerWidth || document.documentElement.clientWidth;
-  var viewport_height = window.innerHeight || document.documentElement.clientHeight;
-
-  // Apply responsive scaling for smaller viewports
-  if (viewport_width < 1024 && !config.scale) {
-    // Mobile/tablet scaling
-    var scale_factor = Math.min(viewport_width / 1450, viewport_height / 1000);
-    config.scale = Math.max(0.5, Math.min(1, scale_factor));
-  }
-
-  // Adjust sizing based on grid complexity (for 5+ quadrants)
-  var grid_quadrants = config.quadrants.length;
-  var grid_rings = config.rings.length;
-  if (grid_quadrants >= 5 || grid_rings >= 6) {
-    // Increase base size for complex grids to prevent overcrowding
-    var complexity_multiplier = 1 + ((grid_quadrants - 4) * 0.05) + ((grid_rings - 4) * 0.03);
-    if (!config.width_override) {
-      config.width = Math.round(config.width * Math.min(complexity_multiplier, 1.3));
-    }
-    if (!config.height_override) {
-      config.height = Math.round(config.height * Math.min(complexity_multiplier, 1.3));
-    }
-
-    // Slightly reduce collision radius for high-complexity grids
-    if (grid_quadrants >= 7 || grid_rings >= 7) {
-      config.blip_collision_radius = Math.max(10, config.blip_collision_radius * 0.9);
-    }
-  }
-
-  // Calculate space for title and footer
-  var title_height = config.print_layout && config.title ? 60 : 0;  // Title + date + padding
-  var footer_height = config.print_layout ? 40 : 0;  // Footer + padding
-  var minimum_chart_height = (2 * config.chart_padding) + 40;
-  var available_height = Math.max(minimum_chart_height, config.height - title_height - footer_height);
-  var available_width = Math.max((2 * config.chart_padding) + 40, config.width);
-
-  var raw_outer_radius = Math.min(available_width, available_height) / 2 - config.chart_padding;
-  var target_outer_radius = Math.max(10, raw_outer_radius);
+  // ============================================================================
+  // Phase 5 Refactoring: Apply config defaults and calculate dimensions
+  // ============================================================================
+  applyConfigDefaults(config);
+  const dimensions = calculateDimensions(config);
+  const target_outer_radius = dimensions.target_outer_radius;
 
   // ============================================================================
   // Phase 1 Refactoring: Use extracted validation module
@@ -165,20 +112,10 @@ function radar_visualization(config) {
     return computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius);
   });
 
-  if (!config.title_offset) {
-    config.title_offset = {
-      x: -outer_radius,
-      y: -outer_radius - 40
-    };
-  }
-  if (!config.footer_offset) {
-    config.footer_offset = {
-      x: -outer_radius,
-      y: outer_radius + 60
-    };
-  }
-
-  config.legend_offset = computeLegendOffsets(num_quadrants, outer_radius, config);
+  // ============================================================================
+  // Phase 5 Refactoring: Configure offsets
+  // ============================================================================
+  configureOffsets(config, outer_radius, num_quadrants);
 
   // ============================================================================
   // Phase 1 Refactoring: Coordinate transformation functions now imported
@@ -220,83 +157,15 @@ function radar_visualization(config) {
   }
 
   // ============================================================================
-  // Phase 3 Refactoring: Helper functions now imported from rendering/helpers.js
-  // (translate, viewbox, computeLegendOffsets, ensureLayoutStructure, legend_transform)
+  // Phase 5 Refactoring: SVG setup now uses imported module
   // ============================================================================
-
-  // adjust with config.scale.
-  config.scale = config.scale || 1;
-  var scaled_width = config.width * config.scale;
-  var scaled_height = config.height * config.scale;
-
-  var svg = d3.select("svg#" + config.svg_id)
-    .style("background-color", config.colors.background)
-    .attr("width", scaled_width)
-    .attr("height", scaled_height);
-
-  var layoutWrapper = ensureLayoutStructure(svg);
-  var legendLeftColumn = layoutWrapper.select('.radar-legend-column.left');
-  var legendRightColumn = layoutWrapper.select('.radar-legend-column.right');
-  var layoutWidth = layoutWrapper.node().getBoundingClientRect().width || config.width;
-  var minLegendColumnWidth = (config.legend_column_width * 2) + 60;
-  var maxLegendColumnWidth = (config.legend_column_width * 4) + 80;
-  var targetLegendColumnWidth = Math.min(
-    maxLegendColumnWidth,
-    Math.max(minLegendColumnWidth, layoutWidth * 0.3)
-  );
-  var legendSectionColumns = Math.min(4, Math.max(2, Math.floor(targetLegendColumnWidth / (config.legend_column_width + 20))));
-
-  legendLeftColumn
-    .style('gap', config.legend_vertical_spacing + 'px')
-    .style('width', targetLegendColumnWidth + 'px');
-  legendRightColumn
-    .style('gap', config.legend_vertical_spacing + 'px')
-    .style('width', targetLegendColumnWidth + 'px');
-
-  var radar = svg.append("g");
-  if ("zoomed_quadrant" in config) {
-    svg.attr("viewBox", viewbox(config.zoomed_quadrant, quadrants, rings));
-  } else {
-    // Center radar in available space (accounting for title and footer)
-    var radar_center_y = (scaled_height / 2) + ((title_height - footer_height) / 2);
-    var radar_center_x = (scaled_width / 2) + config.radar_horizontal_offset;
-    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
-  }
-
-  // define default font-family
-  config.font_family = config.font_family || "Arial, Helvetica";
+  const svgElements = setupSvg(config, quadrants, rings, dimensions);
+  const { svg, radar, legendLeftColumn, legendRightColumn, grid } = svgElements;
 
   // ============================================================================
   // Phase 3 Refactoring: Grid rendering now uses imported module
   // ============================================================================
-  var grid = radar.append("g");
   renderGrid(grid, config, quadrants, rings, outer_radius);
-
-  function legend_transform(quadrant, ring, legendColumnWidth, index = null, currentHeight = 0) {
-    // Determine number of columns based on ring count
-    // 4-6 rings: 2 columns, 7-8 rings: 3 columns
-    var num_columns = num_rings >= 7 ? 3 : 2;
-    var rings_per_column = Math.ceil(num_rings / num_columns);
-
-    var column = Math.floor(ring / rings_per_column);
-
-    const dx = column * legendColumnWidth;
-    // For ring header (index==null), just use currentHeight
-    // For entries, add line height * index to currentHeight
-    let dy;
-    if (index == null) {
-      // Ring header - use currentHeight directly with small adjustment
-      dy = currentHeight;
-    } else {
-      // Entry - add line spacing
-      dy = currentHeight + (index * config.legend_line_height);
-    }
-
-    return translate(
-      config.legend_offset[quadrant].x + dx,
-      config.legend_offset[quadrant].y + dy
-    );
-  }
 
   // ============================================================================
   // Phase 3 Refactoring: Title/footer rendering now uses imported module
@@ -347,7 +216,6 @@ function radar_visualization(config) {
     rink,
     config.entries,
     config,
-    legend_transform,
     showBubble,
     hideBubble,
     highlightLegendItem,
@@ -374,55 +242,11 @@ function radar_visualization(config) {
     );
   }
 
-  function ringDescriptionsTable() {
-    var table = d3.select("body").append("table")
-      .attr("class", "radar-table")
-      .style("border-collapse", "collapse")
-      .style("position", "relative")
-      .style("top", "-70px")  // Adjust this value to move the table closer vertically
-      .style("margin-left", "50px")
-      .style("margin-right", "50px")
-      .style("font-family", config.font_family)
-      .style("font-size", "13px")
-      .style("text-align", "left");
-
-    var thead = table.append("thead");
-    var tbody = table.append("tbody");
-
-    // define fixed width for each column
-    var columnWidth = `${100 / config.rings.length}%`;
-
-    // create table header row with ring names
-    var headerRow = thead.append("tr")
-      .style("border", "1px solid #ddd");
-
-    headerRow.selectAll("th")
-      .data(config.rings)
-      .enter()
-      .append("th")
-      .style("padding", "8px")
-      .style("border", "1px solid #ddd")
-      .style("background-color", d => d.color)
-      .style("color", "#fff")
-      .style("width", columnWidth)
-      .text(d => d.name);
-
-    // create table body row with descriptions
-    var descriptionRow = tbody.append("tr")
-      .style("border", "1px solid #ddd");
-
-    descriptionRow.selectAll("td")
-      .data(config.rings)
-      .enter()
-      .append("td")
-      .style("padding", "8px")
-      .style("border", "1px solid #ddd")
-      .style("width", columnWidth)
-      .text(d => d.description);
-  }
-
+  // ============================================================================
+  // Phase 5 Refactoring: Ring descriptions table now uses imported module
+  // ============================================================================
   if (config.print_ring_descriptions_table) {
-    ringDescriptionsTable();
+    renderRingDescriptionsTable(config);
   }
 }
 
