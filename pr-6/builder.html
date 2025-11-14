@@ -813,19 +813,23 @@
             }
 
             try {
+                // Convert state format to radar_visualization format
+                const quadrants = state.quadrantNames.map(name => ({ name }));
+                const rings = state.ringNames.map((name, index) => ({
+                    name,
+                    color: RING_CONFIGS[state.ringCount].colors[index]
+                }));
+
                 radar_visualization({
                     svg_id: 'radar',
                     width: 1000,
                     height: 800,
-                    quadrants: state.quadrantCount,
-                    rings: state.ringCount,
-                    quadrant_names: state.quadrantNames,
-                    ring_names: state.ringNames,
+                    quadrants: quadrants,
+                    rings: rings,
                     colors: {
                         background: '#fff',
                         grid: '#dddde0',
-                        inactive: '#ddd',
-                        rings: RING_CONFIGS[state.ringCount].colors
+                        inactive: '#ddd'
                     },
                     title: 'Technology Radar',
                     entries: state.entries
@@ -913,19 +917,23 @@
         }
 
         function generateEmbedCode() {
+            // Convert state format to radar_visualization format
+            const quadrants = state.quadrantNames.map(name => ({ name }));
+            const rings = state.ringNames.map((name, index) => ({
+                name,
+                color: RING_CONFIGS[state.ringCount].colors[index]
+            }));
+
             const config = {
                 svg_id: 'radar',
                 width: 1000,
                 height: 800,
-                quadrants: state.quadrantCount,
-                rings: state.ringCount,
-                quadrant_names: state.quadrantNames,
-                ring_names: state.ringNames,
+                quadrants: quadrants,
+                rings: rings,
                 colors: {
                     background: '#fff',
                     grid: '#dddde0',
-                    inactive: '#ddd',
-                    rings: RING_CONFIGS[state.ringCount].colors
+                    inactive: '#ddd'
                 },
                 title: 'Technology Radar',
                 entries: state.entries
