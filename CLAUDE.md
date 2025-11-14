@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This repository generates a **Technology Radar visualization** for Zalando's engineering teams. It's a static site that creates an interactive D3.js-based visualization showing technology choices categorized into quadrants (Languages, Infrastructure, Datastores, Data Management) and rings (ADOPT, TRIAL, ASSESS, HOLD).
+This repository generates a **Technology Radar visualization** for engineering teams. It's a static site that creates an interactive D3.js-based visualization showing technology choices categorized into quadrants (Languages, Infrastructure, Datastores, Data Management) and rings (ADOPT, TRIAL, ASSESS, HOLD).
 
 ## Core Architecture
 

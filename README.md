@@ -1,12 +1,9 @@
 # Motivation
 
-[![Tests](https://github.com/zalando/tech-radar/actions/workflows/test.yml/badge.svg)](https://github.com/zalando/tech-radar/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/zalando/tech-radar/branch/master/graph/badge.svg)](https://codecov.io/gh/zalando/tech-radar)
 
-At [Zalando](http://zalando.de), we maintain a [public Tech
-Radar](http://zalando.github.io/tech-radar/) to help our engineering teams
-align on technology choices. It is based on the [pioneering work
-by ThoughtWorks](https://www.thoughtworks.com/radar).
+The Tech Radar is a tool to help engineering teams align on technology choices.
+It is based on the [pioneering work by ThoughtWorks](https://www.thoughtworks.com/radar).
 
 This repository contains the code to generate the visualization:
 [`radar.js`](/docs/radar.js) (based on [d3.js v7](https://d3js.org)).
@@ -22,13 +19,17 @@ Feel free to use and adapt it for your own purposes.
 
 ```html
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://zalando.github.io/tech-radar/release/radar-0.12.js"></script>
+<script src="https://github.com/OleksandrKucherenko/tech-radar/releases/download/v0.14.0/radar-0.14.0.js"></script>
+<!-- Styled and Optimized Layouts -->
+<link rel="stylesheet" href="https://raw.githubusercontent.com/OleksandrKucherenko/tech-radar/refs/heads/master/docs/radar.css">
 ```
 
 2. insert an empty `svg` tag:
 
 ```html
-<svg id="radar"></svg>
+<div class="radar-container">
+  <svg id="radar"></svg>
+</div>
 ```
 
 3. configure the radar visualization:
@@ -81,8 +82,7 @@ radar_visualization({
 Entries are positioned automatically so that they don't overlap. The "scale" parameter can help
 in adjusting the size of the radar.
 
-As a working example, you can check out `docs/index.html` &mdash; the source of our [public Tech
-Radar](http://zalando.github.io/tech-radar/).
+As a working example, you can check out `docs/index.html`.
 
 ## Deployment
 
