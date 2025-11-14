@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.14
+// Version: 0.14.0
 // License: MIT
 // Source: https://github.com/zalando/tech-radar
 
@@ -93,6 +93,355 @@ function validateConfig(config) {
   return true;
 }
 
+// src/geometry/quadrant-calculator.js
+function generateQuadrants(numQuadrants) {
+  const quadrants = [];
+  const anglePerQuadrant = 2 / numQuadrants;
+  const rotationOffset = numQuadrants === 2 ? -0.5 : 0;
+  for (let i = 0;i < numQuadrants; i++) {
+    const startAngle = -1 + i * anglePerQuadrant + rotationOffset;
+    const endAngle = -1 + (i + 1) * anglePerQuadrant + rotationOffset;
+    const midAngle = -Math.PI + (i + 0.5) * anglePerQuadrant * Math.PI + rotationOffset * Math.PI;
+    quadrants.push({
+      radial_min: startAngle,
+      radial_max: endAngle,
+      factor_x: Math.cos(midAngle),
+      factor_y: Math.sin(midAngle)
+    });
+  }
+  return quadrants;
+}
+function computeQuadrantBounds(startAngle, endAngle, radius) {
+  const twoPi = 2 * Math.PI;
+  let normalizedStart = startAngle;
+  let normalizedEnd = endAngle;
+  while (normalizedEnd <= normalizedStart) {
+    normalizedEnd += twoPi;
+  }
+  const axisAngles = [
+    -Math.PI,
+    -Math.PI / 2,
+    0,
+    Math.PI / 2,
+    Math.PI,
+    3 * Math.PI / 2,
+    2 * Math.PI
+  ];
+  const candidates = [normalizedStart, normalizedEnd];
+  axisAngles.forEach(function(axisAngle) {
+    let candidate = axisAngle;
+    while (candidate < normalizedStart) {
+      candidate += twoPi;
+    }
+    if (candidate <= normalizedEnd) {
+      candidates.push(candidate);
+    }
+  });
+  let min_x = Infinity;
+  let max_x = -Infinity;
+  let min_y = Infinity;
+  let max_y = -Infinity;
+  candidates.forEach(function(angle) {
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+    min_x = Math.min(min_x, cosA);
+    max_x = Math.max(max_x, cosA);
+    min_y = Math.min(min_y, sinA);
+    max_y = Math.max(max_y, sinA);
+  });
+  const padding = 20;
+  return {
+    min: {
+      x: min_x * radius - padding,
+      y: min_y * radius - padding
+    },
+    max: {
+      x: max_x * radius + padding,
+      y: max_y * radius + padding
+    }
+  };
+}
+function generateQuadrantOrder(numQuadrants) {
+  if (numQuadrants === 4) {
+    return [2, 3, 1, 0];
+  }
+  const quadrantOrder = [];
+  const startIndex = Math.floor(numQuadrants / 2);
+  for (let i = 0;i < numQuadrants; i++) {
+    quadrantOrder.push((startIndex + i) % numQuadrants);
+  }
+  return quadrantOrder;
+}
+
+// src/geometry/ring-calculator.js
+var BASE_PATTERN = [130, 220, 310, 400];
+var MAX_BASE_RADIUS = 400;
+function generateRings(numRings, targetOuterRadius) {
+  const ringTemplate = [];
+  if (numRings === 4) {
+    for (let i = 0;i < 4; i++) {
+      ringTemplate.push(BASE_PATTERN[i]);
+    }
+  } else {
+    for (let i = 0;i < numRings; i++) {
+      const patternPosition = i / (numRings - 1) * 3;
+      const patternIndex = Math.floor(patternPosition);
+      const fraction = patternPosition - patternIndex;
+      let radius;
+      if (patternIndex >= 3) {
+        radius = MAX_BASE_RADIUS;
+      } else {
+        radius = BASE_PATTERN[patternIndex] + (BASE_PATTERN[patternIndex + 1] - BASE_PATTERN[patternIndex]) * fraction;
+      }
+      ringTemplate.push(radius);
+    }
+  }
+  const radiusScale = targetOuterRadius / MAX_BASE_RADIUS;
+  return ringTemplate.map(function(r) {
+    return { radius: Math.max(10, Math.round(r * radiusScale)) };
+  });
+}
+
+// src/geometry/segment-calculator.js
+function createSegment(quadrantIndex, ringIndex, quadrants, rings, config, randomBetween) {
+  const min_angle = quadrants[quadrantIndex].radial_min * Math.PI;
+  const max_angle = quadrants[quadrantIndex].radial_max * Math.PI;
+  const base_inner_radius = ringIndex === 0 ? 30 : rings[ringIndex - 1].radius;
+  const base_outer_radius = rings[ringIndex].radius;
+  let inner_radius = base_inner_radius + config.segment_radial_padding;
+  let outer_radius = base_outer_radius - config.segment_radial_padding;
+  if (outer_radius <= inner_radius) {
+    const midpoint = (base_inner_radius + base_outer_radius) / 2;
+    inner_radius = Math.max(0, midpoint - 1);
+    outer_radius = midpoint + 1;
+  }
+  const ring_center = (inner_radius + outer_radius) / 2;
+  let angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
+  const angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
+  angular_padding = Math.min(angular_padding, angular_limit);
+  let angle_min = min_angle + angular_padding;
+  let angle_max = max_angle - angular_padding;
+  if (angle_max <= angle_min) {
+    angle_min = min_angle;
+    angle_max = max_angle;
+  }
+  const segment_bounds = computeQuadrantBounds(angle_min, angle_max, outer_radius);
+  const cartesian_min = segment_bounds.min;
+  const cartesian_max = segment_bounds.max;
+  function clampPoint(point) {
+    const c = boundedBox(point, cartesian_min, cartesian_max);
+    const p = polar(c);
+    p.r = boundedInterval(p.r, inner_radius, outer_radius);
+    p.t = boundedInterval(p.t, angle_min, angle_max);
+    return cartesian(p);
+  }
+  function clampAndAssign(d) {
+    const clipped = clampPoint({ x: d.x, y: d.y });
+    d.x = clipped.x;
+    d.y = clipped.y;
+    return clipped;
+  }
+  return {
+    clipx: function(d) {
+      const clipped = clampAndAssign(d);
+      return clipped.x;
+    },
+    clipy: function(d) {
+      const clipped = clampAndAssign(d);
+      return clipped.y;
+    },
+    clip: function(d) {
+      const clipped = clampPoint({ x: d.x, y: d.y });
+      d.x = clipped.x;
+      d.y = clipped.y;
+      return clipped;
+    },
+    random: function() {
+      return cartesian({
+        t: randomBetween(angle_min, angle_max),
+        r: randomBetween(inner_radius, outer_radius)
+      });
+    }
+  };
+}
+
+// src/processing/entry-processor.js
+class EntryProcessor {
+  constructor(config, quadrants, rings, randomNext, randomBetween) {
+    this.config = config;
+    this.quadrants = quadrants;
+    this.rings = rings;
+    this.randomNext = randomNext;
+    this.randomBetween = randomBetween;
+    this.numQuadrants = quadrants.length;
+    this.numRings = rings.length;
+  }
+  processEntries(entries) {
+    const segmented2 = this.segmentEntries(entries);
+    this.assignSegmentsAndColors(entries);
+    this.positionEntries(segmented2);
+    this.assignIds(segmented2);
+    this.calculateCollisionRadii(segmented2);
+    return entries;
+  }
+  segmentEntries(entries) {
+    const segmented2 = new Array(this.numQuadrants);
+    for (let quadrant = 0;quadrant < this.numQuadrants; quadrant++) {
+      segmented2[quadrant] = new Array(this.numRings);
+      for (let ring = 0;ring < this.numRings; ring++) {
+        segmented2[quadrant][ring] = [];
+      }
+    }
+    for (let i = 0;i < entries.length; i++) {
+      const entry = entries[i];
+      segmented2[entry.quadrant][entry.ring].push(entry);
+    }
+    return segmented2;
+  }
+  assignSegmentsAndColors(entries) {
+    for (let i = 0;i < entries.length; i++) {
+      const entry = entries[i];
+      entry.segment = createSegment(entry.quadrant, entry.ring, this.quadrants, this.rings, this.config, this.randomBetween);
+      entry.color = entry.active || this.config.print_layout ? this.config.rings[entry.ring].color : this.config.colors.inactive;
+    }
+  }
+  positionEntries(segmented2) {
+    for (let quadrant = 0;quadrant < this.numQuadrants; quadrant++) {
+      for (let ring = 0;ring < this.numRings; ring++) {
+        this.gridPosition(segmented2[quadrant][ring], quadrant, ring);
+      }
+    }
+  }
+  gridPosition(entries, quadrant, ring) {
+    if (entries.length === 0)
+      return;
+    const min_angle = this.quadrants[quadrant].radial_min * Math.PI;
+    const max_angle = this.quadrants[quadrant].radial_max * Math.PI;
+    const base_inner_radius = ring === 0 ? 30 : this.rings[ring - 1].radius;
+    const base_outer_radius = this.rings[ring].radius;
+    let inner_radius = base_inner_radius + this.config.segment_radial_padding;
+    let outer_radius = base_outer_radius - this.config.segment_radial_padding;
+    if (outer_radius <= inner_radius) {
+      const midpoint = (base_inner_radius + base_outer_radius) / 2;
+      inner_radius = Math.max(0, midpoint - 1);
+      outer_radius = midpoint + 1;
+    }
+    const ring_center = (inner_radius + outer_radius) / 2;
+    let angular_padding = this.config.segment_angular_padding / Math.max(ring_center, 1);
+    const angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
+    angular_padding = Math.min(angular_padding, angular_limit);
+    const angle_min = min_angle + angular_padding;
+    const angle_max = max_angle - angular_padding;
+    const angle_range = angle_max - angle_min;
+    const radius_range = outer_radius - inner_radius;
+    const count = entries.length;
+    const effective_radius = ring === 0 ? inner_radius : ring_center;
+    const segment_arc_length = angle_range * effective_radius;
+    const segment_radial_depth = radius_range;
+    const item_size = this.config.blip_collision_radius || 14;
+    const max_angular_items = Math.max(3, Math.floor(segment_arc_length / (item_size * 0.7)));
+    const max_radial_items = Math.max(3, Math.floor(segment_radial_depth / (item_size * 0.7)));
+    let angular_divisions, radial_divisions;
+    const base = Math.ceil(Math.sqrt(count));
+    const aspect_ratio = segment_arc_length / Math.max(segment_radial_depth, 1);
+    if (count === 1) {
+      angular_divisions = 1;
+      radial_divisions = 1;
+    } else if (count <= 4) {
+      angular_divisions = Math.min(count, max_angular_items);
+      radial_divisions = Math.ceil(count / angular_divisions);
+    } else {
+      if (aspect_ratio > 2) {
+        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.5));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      } else if (aspect_ratio > 1) {
+        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.2));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      } else if (aspect_ratio < 0.5) {
+        const radial_bias = ring === 0 ? 0.85 : 0.7;
+        angular_divisions = Math.min(max_angular_items, Math.max(3, Math.floor(base * radial_bias)));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      } else {
+        angular_divisions = Math.min(max_angular_items, Math.max(3, base));
+        radial_divisions = Math.ceil(count / angular_divisions);
+      }
+      angular_divisions = Math.max(2, Math.min(angular_divisions, max_angular_items));
+      radial_divisions = Math.max(2, Math.min(radial_divisions, max_radial_items));
+    }
+    for (let i = 0;i < entries.length; i++) {
+      const entry = entries[i];
+      let angular_index = i % angular_divisions;
+      let radial_index = Math.floor(i / angular_divisions);
+      const is_overcrowded = radial_index >= radial_divisions;
+      if (is_overcrowded) {
+        const total_cells = angular_divisions * radial_divisions;
+        const cell_index = i % total_cells;
+        angular_index = cell_index % angular_divisions;
+        radial_index = Math.floor(cell_index / angular_divisions);
+      }
+      const angular_fraction = (angular_index + 0.15 + this.randomNext() * 0.7) / angular_divisions;
+      const radial_fraction = (radial_index + 0.15 + this.randomNext() * 0.7) / radial_divisions;
+      const angle = angle_min + angular_fraction * angle_range;
+      const radius = inner_radius + radial_fraction * radius_range;
+      const point = cartesian({ t: angle, r: radius });
+      entry.x = point.x;
+      entry.y = point.y;
+    }
+  }
+  assignIds(segmented2) {
+    let id = 1;
+    const quadrant_order = generateQuadrantOrder(this.numQuadrants);
+    for (const quadrant of quadrant_order) {
+      for (let ring = 0;ring < this.numRings; ring++) {
+        const entries = segmented2[quadrant][ring];
+        entries.sort(function(a, b) {
+          return a.label.localeCompare(b.label);
+        });
+        for (let i = 0;i < entries.length; i++) {
+          entries[i].id = "" + id++;
+        }
+      }
+    }
+  }
+  calculateCollisionRadii(segmented2) {
+    for (let quadrant = 0;quadrant < this.numQuadrants; quadrant++) {
+      for (let ring = 0;ring < this.numRings; ring++) {
+        const entries = segmented2[quadrant][ring];
+        if (entries.length === 0)
+          continue;
+        const seg_base_inner_radius = ring === 0 ? 30 : this.rings[ring - 1].radius;
+        const seg_base_outer_radius = this.rings[ring].radius;
+        let seg_inner_radius = seg_base_inner_radius + this.config.segment_radial_padding;
+        let seg_outer_radius = seg_base_outer_radius - this.config.segment_radial_padding;
+        if (seg_outer_radius <= seg_inner_radius) {
+          const midpoint = (seg_base_inner_radius + seg_base_outer_radius) / 2;
+          seg_inner_radius = Math.max(0, midpoint - 1);
+          seg_outer_radius = midpoint + 1;
+        }
+        const seg_angle_range = (this.quadrants[quadrant].radial_max - this.quadrants[quadrant].radial_min) * Math.PI;
+        const seg_ring_center = (seg_inner_radius + seg_outer_radius) / 2;
+        const seg_radial_thickness = seg_outer_radius - seg_inner_radius;
+        const segment_area = seg_angle_range * seg_ring_center * seg_radial_thickness;
+        const area_per_entry = segment_area / entries.length;
+        const ideal_radius = Math.sqrt(area_per_entry / Math.PI) * 0.55;
+        let adaptive_radius = Math.max(12, ideal_radius);
+        if (entries.length > 10) {
+          adaptive_radius = Math.max(adaptive_radius, 13);
+        }
+        if (entries.length > 15) {
+          adaptive_radius = Math.max(adaptive_radius, 14);
+        }
+        if (ring === 0 && this.numQuadrants >= 6) {
+          adaptive_radius = Math.max(10, adaptive_radius * 0.9);
+        }
+        for (let i = 0;i < entries.length; i++) {
+          entries[i].collision_radius = adaptive_radius;
+        }
+      }
+    }
+  }
+}
+
 // src/index.js
 function radar_visualization(config) {
   config.svg_id = config.svg || "radar";
@@ -148,47 +497,10 @@ function radar_visualization(config) {
   const random = () => rng.next();
   const random_between = (min, max) => rng.between(min, max);
   const normal_between = (min, max) => rng.normalBetween(min, max);
-  const quadrants = [];
   const num_quadrants = config.quadrants.length;
-  const angle_per_quadrant = 2 / num_quadrants;
-  const rotation_offset = num_quadrants === 2 ? -0.5 : 0;
-  for (let i2 = 0;i2 < num_quadrants; i2++) {
-    const start_angle = -1 + i2 * angle_per_quadrant + rotation_offset;
-    const end_angle = -1 + (i2 + 1) * angle_per_quadrant + rotation_offset;
-    const mid_angle2 = -Math.PI + (i2 + 0.5) * angle_per_quadrant * Math.PI + rotation_offset * Math.PI;
-    quadrants.push({
-      radial_min: start_angle,
-      radial_max: end_angle,
-      factor_x: Math.cos(mid_angle2),
-      factor_y: Math.sin(mid_angle2)
-    });
-  }
+  const quadrants = generateQuadrants(num_quadrants);
   const num_rings = config.rings.length;
-  const base_pattern = [130, 220, 310, 400];
-  const max_base_radius = base_pattern[base_pattern.length - 1];
-  const ring_template = [];
-  if (num_rings === 4) {
-    for (let i2 = 0;i2 < 4; i2++) {
-      ring_template.push(base_pattern[i2]);
-    }
-  } else {
-    for (let i2 = 0;i2 < num_rings; i2++) {
-      const pattern_position = i2 / (num_rings - 1) * 3;
-      const pattern_index = Math.floor(pattern_position);
-      const fraction = pattern_position - pattern_index;
-      let radius;
-      if (pattern_index >= 3) {
-        radius = max_base_radius;
-      } else {
-        radius = base_pattern[pattern_index] + (base_pattern[pattern_index + 1] - base_pattern[pattern_index]) * fraction;
-      }
-      ring_template.push(radius);
-    }
-  }
-  const radius_scale = target_outer_radius / max_base_radius;
-  const rings = ring_template.map(function(r) {
-    return { radius: Math.max(10, Math.round(r * radius_scale)) };
-  });
+  const rings = generateRings(num_rings, target_outer_radius);
   const outer_radius = rings[rings.length - 1].radius;
   const quadrant_bounds = quadrants.map(function(q) {
     return computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius);
@@ -246,279 +558,20 @@ function radar_visualization(config) {
   const bounded_interval = boundedInterval;
   const bounded_ring = boundedRing;
   const bounded_box = boundedBox;
-  function computeQuadrantBounds(startAngle, endAngle, radius) {
-    var twoPi = 2 * Math.PI;
-    var normalizedStart = startAngle;
-    var normalizedEnd = endAngle;
-    while (normalizedEnd <= normalizedStart) {
-      normalizedEnd += twoPi;
-    }
-    var axisAngles = [
-      -Math.PI,
-      -Math.PI / 2,
-      0,
-      Math.PI / 2,
-      Math.PI,
-      3 * Math.PI / 2,
-      2 * Math.PI
-    ];
-    var candidates = [normalizedStart, normalizedEnd];
-    axisAngles.forEach(function(axisAngle) {
-      var candidate = axisAngle;
-      while (candidate < normalizedStart) {
-        candidate += twoPi;
-      }
-      if (candidate <= normalizedEnd) {
-        candidates.push(candidate);
-      }
-    });
-    var min_x = Infinity;
-    var max_x = -Infinity;
-    var min_y = Infinity;
-    var max_y = -Infinity;
-    candidates.forEach(function(angle2) {
-      var cosA = Math.cos(angle2);
-      var sinA = Math.sin(angle2);
-      min_x = Math.min(min_x, cosA);
-      max_x = Math.max(max_x, cosA);
-      min_y = Math.min(min_y, sinA);
-      max_y = Math.max(max_y, sinA);
-    });
-    var padding = 20;
-    return {
-      min: {
-        x: min_x * radius - padding,
-        y: min_y * radius - padding
-      },
-      max: {
-        x: max_x * radius + padding,
-        y: max_y * radius + padding
-      }
-    };
+  function segment(quadrant, ring) {
+    return createSegment(quadrant, ring, quadrants, rings, config, random_between);
   }
-  function segment(quadrant2, ring2) {
-    var min_angle2 = quadrants[quadrant2].radial_min * Math.PI;
-    var max_angle2 = quadrants[quadrant2].radial_max * Math.PI;
-    var base_inner_radius = ring2 === 0 ? 30 : rings[ring2 - 1].radius;
-    var base_outer_radius = rings[ring2].radius;
-    var inner_radius = base_inner_radius + config.segment_radial_padding;
-    var outer_radius2 = base_outer_radius - config.segment_radial_padding;
-    if (outer_radius2 <= inner_radius) {
-      var midpoint2 = (base_inner_radius + base_outer_radius) / 2;
-      inner_radius = Math.max(0, midpoint2 - 1);
-      outer_radius2 = midpoint2 + 1;
-    }
-    var ring_center = (inner_radius + outer_radius2) / 2;
-    var angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
-    var angular_limit2 = Math.max(0, (max_angle2 - min_angle2) / 2 - 0.01);
-    angular_padding = Math.min(angular_padding, angular_limit2);
-    var angle_min2 = min_angle2 + angular_padding;
-    var angle_max2 = max_angle2 - angular_padding;
-    if (angle_max2 <= angle_min2) {
-      angle_min2 = min_angle2;
-      angle_max2 = max_angle2;
-    }
-    var segment_bounds = computeQuadrantBounds(angle_min2, angle_max2, outer_radius2);
-    var cartesian_min = segment_bounds.min;
-    var cartesian_max = segment_bounds.max;
-    function clampPoint(point) {
-      var c = bounded_box(point, cartesian_min, cartesian_max);
-      var p = polar(c);
-      p.r = bounded_interval(p.r, inner_radius, outer_radius2);
-      p.t = bounded_interval(p.t, angle_min2, angle_max2);
-      return cartesian(p);
-    }
-    function clampAndAssign(d) {
-      var clipped = clampPoint({ x: d.x, y: d.y });
-      d.x = clipped.x;
-      d.y = clipped.y;
-      return clipped;
-    }
-    return {
-      clipx: function(d) {
-        var clipped = clampAndAssign(d);
-        return clipped.x;
-      },
-      clipy: function(d) {
-        var clipped = clampAndAssign(d);
-        return clipped.y;
-      },
-      clip: function(d) {
-        var clipped = clampPoint({ x: d.x, y: d.y });
-        d.x = clipped.x;
-        d.y = clipped.y;
-        return clipped;
-      },
-      random: function() {
-        return cartesian({
-          t: random_between(angle_min2, angle_max2),
-          r: random_between(inner_radius, outer_radius2)
-        });
-      }
-    };
-  }
-  function gridPosition(entries2, segmentInfo) {
-    if (entries2.length === 0)
-      return;
-    var min_angle2 = quadrants[segmentInfo.quadrant].radial_min * Math.PI;
-    var max_angle2 = quadrants[segmentInfo.quadrant].radial_max * Math.PI;
-    var base_inner_radius = segmentInfo.ring === 0 ? 30 : rings[segmentInfo.ring - 1].radius;
-    var base_outer_radius = rings[segmentInfo.ring].radius;
-    var inner_radius = base_inner_radius + config.segment_radial_padding;
-    var outer_radius2 = base_outer_radius - config.segment_radial_padding;
-    if (outer_radius2 <= inner_radius) {
-      var midpoint2 = (base_inner_radius + base_outer_radius) / 2;
-      inner_radius = Math.max(0, midpoint2 - 1);
-      outer_radius2 = midpoint2 + 1;
-    }
-    var ring_center = (inner_radius + outer_radius2) / 2;
-    var angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
-    var angular_limit2 = Math.max(0, (max_angle2 - min_angle2) / 2 - 0.01);
-    angular_padding = Math.min(angular_padding, angular_limit2);
-    var angle_min2 = min_angle2 + angular_padding;
-    var angle_max2 = max_angle2 - angular_padding;
-    var angle_range = angle_max2 - angle_min2;
-    var radius_range = outer_radius2 - inner_radius;
-    var count = entries2.length;
-    var effective_radius = segmentInfo.ring === 0 ? inner_radius : ring_center;
-    var segment_arc_length = angle_range * effective_radius;
-    var segment_radial_depth = radius_range;
-    var item_size = config.blip_collision_radius || 14;
-    var max_angular_items = Math.max(3, Math.floor(segment_arc_length / (item_size * 0.7)));
-    var max_radial_items = Math.max(3, Math.floor(segment_radial_depth / (item_size * 0.7)));
-    var angular_divisions, radial_divisions;
-    var base = Math.ceil(Math.sqrt(count));
-    var aspect_ratio = segment_arc_length / Math.max(segment_radial_depth, 1);
-    if (count === 1) {
-      angular_divisions = 1;
-      radial_divisions = 1;
-    } else if (count <= 4) {
-      angular_divisions = Math.min(count, max_angular_items);
-      radial_divisions = Math.ceil(count / angular_divisions);
-    } else {
-      if (aspect_ratio > 2) {
-        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.5));
-        radial_divisions = Math.ceil(count / angular_divisions);
-      } else if (aspect_ratio > 1) {
-        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.2));
-        radial_divisions = Math.ceil(count / angular_divisions);
-      } else if (aspect_ratio < 0.5) {
-        var radial_bias = segmentInfo.ring === 0 ? 0.85 : 0.7;
-        angular_divisions = Math.min(max_angular_items, Math.max(3, Math.floor(base * radial_bias)));
-        radial_divisions = Math.ceil(count / angular_divisions);
-      } else {
-        angular_divisions = Math.min(max_angular_items, Math.max(3, base));
-        radial_divisions = Math.ceil(count / angular_divisions);
-      }
-      angular_divisions = Math.max(2, Math.min(angular_divisions, max_angular_items));
-      radial_divisions = Math.max(2, Math.min(radial_divisions, max_radial_items));
-    }
-    for (var i2 = 0;i2 < entries2.length; i2++) {
-      var entry2 = entries2[i2];
-      var angular_index = i2 % angular_divisions;
-      var radial_index = Math.floor(i2 / angular_divisions);
-      var is_overcrowded = radial_index >= radial_divisions;
-      if (is_overcrowded) {
-        var total_cells = angular_divisions * radial_divisions;
-        var cell_index = i2 % total_cells;
-        angular_index = cell_index % angular_divisions;
-        radial_index = Math.floor(cell_index / angular_divisions);
-      }
-      var angular_fraction = (angular_index + 0.15 + random() * 0.7) / angular_divisions;
-      var radial_fraction = (radial_index + 0.15 + random() * 0.7) / radial_divisions;
-      var angle2 = angle_min2 + angular_fraction * angle_range;
-      var radius = inner_radius + radial_fraction * radius_range;
-      var point = cartesian({ t: angle2, r: radius });
-      entry2.x = point.x;
-      entry2.y = point.y;
-    }
-  }
-  var segmented = new Array(num_quadrants);
-  for (let quadrant2 = 0;quadrant2 < num_quadrants; quadrant2++) {
-    segmented[quadrant2] = new Array(num_rings);
-    for (var ring = 0;ring < num_rings; ring++) {
-      segmented[quadrant2][ring] = [];
-    }
-  }
-  for (var i = 0;i < config.entries.length; i++) {
-    var entry = config.entries[i];
-    segmented[entry.quadrant][entry.ring].push(entry);
-  }
-  for (var i = 0;i < config.entries.length; i++) {
-    var entry = config.entries[i];
-    entry.segment = segment(entry.quadrant, entry.ring);
-    entry.color = entry.active || config.print_layout ? config.rings[entry.ring].color : config.colors.inactive;
-  }
-  for (let quadrant2 = 0;quadrant2 < num_quadrants; quadrant2++) {
-    for (let ring2 = 0;ring2 < num_rings; ring2++) {
-      gridPosition(segmented[quadrant2][ring2], { quadrant: quadrant2, ring: ring2 });
-    }
-  }
-  var id = 1;
-  var quadrant_order = [];
-  if (num_quadrants === 4) {
-    quadrant_order = [2, 3, 1, 0];
-  } else {
-    var start_index = Math.floor(num_quadrants / 2);
-    for (var i = 0;i < num_quadrants; i++) {
-      quadrant_order.push((start_index + i) % num_quadrants);
-    }
-  }
-  for (var quadrant of quadrant_order) {
-    for (var ring = 0;ring < num_rings; ring++) {
-      var entries = segmented[quadrant][ring];
-      entries.sort(function(a, b) {
-        return a.label.localeCompare(b.label);
-      });
-      for (var i = 0;i < entries.length; i++) {
-        entries[i].id = "" + id++;
-      }
-    }
-  }
-  for (let quadrant2 = 0;quadrant2 < num_quadrants; quadrant2++) {
-    for (let ring2 = 0;ring2 < num_rings; ring2++) {
-      var entries = segmented[quadrant2][ring2];
-      if (entries.length === 0)
-        continue;
-      var seg_base_inner_radius = ring2 === 0 ? 30 : rings[ring2 - 1].radius;
-      var seg_base_outer_radius = rings[ring2].radius;
-      var seg_inner_radius = seg_base_inner_radius + config.segment_radial_padding;
-      var seg_outer_radius = seg_base_outer_radius - config.segment_radial_padding;
-      if (seg_outer_radius <= seg_inner_radius) {
-        var midpoint = (seg_base_inner_radius + seg_base_outer_radius) / 2;
-        seg_inner_radius = Math.max(0, midpoint - 1);
-        seg_outer_radius = midpoint + 1;
-      }
-      var seg_angle_range = (quadrants[quadrant2].radial_max - quadrants[quadrant2].radial_min) * Math.PI;
-      var seg_ring_center = (seg_inner_radius + seg_outer_radius) / 2;
-      var seg_radial_thickness = seg_outer_radius - seg_inner_radius;
-      var segment_area = seg_angle_range * seg_ring_center * seg_radial_thickness;
-      var area_per_entry = segment_area / entries.length;
-      var ideal_radius = Math.sqrt(area_per_entry / Math.PI) * 0.55;
-      var adaptive_radius = Math.max(12, ideal_radius);
-      if (entries.length > 10) {
-        adaptive_radius = Math.max(adaptive_radius, 13);
-      }
-      if (entries.length > 15) {
-        adaptive_radius = Math.max(adaptive_radius, 14);
-      }
-      if (ring2 === 0 && num_quadrants >= 6) {
-        adaptive_radius = Math.max(10, adaptive_radius * 0.9);
-      }
-      for (var i = 0;i < entries.length; i++) {
-        entries[i].collision_radius = adaptive_radius;
-      }
-    }
-  }
+  const entryProcessor = new EntryProcessor(config, quadrants, rings, random, random_between);
+  entryProcessor.processEntries(config.entries);
   function translate(x, y) {
     return "translate(" + x + "," + y + ")";
   }
-  function viewbox(quadrant2) {
+  function viewbox(quadrant) {
     var outer_radius2 = rings[rings.length - 1].radius;
     var padding = 20;
     return [
-      Math.max(0, quadrants[quadrant2].factor_x * outer_radius2) - (outer_radius2 + padding),
-      Math.max(0, quadrants[quadrant2].factor_y * outer_radius2) - (outer_radius2 + padding),
+      Math.max(0, quadrants[quadrant].factor_x * outer_radius2) - (outer_radius2 + padding),
+      Math.max(0, quadrants[quadrant].factor_y * outer_radius2) - (outer_radius2 + padding),
       outer_radius2 + 2 * padding,
       outer_radius2 + 2 * padding
     ].join(" ");
@@ -591,10 +644,10 @@ function radar_visualization(config) {
       grid.append("text").text(config.rings[i].name).attr("y", -labelRadius).attr("text-anchor", "middle").attr("dominant-baseline", "middle").style("fill", config.rings[i].color).style("opacity", 0.35).style("font-family", config.font_family).style("font-size", labelFontSize + "px").style("font-weight", "bold").style("pointer-events", "none").style("user-select", "none");
     }
   }
-  function legend_transform(quadrant2, ring2, legendColumnWidth, index = null, currentHeight = 0) {
+  function legend_transform(quadrant, ring, legendColumnWidth, index = null, currentHeight = 0) {
     var num_columns = num_rings >= 7 ? 3 : 2;
     var rings_per_column = Math.ceil(num_rings / num_columns);
-    var column = Math.floor(ring2 / rings_per_column);
+    var column = Math.floor(ring / rings_per_column);
     const dx = column * legendColumnWidth;
     let dy;
     if (index == null) {
@@ -602,7 +655,7 @@ function radar_visualization(config) {
     } else {
       dy = currentHeight + index * config.legend_line_height;
     }
-    return translate(config.legend_offset[quadrant2].x + dx, config.legend_offset[quadrant2].y + dy);
+    return translate(config.legend_offset[quadrant].x + dx, config.legend_offset[quadrant].y + dy);
   }
   if (config.print_layout) {
     radar.append("a").attr("href", config.repo_url).attr("transform", translate(config.title_offset.x, config.title_offset.y)).append("text").attr("class", "hover-underline").text(config.title).style("font-family", config.font_family).style("font-size", "30").style("font-weight", "bold");
@@ -631,21 +684,21 @@ function radar_visualization(config) {
     for (var i2 = 0;i2 < left_count; i2++) {
       leftQuadrants.push((right_start - 1 - i2 + num_quadrants) % num_quadrants);
     }
-    function targetColumn(quadrant2) {
-      return leftQuadrants.includes(quadrant2) ? legendLeftColumn : legendRightColumn;
+    function targetColumn(quadrant) {
+      return leftQuadrants.includes(quadrant) ? legendLeftColumn : legendRightColumn;
     }
-    for (let quadrant2 = 0;quadrant2 < num_quadrants; quadrant2++) {
-      var column = targetColumn(quadrant2);
+    for (let quadrant = 0;quadrant < num_quadrants; quadrant++) {
+      var column = targetColumn(quadrant);
       var section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns);
-      section.append("div").attr("class", "legend-quadrant-name").text(config.quadrants[quadrant2].name);
+      section.append("div").attr("class", "legend-quadrant-name").text(config.quadrants[quadrant].name);
       var ringsContainer = section.append("div").attr("class", "legend-rings");
-      for (let ring2 = 0;ring2 < num_rings; ring2++) {
-        var entriesInRing = segmented[quadrant2][ring2];
+      for (let ring = 0;ring < num_rings; ring++) {
+        var entriesInRing = segmented[quadrant][ring];
         if (!entriesInRing.length) {
           continue;
         }
         var ringBlock = ringsContainer.append("div").attr("class", "legend-ring");
-        ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring2].color).text(config.rings[ring2].name);
+        ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).text(config.rings[ring].name);
         var entriesList = ringBlock.append("div").attr("class", "legend-ring-entries");
         entriesList.selectAll("a").data(entriesInRing).enter().append("a").attr("href", function(d) {
           return d.link ? d.link : "#";

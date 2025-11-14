@@ -27,6 +27,14 @@ import { polar, cartesian, boundedInterval, boundedRing, boundedBox } from './ma
 import { SeededRandom } from './math/random.js';
 import { validateConfig } from './validation/config-validator.js';
 
+// ============================================================================
+// Phase 2 Refactoring: Import extracted geometry and processing modules
+// ============================================================================
+import { generateQuadrants, computeQuadrantBounds } from './geometry/quadrant-calculator.js';
+import { generateRings } from './geometry/ring-calculator.js';
+import { createSegment } from './geometry/segment-calculator.js';
+import { EntryProcessor } from './processing/entry-processor.js';
+
 function radar_visualization(config) {
 
   config.svg_id = config.svg || "radar";
@@ -109,60 +117,22 @@ function radar_visualization(config) {
   const random_between = (min, max) => rng.between(min, max);
   const normal_between = (min, max) => rng.normalBetween(min, max);
 
-  // Generate quadrants dynamically based on config.quadrants.length
-  // radial_min / radial_max are multiples of PI
-  const quadrants = [];
+  // ============================================================================
+  // Phase 2 Refactoring: Use extracted quadrant calculator module
+  // ============================================================================
   const num_quadrants = config.quadrants.length;
-  const angle_per_quadrant = 2 / num_quadrants; // in PI multiples
-  const rotation_offset = (num_quadrants === 2) ? -0.5 : 0; // rotate to vertical split for 2 quadrants
+  const quadrants = generateQuadrants(num_quadrants);
 
-  for (let i = 0; i < num_quadrants; i++) {
-    const start_angle = -1 + (i * angle_per_quadrant) + rotation_offset;
-    const end_angle = -1 + ((i + 1) * angle_per_quadrant) + rotation_offset;
-    const mid_angle = (-Math.PI + (i + 0.5) * angle_per_quadrant * Math.PI) + (rotation_offset * Math.PI);
-
-    quadrants.push({
-      radial_min: start_angle,
-      radial_max: end_angle,
-      factor_x: Math.cos(mid_angle),
-      factor_y: Math.sin(mid_angle)
-    });
-  }
-
-  // Generate rings dynamically based on config.rings.length
-  // Scale the current pattern [130, 220, 310, 400] proportionally
+  // ============================================================================
+  // Phase 2 Refactoring: Use extracted ring calculator module
+  // ============================================================================
   const num_rings = config.rings.length;
-  const base_pattern = [130, 220, 310, 400];
-  const max_base_radius = base_pattern[base_pattern.length - 1];
-  const ring_template = [];
-
-  if (num_rings === 4) {
-    for (let i = 0; i < 4; i++) {
-      ring_template.push(base_pattern[i]);
-    }
-  } else {
-    for (let i = 0; i < num_rings; i++) {
-      const pattern_position = (i / (num_rings - 1)) * 3;
-      const pattern_index = Math.floor(pattern_position);
-      const fraction = pattern_position - pattern_index;
-
-      let radius;
-      if (pattern_index >= 3) {
-        radius = max_base_radius;
-      } else {
-        radius = base_pattern[pattern_index] +
-          (base_pattern[pattern_index + 1] - base_pattern[pattern_index]) * fraction;
-      }
-
-      ring_template.push(radius);
-    }
-  }
-
-  const radius_scale = target_outer_radius / max_base_radius;
-  const rings = ring_template.map(function (r) {
-    return { radius: Math.max(10, Math.round(r * radius_scale)) };
-  });
+  const rings = generateRings(num_rings, target_outer_radius);
   const outer_radius = rings[rings.length - 1].radius;
+
+  // ============================================================================
+  // Phase 2 Refactoring: Use extracted computeQuadrantBounds function
+  // ============================================================================
   const quadrant_bounds = quadrants.map(function (q) {
     return computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius);
   });
@@ -233,372 +203,25 @@ function radar_visualization(config) {
   // boundedRing, boundedBox)
   // ============================================================================
 
-  // Alias boundedInterval to match original naming convention
+  // ============================================================================
+  // Phase 1 Refactoring: Alias coordinate functions for naming convention
+  // ============================================================================
   const bounded_interval = boundedInterval;
   const bounded_ring = boundedRing;
   const bounded_box = boundedBox;
 
-  function computeQuadrantBounds(startAngle, endAngle, radius) {
-    var twoPi = 2 * Math.PI;
-    var normalizedStart = startAngle;
-    var normalizedEnd = endAngle;
-
-    while (normalizedEnd <= normalizedStart) {
-      normalizedEnd += twoPi;
-    }
-
-    var axisAngles = [
-      -Math.PI,
-      -Math.PI / 2,
-      0,
-      Math.PI / 2,
-      Math.PI,
-      (3 * Math.PI) / 2,
-      2 * Math.PI
-    ];
-
-    var candidates = [normalizedStart, normalizedEnd];
-
-    axisAngles.forEach(function (axisAngle) {
-      var candidate = axisAngle;
-      while (candidate < normalizedStart) {
-        candidate += twoPi;
-      }
-      if (candidate <= normalizedEnd) {
-        candidates.push(candidate);
-      }
-    });
-
-    var min_x = Infinity;
-    var max_x = -Infinity;
-    var min_y = Infinity;
-    var max_y = -Infinity;
-
-    candidates.forEach(function (angle) {
-      var cosA = Math.cos(angle);
-      var sinA = Math.sin(angle);
-      min_x = Math.min(min_x, cosA);
-      max_x = Math.max(max_x, cosA);
-      min_y = Math.min(min_y, sinA);
-      max_y = Math.max(max_y, sinA);
-    });
-
-    var padding = 20;
-    return {
-      min: {
-        x: (min_x * radius) - padding,
-        y: (min_y * radius) - padding
-      },
-      max: {
-        x: (max_x * radius) + padding,
-        y: (max_y * radius) + padding
-      }
-    };
-  }
-
+  // ============================================================================
+  // Phase 2 Refactoring: Use extracted segment calculator module
+  // ============================================================================
   function segment(quadrant, ring) {
-    var min_angle = quadrants[quadrant].radial_min * Math.PI;
-    var max_angle = quadrants[quadrant].radial_max * Math.PI;
-    var base_inner_radius = ring === 0 ? 30 : rings[ring - 1].radius;
-    var base_outer_radius = rings[ring].radius;
-
-    var inner_radius = base_inner_radius + config.segment_radial_padding;
-    var outer_radius = base_outer_radius - config.segment_radial_padding;
-    if (outer_radius <= inner_radius) {
-      var midpoint = (base_inner_radius + base_outer_radius) / 2;
-      inner_radius = Math.max(0, midpoint - 1);
-      outer_radius = midpoint + 1;
-    }
-
-    var ring_center = (inner_radius + outer_radius) / 2;
-    var angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
-    var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
-    angular_padding = Math.min(angular_padding, angular_limit);
-
-    var angle_min = min_angle + angular_padding;
-    var angle_max = max_angle - angular_padding;
-    if (angle_max <= angle_min) {
-      angle_min = min_angle;
-      angle_max = max_angle;
-    }
-
-    // FIX #7: Calculate bounding box PER SEGMENT, not per quadrant
-    // Use segment's actual angles and outer_radius, not the full quadrant
-    var segment_bounds = computeQuadrantBounds(angle_min, angle_max, outer_radius);
-    var cartesian_min = segment_bounds.min;
-    var cartesian_max = segment_bounds.max;
-
-    function clampPoint(point) {
-      var c = bounded_box(point, cartesian_min, cartesian_max);
-      var p = polar(c);
-      p.r = bounded_interval(p.r, inner_radius, outer_radius);
-      p.t = bounded_interval(p.t, angle_min, angle_max);
-      return cartesian(p);
-    }
-
-    function clampAndAssign(d) {
-      var clipped = clampPoint({ x: d.x, y: d.y });
-      d.x = clipped.x;
-      d.y = clipped.y;
-      return clipped;
-    }
-
-    return {
-      clipx: function (d) {
-        var clipped = clampAndAssign(d);
-        return clipped.x;
-      },
-      clipy: function (d) {
-        var clipped = clampAndAssign(d);
-        return clipped.y;
-      },
-      // FIX #5: Single clip operation that doesn't double-clip
-      clip: function (d) {
-        var clipped = clampPoint({ x: d.x, y: d.y });
-        d.x = clipped.x;
-        d.y = clipped.y;
-        return clipped;
-      },
-      random: function () {
-        return cartesian({
-          t: random_between(angle_min, angle_max),
-          r: random_between(inner_radius, outer_radius)
-        });
-      }
-    }
+    return createSegment(quadrant, ring, quadrants, rings, config, random_between);
   }
 
-  // Helper function to distribute entries in a grid pattern within their segment
-  function gridPosition(entries, segmentInfo) {
-    if (entries.length === 0) return;
-
-    var min_angle = quadrants[segmentInfo.quadrant].radial_min * Math.PI;
-    var max_angle = quadrants[segmentInfo.quadrant].radial_max * Math.PI;
-    var base_inner_radius = segmentInfo.ring === 0 ? 30 : rings[segmentInfo.ring - 1].radius;
-    var base_outer_radius = rings[segmentInfo.ring].radius;
-
-    var inner_radius = base_inner_radius + config.segment_radial_padding;
-    var outer_radius = base_outer_radius - config.segment_radial_padding;
-    if (outer_radius <= inner_radius) {
-      var midpoint = (base_inner_radius + base_outer_radius) / 2;
-      inner_radius = Math.max(0, midpoint - 1);
-      outer_radius = midpoint + 1;
-    }
-
-    var ring_center = (inner_radius + outer_radius) / 2;
-    var angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
-    var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
-    angular_padding = Math.min(angular_padding, angular_limit);
-
-    var angle_min = min_angle + angular_padding;
-    var angle_max = max_angle - angular_padding;
-
-    // Calculate optimal grid dimensions to maximize spatial distribution
-    var angle_range = angle_max - angle_min;
-    var radius_range = outer_radius - inner_radius;
-    var count = entries.length;
-
-    // Calculate segment dimensions in pixels (approximate)
-    // FIX #1: Use inner_radius for ring 0 to avoid overestimating angular capacity
-    // Ring 0 has smallest inner arc, using center radius overestimates by ~74%
-    var effective_radius = (segmentInfo.ring === 0) ? inner_radius : ring_center;
-    var segment_arc_length = angle_range * effective_radius;
-    var segment_radial_depth = radius_range;
-
-    // Estimate item size (based on collision radius)
-    var item_size = config.blip_collision_radius || 14;
-
-    // Calculate maximum items that could fit in each dimension
-    // Use a more generous calculation since force simulation will adjust spacing
-    // Divide by 70% of item size to allow for better initial distribution
-    var max_angular_items = Math.max(3, Math.floor(segment_arc_length / (item_size * 0.7)));
-    var max_radial_items = Math.max(3, Math.floor(segment_radial_depth / (item_size * 0.7)));
-
-    // Calculate balanced grid that uses both dimensions effectively
-    var angular_divisions, radial_divisions;
-
-    // Start with square root distribution
-    var base = Math.ceil(Math.sqrt(count));
-
-    // Calculate aspect ratio
-    var aspect_ratio = segment_arc_length / Math.max(segment_radial_depth, 1);
-
-    if (count === 1) {
-      angular_divisions = 1;
-      radial_divisions = 1;
-    } else if (count <= 4) {
-      // For small counts, spread evenly
-      angular_divisions = Math.min(count, max_angular_items);
-      radial_divisions = Math.ceil(count / angular_divisions);
-    } else {
-      // For larger counts, balance based on aspect ratio but enforce minimums
-      if (aspect_ratio > 2) {
-        // Much wider than tall - strongly prefer angular spread
-        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.5));
-        radial_divisions = Math.ceil(count / angular_divisions);
-      } else if (aspect_ratio > 1) {
-        // Moderately wider - prefer angular spread
-        angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.2));
-        radial_divisions = Math.ceil(count / angular_divisions);
-      } else if (aspect_ratio < 0.5) {
-        // FIX #2: Much taller than wide - but don't over-favor radial in narrow segments
-        // For ring 0 with many quadrants, radial depth is limited, so balance better
-        var radial_bias = (segmentInfo.ring === 0) ? 0.85 : 0.7;
-        angular_divisions = Math.min(max_angular_items, Math.max(3, Math.floor(base * radial_bias)));
-        radial_divisions = Math.ceil(count / angular_divisions);
-      } else {
-        // Moderately tall or square - balanced approach
-        angular_divisions = Math.min(max_angular_items, Math.max(3, base));
-        radial_divisions = Math.ceil(count / angular_divisions);
-      }
-
-      // Ensure we don't exceed capacity in either dimension
-      angular_divisions = Math.max(2, Math.min(angular_divisions, max_angular_items));
-      radial_divisions = Math.max(2, Math.min(radial_divisions, max_radial_items));
-    }
-
-    // Distribute entries in grid with better spacing
-    for (var i = 0; i < entries.length; i++) {
-      var entry = entries[i];
-
-      // Grid cell indices
-      var angular_index = i % angular_divisions;
-      var radial_index = Math.floor(i / angular_divisions);
-
-      // FIX #3: Better handling when entries exceed grid capacity
-      // Instead of simple wrapping, detect overcrowding for collision radius adjustment
-      var is_overcrowded = radial_index >= radial_divisions;
-      if (is_overcrowded) {
-        // Wrap excess entries back into the grid using modulo
-        var total_cells = angular_divisions * radial_divisions;
-        var cell_index = i % total_cells;
-        angular_index = cell_index % angular_divisions;
-        radial_index = Math.floor(cell_index / angular_divisions);
-      }
-
-      // Position within grid cell with increased jitter for better spread
-      // Use 0.15-0.85 range instead of 0.3-0.7 to fill more of each cell
-      var angular_fraction = (angular_index + 0.15 + random() * 0.7) / angular_divisions;
-      var radial_fraction = (radial_index + 0.15 + random() * 0.7) / radial_divisions;
-
-      var angle = angle_min + angular_fraction * angle_range;
-      var radius = inner_radius + radial_fraction * radius_range;
-
-      var point = cartesian({ t: angle, r: radius });
-      entry.x = point.x;
-      entry.y = point.y;
-    }
-  }
-
-  // partition entries according to segments first
-  var segmented = new Array(num_quadrants);
-  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
-    segmented[quadrant] = new Array(num_rings);
-    for (var ring = 0; ring < num_rings; ring++) {
-      segmented[quadrant][ring] = [];
-    }
-  }
-  for (var i = 0; i < config.entries.length; i++) {
-    var entry = config.entries[i];
-    segmented[entry.quadrant][entry.ring].push(entry);
-  }
-
-  // position each entry using grid-based distribution
-  for (var i = 0; i < config.entries.length; i++) {
-    var entry = config.entries[i];
-    entry.segment = segment(entry.quadrant, entry.ring);
-    entry.color = entry.active || config.print_layout ?
-      config.rings[entry.ring].color : config.colors.inactive;
-  }
-
-  // Apply grid positioning to each segment
-  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
-    for (let ring = 0; ring < num_rings; ring++) {
-      gridPosition(segmented[quadrant][ring], { quadrant: quadrant, ring: ring });
-    }
-  }
-
-  // assign unique sequential id to each entry
-  var id = 1;
-  // Generate quadrant ordering (for 4 quadrants: [2,3,1,0], otherwise sequential with wrap)
-  var quadrant_order = [];
-  if (num_quadrants === 4) {
-    quadrant_order = [2, 3, 1, 0]; // Original ordering for 4 quadrants
-  } else {
-    // For other counts, start from bottom-left and go counter-clockwise
-    var start_index = Math.floor(num_quadrants / 2);
-    for (var i = 0; i < num_quadrants; i++) {
-      quadrant_order.push((start_index + i) % num_quadrants);
-    }
-  }
-
-  for (var quadrant of quadrant_order) {
-    for (var ring = 0; ring < num_rings; ring++) {
-      var entries = segmented[quadrant][ring];
-      entries.sort(function (a, b) { return a.label.localeCompare(b.label); })
-      for (var i = 0; i < entries.length; i++) {
-        entries[i].id = "" + id++;
-      }
-    }
-  }
-
-  // Calculate adaptive collision radius based on segment density
-  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
-    for (let ring = 0; ring < num_rings; ring++) {
-      var entries = segmented[quadrant][ring];
-      if (entries.length === 0) continue;
-
-      // Calculate segment area
-      var seg_base_inner_radius = ring === 0 ? 30 : rings[ring - 1].radius;
-      var seg_base_outer_radius = rings[ring].radius;
-      var seg_inner_radius = seg_base_inner_radius + config.segment_radial_padding;
-      var seg_outer_radius = seg_base_outer_radius - config.segment_radial_padding;
-
-      // Guard against zero-width or negative-width segments
-      if (seg_outer_radius <= seg_inner_radius) {
-        var midpoint = (seg_base_inner_radius + seg_base_outer_radius) / 2;
-        seg_inner_radius = Math.max(0, midpoint - 1);
-        seg_outer_radius = midpoint + 1;
-      }
-
-      var seg_angle_range = (quadrants[quadrant].radial_max - quadrants[quadrant].radial_min) * Math.PI;
-      var seg_ring_center = (seg_inner_radius + seg_outer_radius) / 2;
-      var seg_radial_thickness = seg_outer_radius - seg_inner_radius;
-
-      // Approximate segment area (sector area)
-      var segment_area = seg_angle_range * seg_ring_center * seg_radial_thickness;
-
-      // Calculate area per entry
-      var area_per_entry = segment_area / entries.length;
-
-      // Collision radius based on available area (with safety factor)
-      // Increased safety factor from 0.45 to 0.55 for better spacing
-      var ideal_radius = Math.sqrt(area_per_entry / Math.PI) * 0.55;
-
-      // Allow adaptive radius to exceed default when there's room
-      // Use minimum of 12px to ensure reasonable spacing
-      var adaptive_radius = Math.max(12, ideal_radius);
-
-      // For very dense segments, ensure minimum spacing
-      if (entries.length > 10) {
-        adaptive_radius = Math.max(adaptive_radius, 13);
-      }
-      if (entries.length > 15) {
-        adaptive_radius = Math.max(adaptive_radius, 14);
-      }
-
-      // FIX #4: Reduce collision radius for narrow segments (many quadrants in ring 0)
-      // Narrow segments with small inner arc need tighter packing
-      if (ring === 0 && num_quadrants >= 6) {
-        adaptive_radius = Math.max(10, adaptive_radius * 0.9);
-      }
-
-      // Assign collision radius to each entry
-      for (var i = 0; i < entries.length; i++) {
-        entries[i].collision_radius = adaptive_radius;
-      }
-    }
-  }
+  // ============================================================================
+  // Phase 2 Refactoring: Use extracted entry processor module
+  // ============================================================================
+  const entryProcessor = new EntryProcessor(config, quadrants, rings, random, random_between);
+  entryProcessor.processEntries(config.entries);
 
   function translate(x, y) {
     return "translate(" + x + "," + y + ")";
