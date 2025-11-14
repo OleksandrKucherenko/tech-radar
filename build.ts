@@ -1,22 +1,102 @@
 // Build script to bundle and minify radar.js using Bun + terser
 // Phase 1 Refactoring: Now bundles ES6 modules from src/ into browser-compatible output
-// Usage: bun run build.ts
-// Can override version via RELEASE_VERSION environment variable
-import { $ } from 'bun';
-import { readFileSync, writeFileSync } from 'fs';
+//
+// Usage:
+//   RELEASE_VERSION=0.15.0 bun run build            # Build new version
+//   RELEASE_VERSION=0.14.0 bun run build --force    # Override existing version (use with caution!)
+//
+// IMPORTANT: Released versions should never be modified.
+//            Always create a new version for changes.
+//            Version must follow strict semantic versioning (MAJOR.MINOR.PATCH)
 
-const version = process.env.RELEASE_VERSION || '0.14'; // Update this when creating new releases
+import { $ } from 'bun';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const forceFlag = args.includes('--force');
+
+// Require explicit version via environment variable
+const version = process.env.RELEASE_VERSION;
+
+if (!version) {
+  console.error('❌ ERROR: RELEASE_VERSION environment variable is required');
+  console.error('');
+  console.error('Released versions should never be modified. You must specify a version.');
+  console.error('');
+  console.error('Usage:');
+  console.error('  RELEASE_VERSION=0.15.0 bun run build            # Build new version');
+  console.error('  RELEASE_VERSION=0.14.0 bun run build --force    # Override existing (dangerous!)');
+  console.error('');
+  console.error('Example:');
+  console.error('  RELEASE_VERSION=0.15.0 bun run build');
+  process.exit(1);
+}
+
+// Validate version format (strict semver: MAJOR.MINOR.PATCH)
+// See https://semver.org/ for specification
+const versionRegex = /^\d+\.\d+\.\d+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$/;
+if (!versionRegex.test(version)) {
+  console.error(`❌ ERROR: Invalid version format: ${version}`);
+  console.error('');
+  console.error('Version must follow strict semantic versioning: MAJOR.MINOR.PATCH');
+  console.error('See https://semver.org/ for details');
+  console.error('');
+  console.error('Valid examples:');
+  console.error('  ✓ 0.14.0           - Standard release');
+  console.error('  ✓ 0.14.1           - Patch release');
+  console.error('  ✓ 1.0.0            - Major release');
+  console.error('  ✓ 1.0.0-alpha.1    - Pre-release with identifier');
+  console.error('  ✓ 1.0.0-beta+001   - Pre-release with build metadata');
+  console.error('');
+  console.error('Invalid examples:');
+  console.error('  ✗ 0.14             - Missing PATCH version');
+  console.error('  ✗ 1.0              - Missing PATCH version');
+  console.error('  ✗ v1.0.0           - Prefix not allowed');
+  console.error('');
+  process.exit(1);
+}
 
 async function buildRadar() {
   console.log(`Building radar.js version ${version}...`);
-  console.log('Phase 1: Bundling ES6 modules from src/...');
 
   const srcInputPath = './src/index.js';
   const bundledOutputPath = './docs/radar.js';
   const minifiedOutputPath = `./docs/release/radar-${version}.js`;
 
+  // Check if release version already exists
+  if (existsSync(minifiedOutputPath)) {
+    if (!forceFlag) {
+      console.error('');
+      console.error(`❌ ERROR: Release version ${version} already exists!`);
+      console.error(`   File: ${minifiedOutputPath}`);
+      console.error('');
+      console.error('Released versions should NEVER be modified.');
+      console.error('');
+
+      // Parse version to suggest next version
+      const [major, minor, patch] = version.split(/[-+]/)[0].split('.').map(Number);
+      const nextVersion = `${major}.${minor}.${patch + 1}`;
+
+      console.error('Options:');
+      console.error('  1. Use a new version number (recommended):');
+      console.error(`     RELEASE_VERSION=${nextVersion} bun run build`);
+      console.error('');
+      console.error('  2. Force overwrite (USE WITH EXTREME CAUTION):');
+      console.error(`     RELEASE_VERSION=${version} bun run build --force`);
+      console.error('');
+      process.exit(1);
+    } else {
+      console.warn('');
+      console.warn(`⚠️  WARNING: Forcing overwrite of existing release ${version}`);
+      console.warn('   This should only be done during development, NEVER for production releases!');
+      console.warn('');
+    }
+  }
+
+  console.log('Phase 1: Bundling ES6 modules from src/...');
+
   // Step 1: Bundle ES6 modules using Bun's built-in bundler
-  // Use esm format and we'll wrap it ourselves
   const buildResult = await Bun.build({
     entrypoints: [srcInputPath],
     outdir: './temp-build',
@@ -27,7 +107,7 @@ async function buildRadar() {
   });
 
   if (!buildResult.success) {
-    console.error('Bundle failed:', buildResult.logs);
+    console.error('❌ Bundle failed:', buildResult.logs);
     process.exit(1);
   }
 
@@ -71,7 +151,7 @@ if (typeof global !== 'undefined') {
   const result = await $`npx terser ${bundledOutputPath} --compress --mangle reserved=['radar_visualization'] --output ${minifiedOutputPath}`.quiet();
 
   if (result.exitCode !== 0) {
-    console.error('Minification failed:', result.stderr.toString());
+    console.error('❌ Minification failed:', result.stderr.toString());
     process.exit(1);
   }
 
@@ -83,7 +163,19 @@ if (typeof global !== 'undefined') {
   console.log(`  Bundled size: ${bundledSize.toLocaleString()} bytes`);
   console.log(`  Minified size: ${minifiedSize.toLocaleString()} bytes`);
   console.log(`  Size reduction: ${reduction}%`);
-  console.log(`\n✓ Build complete!`);
+  console.log('');
+  console.log(`✅ Build complete!`);
+
+  if (!forceFlag) {
+    console.log('');
+    console.log('Release checklist:');
+    console.log(`  1. Test the bundled file: open docs/index.html`);
+    console.log(`  2. Test the minified file: open docs/test-minified.html`);
+    console.log(`  3. Run tests: bun test`);
+    console.log(`  4. Commit changes: git add . && git commit -m "release: version ${version}"`);
+    console.log(`  5. Create git tag: git tag v${version}`);
+    console.log(`  6. Push: git push && git push --tags`);
+  }
 }
 
 buildRadar().catch(console.error);
