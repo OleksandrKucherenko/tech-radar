@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <meta name="description"
+    content="Zalando Tech Radar: a tool to visualize technology choices, inspire and support Engineering teams at Zalando to pick the best technologies for new projects">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zalando Tech Radar</title>
+  <link rel="shortcut icon" href="https://www.zalando.de/favicon.ico">
+
+  <title>Demo: 4 Quadrants × 8 Rings</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="radar.js"></script>
+  <link rel="stylesheet" href="radar.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="demo-links">
+    <strong>Demo pages:</strong>
+    <a href="./index.html">Default</a>
+    <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
+    <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
+    <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
+    <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
+    <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
+    <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
+    <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
+  </nav>
+
+  <svg id="radar"></svg>
+
+  <script>
+    radar_visualization({
+      svg_id: "radar",
+      title: "4 Quadrants × 8 Rings",
+      quadrants: [
+        { name: "Frontend" },
+        { name: "Backend" },
+        { name: "Data" },
+        { name: "Infrastructure" }
+      ],
+      rings: [
+        { name: "ADOPT", color: "#5ba300" },
+        { name: "TRIAL", color: "#009eb0" },
+        { name: "ASSESS", color: "#c7ba00" },
+        { name: "EXPERIMENT", color: "#f2994a" },
+        { name: "WATCH", color: "#bb6bd9" },
+        { name: "EVALUATE", color: "#9b51e0" },
+        { name: "HOLD", color: "#e09b96" },
+        { name: "RETIRE", color: "#c0392b" }
+      ],
+      entries: [
+        { label: "React", quadrant: 0, ring: 0, moved: 0, active: true },
+        { label: "Next.js", quadrant: 0, ring: 0, moved: 1, active: true },
+        { label: "Remix", quadrant: 0, ring: 1, moved: -1, active: true },
+        { label: "Astro", quadrant: 0, ring: 1, moved: 2, active: true },
+        { label: "Qwik", quadrant: 0, ring: 2, moved: 0, active: true },
+        { label: "SolidStart", quadrant: 0, ring: 2, moved: 1, active: true },
+        { label: "Fresh", quadrant: 0, ring: 3, moved: -1, active: true },
+        { label: "RedwoodJS", quadrant: 0, ring: 3, moved: 2, active: true },
+        { label: "SvelteKit", quadrant: 0, ring: 4, moved: 0, active: true },
+        { label: "Eleventy", quadrant: 0, ring: 4, moved: 1, active: true },
+        { label: "Stimulus", quadrant: 0, ring: 5, moved: -1, active: true },
+        { label: "Alpine.js", quadrant: 0, ring: 5, moved: 2, active: true },
+        { label: "Backbone", quadrant: 0, ring: 6, moved: 0, active: true },
+        { label: "AngularJS", quadrant: 0, ring: 6, moved: 1, active: true },
+        { label: "jQuery", quadrant: 0, ring: 7, moved: -1, active: true },
+        { label: "Prototype", quadrant: 0, ring: 7, moved: 2, active: true },
+
+        { label: "Node.js", quadrant: 1, ring: 0, moved: 0, active: true },
+        { label: "NestJS", quadrant: 1, ring: 0, moved: 1, active: true },
+        { label: "Deno", quadrant: 1, ring: 1, moved: -1, active: true },
+        { label: "Bun", quadrant: 1, ring: 1, moved: 2, active: true },
+        { label: "Spring Boot", quadrant: 1, ring: 2, moved: 0, active: true },
+        { label: "Micronaut", quadrant: 1, ring: 2, moved: 1, active: true },
+        { label: "Quarkus", quadrant: 1, ring: 3, moved: -1, active: true },
+        { label: "Helidon", quadrant: 1, ring: 3, moved: 2, active: true },
+        { label: "Lagom", quadrant: 1, ring: 4, moved: 0, active: true },
+        { label: "Akka", quadrant: 1, ring: 4, moved: 1, active: true },
+        { label: "Serverless Stack", quadrant: 1, ring: 5, moved: -1, active: true },
+        { label: "Temporal", quadrant: 1, ring: 5, moved: 2, active: true },
+        { label: "Struts", quadrant: 1, ring: 6, moved: 0, active: true },
+        { label: "ColdFusion", quadrant: 1, ring: 6, moved: 1, active: true },
+        { label: "SOAP Services", quadrant: 1, ring: 7, moved: -1, active: true },
+        { label: "CORBA", quadrant: 1, ring: 7, moved: 2, active: true },
+
+        { label: "PostgreSQL", quadrant: 2, ring: 0, moved: 0, active: true },
+        { label: "MySQL", quadrant: 2, ring: 0, moved: 1, active: true },
+        { label: "MongoDB", quadrant: 2, ring: 1, moved: -1, active: true },
+        { label: "Cassandra", quadrant: 2, ring: 1, moved: 2, active: true },
+        { label: "Snowflake", quadrant: 2, ring: 2, moved: 0, active: true },
+        { label: "BigQuery", quadrant: 2, ring: 2, moved: 1, active: true },
+        { label: "DuckDB", quadrant: 2, ring: 3, moved: -1, active: true },
+        { label: "ClickHouse", quadrant: 2, ring: 3, moved: 2, active: true },
+        { label: "Kafka", quadrant: 2, ring: 4, moved: 0, active: true },
+        { label: "Pulsar", quadrant: 2, ring: 4, moved: 1, active: true },
+        { label: "Debezium", quadrant: 2, ring: 5, moved: -1, active: true },
+        { label: "Flink", quadrant: 2, ring: 5, moved: 2, active: true },
+        { label: "Hadoop", quadrant: 2, ring: 6, moved: 0, active: true },
+        { label: "Teradata", quadrant: 2, ring: 6, moved: 1, active: true },
+        { label: "Tape Archive", quadrant: 2, ring: 7, moved: -1, active: true },
+        { label: "Mainframe DB", quadrant: 2, ring: 7, moved: 2, active: true },
+
+        { label: "Docker", quadrant: 3, ring: 0, moved: 0, active: true },
+        { label: "Kubernetes", quadrant: 3, ring: 0, moved: 1, active: true },
+        { label: "Nomad", quadrant: 3, ring: 1, moved: -1, active: true },
+        { label: "Fly.io", quadrant: 3, ring: 1, moved: 2, active: true },
+        { label: "Lambda", quadrant: 3, ring: 2, moved: 0, active: true },
+        { label: "Cloud Run", quadrant: 3, ring: 2, moved: 1, active: true },
+        { label: "WebAssembly", quadrant: 3, ring: 3, moved: -1, active: true },
+        { label: "Firecracker", quadrant: 3, ring: 3, moved: 2, active: true },
+        { label: "Vercel", quadrant: 3, ring: 4, moved: 0, active: true },
+        { label: "Netlify", quadrant: 3, ring: 4, moved: 1, active: true },
+        { label: "Crossplane", quadrant: 3, ring: 5, moved: -1, active: true },
+        { label: "Pulumi", quadrant: 3, ring: 5, moved: 2, active: true },
+        { label: "On-Prem VM", quadrant: 3, ring: 6, moved: 0, active: true },
+        { label: "Bare Metal", quadrant: 3, ring: 6, moved: 1, active: true },
+        { label: "Colocation", quadrant: 3, ring: 7, moved: -1, active: true },
+        { label: "Physical Servers", quadrant: 3, ring: 7, moved: 2, active: true }
+      ]
+    });
+  </script>
+
+</body>
+
+</html>
