@@ -3,13 +3,10 @@
 
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <meta name="description"
-    content="Zalando Tech Radar: a tool to visualize technology choices, inspire and support Engineering teams at Zalando to pick the best technologies for new projects">
+  <meta name="description" content="Debug view for 3 Quadrants × 4 Rings with geometric visualizations">
   <link rel="shortcut icon" href="https://www.zalando.de/favicon.ico">
-
-  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Demo: 3 Quadrants × 4 Rings</title>
+  <title>DEBUG: 3 Quadrants × 4 Rings</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="radar.js"></script>
   <link rel="stylesheet" href="radar.css">
@@ -21,6 +18,44 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+    }
+
+    .debug-header {
+      padding: 20px;
+      background: #fffbcc;
+      border-bottom: 3px solid #ffcc00;
+      margin: 0;
+    }
+
+    .debug-header h1 {
+      margin: 0 0 10px 0;
+      color: #cc6600;
+      font-size: 24px;
+    }
+
+    .debug-header p {
+      margin: 5px 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .debug-header ul {
+      margin: 10px 0 0 20px;
+      padding: 0;
+      color: #333;
+      font-size: 13px;
+    }
+
+    .debug-header li {
+      margin: 3px 0;
+    }
+
+    .debug-header code {
+      background: #fff;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      border: 1px solid #ddd;
     }
 
     nav.demo-links {
@@ -54,30 +89,33 @@
       color: #666;
       font-size: 12px;
     }
-
-    footer code {
-      background: #e8e8e8;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-family: 'Courier New', monospace;
-    }
   </style>
 </head>
 
 <body>
 
+  <div class="debug-header">
+    <h1>🔍 DEBUG MODE: 3 Quadrants × 4 Rings</h1>
+    <p><strong>Purpose:</strong> Visualize segment boundaries, collision radii, and geometric calculations</p>
+    <ul>
+      <li><strong style="color:#ff0000;">Red dashed arcs:</strong> Ring 0 (ADOPT) polar sector boundaries (with angular padding)</li>
+      <li><strong style="color:#00ffff;">Cyan dashed arcs:</strong> Other rings polar sector boundaries (with angular padding)</li>
+      <li><strong style="color:#ff00ff;">Magenta dashed rays:</strong> Quadrant boundaries (NO padding) - should align with grid lines</li>
+      <li><strong style="color:#ffff00;">Yellow dashed boxes:</strong> Cartesian bounding boxes (rectangular approximation)</li>
+      <li><strong style="color:#00ff00;">Green dotted circles:</strong> Collision radii for Ring 0 items</li>
+      <li><strong style="color:#0000ff;">Blue dotted circles:</strong> Collision radii for Ring 1+ items</li>
+      <li><strong>Red text labels:</strong> Segment info (items count, arc length in pixels)</li>
+    </ul>
+    <p><strong>Status:</strong> Fix #7 applied - items stay within segments! Collision circles now update with force simulation.</p>
+  </div>
+
   <nav class="demo-links">
-    <strong>Demo pages:</strong>
-    <a href="./index.html">Default</a>
-    <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
-    <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
-    <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
-    <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
-    <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
-    <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
-    <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
+    <strong>Debug pages:</strong>
+    <a href="./demo-3x4.html">Normal View</a>
+    <a href="./demo-3x4-debug.html">Debug View (current)</a>
     <span class="separator">|</span>
-    <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
+    <a href="./investigate-collision-issues.html">Collision Investigation</a>
+    <a href="./test-collision.html">Collision Tests</a>
   </nav>
 
   <div class="radar-container">
@@ -87,7 +125,8 @@
   <script>
     radar_visualization({
       svg_id: "radar",
-      title: "3 Quadrants × 4 Rings",
+      title: "3 Quadrants × 4 Rings (DEBUG MODE)",
+      debug_geometry: true, // ENABLE DEBUG VISUALIZATIONS
       quadrants: [
         { name: "Tools" },
         { name: "Techniques" },
@@ -185,7 +224,7 @@
   </script>
 
   <footer>
-    Build: <code>096ec85</code>
+    <strong>Debug Mode Active</strong> - Geometric boundaries and collision radii are visible
   </footer>
 
 </body>

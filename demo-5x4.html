@@ -16,8 +16,50 @@
   <style>
     body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
       background: white;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    nav.demo-links {
+      padding: 15px 20px;
+      background: #f8f8f8;
+      border-bottom: 1px solid #e0e0e0;
+      margin: 0;
+    }
+
+    .radar-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    #radar {
+      max-width: 100%;
+      height: auto;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px 20px;
+      margin: 0;
+      border-top: 1px solid #e0e0e0;
+      background: #f8f8f8;
+      color: #666;
+      font-size: 12px;
+    }
+
+    footer code {
+      background: #e8e8e8;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
     }
   </style>
 </head>
@@ -38,7 +80,9 @@
     <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
   </nav>
 
-  <svg id="radar"></svg>
+  <div class="radar-container">
+    <svg id="radar"></svg>
+  </div>
 
   <script>
     radar_visualization({
@@ -166,6 +210,10 @@
       ]
     });
   </script>
+
+  <footer>
+    Build: <code>096ec85</code>
+  </footer>
 
 </body>
 
