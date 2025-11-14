@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.14.0
+// Version: 0.15.0
 // License: MIT
 // Source: https://github.com/zalando/tech-radar
 
@@ -517,7 +517,7 @@ function radar_visualization(config) {
       y: outer_radius + 60
     };
   }
-  function computeLegendOffsets() {
+  function computeLegendOffsets2() {
     if (config.legend_offset) {
       return config.legend_offset;
     }
@@ -554,7 +554,7 @@ function radar_visualization(config) {
     assignOffsets(right_column, right_x);
     return offsets;
   }
-  config.legend_offset = computeLegendOffsets();
+  config.legend_offset = computeLegendOffsets2();
   const bounded_interval = boundedInterval;
   const bounded_ring = boundedRing;
   const bounded_box = boundedBox;
@@ -563,10 +563,10 @@ function radar_visualization(config) {
   }
   const entryProcessor = new EntryProcessor(config, quadrants, rings, random, random_between);
   entryProcessor.processEntries(config.entries);
-  function translate(x, y) {
+  function translate2(x, y) {
     return "translate(" + x + "," + y + ")";
   }
-  function viewbox(quadrant) {
+  function viewbox2(quadrant) {
     var outer_radius2 = rings[rings.length - 1].radius;
     var padding = 20;
     return [
@@ -580,7 +580,7 @@ function radar_visualization(config) {
   var scaled_width = config.width * config.scale;
   var scaled_height = config.height * config.scale;
   var svg = d3.select("svg#" + config.svg_id).style("background-color", config.colors.background).attr("width", scaled_width).attr("height", scaled_height);
-  function ensureLayoutStructure(svgSelection) {
+  function ensureLayoutStructure2(svgSelection) {
     var existing = svgSelection.node().closest(".radar-layout");
     if (existing) {
       return d3.select(existing);
@@ -602,7 +602,7 @@ function radar_visualization(config) {
     wrapper.appendChild(rightColumn);
     return d3.select(wrapper);
   }
-  var layoutWrapper = ensureLayoutStructure(svg);
+  var layoutWrapper = ensureLayoutStructure2(svg);
   var legendLeftColumn = layoutWrapper.select(".radar-legend-column.left");
   var legendRightColumn = layoutWrapper.select(".radar-legend-column.right");
   var layoutWidth = layoutWrapper.node().getBoundingClientRect().width || config.width;
@@ -614,11 +614,11 @@ function radar_visualization(config) {
   legendRightColumn.style("gap", config.legend_vertical_spacing + "px").style("width", targetLegendColumnWidth + "px");
   var radar = svg.append("g");
   if ("zoomed_quadrant" in config) {
-    svg.attr("viewBox", viewbox(config.zoomed_quadrant));
+    svg.attr("viewBox", viewbox2(config.zoomed_quadrant));
   } else {
     var radar_center_y = scaled_height / 2 + (title_height - footer_height) / 2;
     var radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
-    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
+    radar.attr("transform", translate2(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
   }
   var grid = radar.append("g");
   config.font_family = config.font_family || "Arial, Helvetica";
@@ -644,7 +644,7 @@ function radar_visualization(config) {
       grid.append("text").text(config.rings[i].name).attr("y", -labelRadius).attr("text-anchor", "middle").attr("dominant-baseline", "middle").style("fill", config.rings[i].color).style("opacity", 0.35).style("font-family", config.font_family).style("font-size", labelFontSize + "px").style("font-weight", "bold").style("pointer-events", "none").style("user-select", "none");
     }
   }
-  function legend_transform(quadrant, ring, legendColumnWidth, index = null, currentHeight = 0) {
+  function legend_transform2(quadrant, ring, legendColumnWidth, index = null, currentHeight = 0) {
     var num_columns = num_rings >= 7 ? 3 : 2;
     var rings_per_column = Math.ceil(num_rings / num_columns);
     var column = Math.floor(ring / rings_per_column);
@@ -655,22 +655,22 @@ function radar_visualization(config) {
     } else {
       dy = currentHeight + index * config.legend_line_height;
     }
-    return translate(config.legend_offset[quadrant].x + dx, config.legend_offset[quadrant].y + dy);
+    return translate2(config.legend_offset[quadrant].x + dx, config.legend_offset[quadrant].y + dy);
   }
   if (config.print_layout) {
-    radar.append("a").attr("href", config.repo_url).attr("transform", translate(config.title_offset.x, config.title_offset.y)).append("text").attr("class", "hover-underline").text(config.title).style("font-family", config.font_family).style("font-size", "30").style("font-weight", "bold");
-    radar.append("text").attr("transform", translate(config.title_offset.x, config.title_offset.y + 20)).text(config.date || "").style("font-family", config.font_family).style("font-size", "14").style("fill", "#999");
-    radar.append("text").attr("transform", translate(config.footer_offset.x, config.footer_offset.y)).text("▲ moved up     ▼ moved down     ★ new     ⬤ no change").attr("xml:space", "preserve").style("font-family", config.font_family).style("font-size", "12px");
+    radar.append("a").attr("href", config.repo_url).attr("transform", translate2(config.title_offset.x, config.title_offset.y)).append("text").attr("class", "hover-underline").text(config.title).style("font-family", config.font_family).style("font-size", "30").style("font-weight", "bold");
+    radar.append("text").attr("transform", translate2(config.title_offset.x, config.title_offset.y + 20)).text(config.date || "").style("font-family", config.font_family).style("font-size", "14").style("fill", "#999");
+    radar.append("text").attr("transform", translate2(config.footer_offset.x, config.footer_offset.y)).text("▲ moved up     ▼ moved down     ★ new     ⬤ no change").attr("xml:space", "preserve").style("font-family", config.font_family).style("font-size", "12px");
     if (config.print_layout) {
       legendLeftColumn.style("display", "flex");
       legendRightColumn.style("display", "flex");
-      renderLegendColumns();
+      renderLegendColumns2();
     } else {
       legendLeftColumn.style("display", "none").html("");
       legendRightColumn.style("display", "none").html("");
     }
   }
-  function renderLegendColumns() {
+  function renderLegendColumns2() {
     legendLeftColumn.html("");
     legendRightColumn.html("");
     var right_count = Math.ceil(num_quadrants / 2);
@@ -709,11 +709,11 @@ function radar_visualization(config) {
         }).attr("class", "legend-entry").text(function(d) {
           return d.id + ". " + d.label;
         }).on("mouseover", function(event, d) {
-          showBubble(d);
-          highlightLegendItem(d);
+          showBubble2(d);
+          highlightLegendItem2(d);
         }).on("mouseout", function(event, d) {
-          hideBubble(d);
-          unhighlightLegendItem(d);
+          hideBubble2(d);
+          unhighlightLegendItem2(d);
         });
       }
     }
@@ -723,40 +723,40 @@ function radar_visualization(config) {
   bubble.append("rect").attr("rx", 4).attr("ry", 4).style("fill", "#333");
   bubble.append("text").style("font-family", config.font_family).style("font-size", "10px").style("fill", "#fff");
   bubble.append("path").attr("d", "M 0,0 10,0 5,8 z").style("fill", "#333");
-  function showBubble(d) {
+  function showBubble2(d) {
     if (d.active || config.print_layout) {
       var tooltip = d3.select("#bubble text").text(d.label);
       var bbox = tooltip.node().getBBox();
       var x = d.rendered_x !== undefined ? d.rendered_x : d.x;
       var y = d.rendered_y !== undefined ? d.rendered_y : d.y;
-      d3.select("#bubble").attr("transform", translate(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
+      d3.select("#bubble").attr("transform", translate2(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
       d3.select("#bubble rect").attr("x", -5).attr("y", -bbox.height).attr("width", bbox.width + 10).attr("height", bbox.height + 4);
-      d3.select("#bubble path").attr("transform", translate(bbox.width / 2 - 5, 3));
+      d3.select("#bubble path").attr("transform", translate2(bbox.width / 2 - 5, 3));
     }
   }
-  function hideBubble(d) {
-    var bubble2 = d3.select("#bubble").attr("transform", translate(0, 0)).style("opacity", 0);
+  function hideBubble2(d) {
+    var bubble2 = d3.select("#bubble").attr("transform", translate2(0, 0)).style("opacity", 0);
   }
-  function highlightLegendItem(d) {
+  function highlightLegendItem2(d) {
     var legendItem = document.getElementById("legendItem" + d.id);
     if (legendItem) {
       legendItem.classList.add("legend-highlight");
     }
   }
-  function unhighlightLegendItem(d) {
+  function unhighlightLegendItem2(d) {
     var legendItem = document.getElementById("legendItem" + d.id);
     if (legendItem) {
       legendItem.classList.remove("legend-highlight");
     }
   }
   var blips = rink.selectAll(".blip").data(config.entries).enter().append("g").attr("class", "blip").attr("transform", function(d, i2) {
-    return legend_transform(d.quadrant, d.ring, config.legend_column_width, i2);
+    return legend_transform2(d.quadrant, d.ring, config.legend_column_width, i2);
   }).on("mouseover", function(event, d) {
-    showBubble(d);
-    highlightLegendItem(d);
+    showBubble2(d);
+    highlightLegendItem2(d);
   }).on("mouseout", function(event, d) {
-    hideBubble(d);
-    unhighlightLegendItem(d);
+    hideBubble2(d);
+    unhighlightLegendItem2(d);
   });
   blips.each(function(d) {
     var blip = d3.select(this);
@@ -787,7 +787,7 @@ function radar_visualization(config) {
       var clipped = d.segment.clip(d);
       d.rendered_x = clipped.x;
       d.rendered_y = clipped.y;
-      return translate(clipped.x, clipped.y);
+      return translate2(clipped.x, clipped.y);
     });
     if (config.debug_geometry) {
       d3.select("#debug-collision-radii").selectAll("circle").attr("cx", function(d) {
@@ -853,7 +853,7 @@ function radar_visualization(config) {
       var grid_angle = -Math.PI + i * 2 * Math.PI / num_quadrants;
       debugLayer.append("line").attr("x1", 0).attr("y1", 0).attr("x2", debug_outer_radius * Math.cos(grid_angle)).attr("y2", debug_outer_radius * Math.sin(grid_angle)).attr("stroke", "#ff00ff").attr("stroke-width", 2).attr("opacity", 0.6).attr("stroke-dasharray", "10,5");
     }
-    var debugLegend = debugLayer.append("g").attr("transform", translate(-debug_outer_radius + 10, -debug_outer_radius + 10));
+    var debugLegend = debugLayer.append("g").attr("transform", translate2(-debug_outer_radius + 10, -debug_outer_radius + 10));
     debugLegend.append("text").attr("x", 0).attr("y", 0).attr("font-size", "11px").attr("font-weight", "bold").attr("fill", "#000").text("DEBUG MODE");
     debugLegend.append("text").attr("x", 0).attr("y", 15).attr("font-size", "9px").attr("fill", "#ff0000").text("━━ Ring 0 polar sector");
     debugLegend.append("text").attr("x", 0).attr("y", 28).attr("font-size", "9px").attr("fill", "#00ffff").text("━━ Other rings polar sector");

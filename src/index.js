@@ -35,6 +35,27 @@ import { generateRings } from './geometry/ring-calculator.js';
 import { createSegment } from './geometry/segment-calculator.js';
 import { EntryProcessor } from './processing/entry-processor.js';
 
+// ============================================================================
+// Phase 3 Refactoring: Import extracted rendering modules
+// ============================================================================
+import {
+  translate,
+  viewbox,
+  computeLegendOffsets,
+  ensureLayoutStructure,
+  legend_transform
+} from './rendering/helpers.js';
+import { renderGrid, renderTitleAndFooter } from './rendering/grid-renderer.js';
+import { renderLegendColumns } from './rendering/legend-renderer.js';
+import {
+  createBubble,
+  showBubble,
+  hideBubble,
+  highlightLegendItem,
+  unhighlightLegendItem,
+  createBlipInteractions
+} from './rendering/interactions.js';
+
 function radar_visualization(config) {
 
   config.svg_id = config.svg || "radar";
