@@ -584,8 +584,20 @@ function radar_visualization(config) {
       var area_per_entry = segment_area / entries.length;
 
       // Collision radius based on available area (with safety factor)
-      var ideal_radius = Math.sqrt(area_per_entry / Math.PI) * 0.45;
-      var adaptive_radius = Math.max(10, Math.min(config.blip_collision_radius, ideal_radius));
+      // Increased safety factor from 0.45 to 0.55 for better spacing
+      var ideal_radius = Math.sqrt(area_per_entry / Math.PI) * 0.55;
+
+      // Allow adaptive radius to exceed default when there's room
+      // Use minimum of 12px to ensure reasonable spacing
+      var adaptive_radius = Math.max(12, ideal_radius);
+
+      // For very dense segments, ensure minimum spacing
+      if (entries.length > 10) {
+        adaptive_radius = Math.max(adaptive_radius, 13);
+      }
+      if (entries.length > 15) {
+        adaptive_radius = Math.max(adaptive_radius, 14);
+      }
 
       // Assign collision radius to each entry
       for (var i = 0; i < entries.length; i++) {
@@ -1017,16 +1029,17 @@ function radar_visualization(config) {
   // distribute blips, while avoiding collisions
   d3.forceSimulation()
     .nodes(config.entries)
-    .velocityDecay(0.25) // Increased for more stable movement
-    .alphaDecay(0.015) // Slower cooling for better convergence
-    .alphaMin(0.001) // Lower minimum to run longer
+    .velocityDecay(0.19) // Reduced for more movement freedom
+    .alphaDecay(0.01) // Slower cooling for better convergence
+    .alphaMin(0.0001) // Much lower minimum to run significantly longer
     .force("collision", d3.forceCollide()
       .radius(function(d) {
         return d.collision_radius || config.blip_collision_radius;
       })
-      .strength(0.9) // Increased collision strength
-      .iterations(3)) // Multiple iterations per tick for better collision resolution
-    .on("tick", ticked);
+      .strength(1.0) // Maximum collision strength for strict enforcement
+      .iterations(5)) // More iterations per tick for better collision resolution
+    .on("tick", ticked)
+    .tick(300); // Pre-run 300 iterations to stabilize before rendering
 
   function ringDescriptionsTable() {
     var table = d3.select("body").append("table")
