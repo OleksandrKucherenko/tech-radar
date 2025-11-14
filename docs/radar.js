@@ -46,6 +46,9 @@ function radar_visualization(config) {
   config.radar_horizontal_offset = ("radar_horizontal_offset" in config)
     ? config.radar_horizontal_offset
     : Math.round(config.legend_column_width * 0.25);
+  
+  // DEBUG MODE: Enable geometric visualizations
+  config.debug_geometry = ("debug_geometry" in config) ? config.debug_geometry : false;
 
   // Responsive sizing based on viewport and grid complexity
   var viewport_width = window.innerWidth || document.documentElement.clientWidth;
@@ -360,8 +363,11 @@ function radar_visualization(config) {
       angle_max = max_angle;
     }
 
-    var cartesian_min = quadrant_bounds[quadrant].min;
-    var cartesian_max = quadrant_bounds[quadrant].max;
+    // FIX #7: Calculate bounding box PER SEGMENT, not per quadrant
+    // Use segment's actual angles and outer_radius, not the full quadrant
+    var segment_bounds = computeQuadrantBounds(angle_min, angle_max, outer_radius);
+    var cartesian_min = segment_bounds.min;
+    var cartesian_max = segment_bounds.max;
 
     function clampPoint(point) {
       var c = bounded_box(point, cartesian_min, cartesian_max);
@@ -371,22 +377,28 @@ function radar_visualization(config) {
       return cartesian(p);
     }
 
-    function clampAndStore(d) {
+    function clampAndAssign(d) {
       var clipped = clampPoint({ x: d.x, y: d.y });
-      // Store the rendered (clamped) position for stable tooltip positioning
-      d.rendered_x = clipped.x;
-      d.rendered_y = clipped.y;
+      d.x = clipped.x;
+      d.y = clipped.y;
       return clipped;
     }
 
     return {
       clipx: function(d) {
-        var clipped = clampAndStore(d);
+        var clipped = clampAndAssign(d);
         return clipped.x;
       },
       clipy: function(d) {
-        var clipped = clampAndStore(d);
+        var clipped = clampAndAssign(d);
         return clipped.y;
+      },
+      // FIX #5: Single clip operation that doesn't double-clip
+      clip: function(d) {
+        var clipped = clampPoint({ x: d.x, y: d.y });
+        d.x = clipped.x;
+        d.y = clipped.y;
+        return clipped;
       },
       random: function() {
         return cartesian({
@@ -428,7 +440,10 @@ function radar_visualization(config) {
     var count = entries.length;
 
     // Calculate segment dimensions in pixels (approximate)
-    var segment_arc_length = angle_range * ring_center;
+    // FIX #1: Use inner_radius for ring 0 to avoid overestimating angular capacity
+    // Ring 0 has smallest inner arc, using center radius overestimates by ~74%
+    var effective_radius = (segmentInfo.ring === 0) ? inner_radius : ring_center;
+    var segment_arc_length = angle_range * effective_radius;
     var segment_radial_depth = radius_range;
 
     // Estimate item size (based on collision radius)
@@ -467,8 +482,10 @@ function radar_visualization(config) {
         angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.2));
         radial_divisions = Math.ceil(count / angular_divisions);
       } else if (aspect_ratio < 0.5) {
-        // Much taller than wide - prefer radial spread but maintain minimum angular
-        angular_divisions = Math.min(max_angular_items, Math.max(3, Math.floor(base * 0.7)));
+        // FIX #2: Much taller than wide - but don't over-favor radial in narrow segments
+        // For ring 0 with many quadrants, radial depth is limited, so balance better
+        var radial_bias = (segmentInfo.ring === 0) ? 0.85 : 0.7;
+        angular_divisions = Math.min(max_angular_items, Math.max(3, Math.floor(base * radial_bias)));
         radial_divisions = Math.ceil(count / angular_divisions);
       } else {
         // Moderately tall or square - balanced approach
@@ -489,9 +506,10 @@ function radar_visualization(config) {
       var angular_index = i % angular_divisions;
       var radial_index = Math.floor(i / angular_divisions);
 
-      // P1 FIX: Clamp indices when entries exceed grid capacity
-      // This prevents radial_fraction > 1.0 which causes boundary stacking
-      if (radial_index >= radial_divisions) {
+      // FIX #3: Better handling when entries exceed grid capacity
+      // Instead of simple wrapping, detect overcrowding for collision radius adjustment
+      var is_overcrowded = radial_index >= radial_divisions;
+      if (is_overcrowded) {
         // Wrap excess entries back into the grid using modulo
         var total_cells = angular_divisions * radial_divisions;
         var cell_index = i % total_cells;
@@ -608,6 +626,12 @@ function radar_visualization(config) {
       }
       if (entries.length > 15) {
         adaptive_radius = Math.max(adaptive_radius, 14);
+      }
+
+      // FIX #4: Reduce collision radius for narrow segments (many quadrants in ring 0)
+      // Narrow segments with small inner arc need tighter packing
+      if (ring === 0 && num_quadrants >= 6) {
+        adaptive_radius = Math.max(10, adaptive_radius * 0.9);
       }
 
       // Assign collision radius to each entry
@@ -1034,27 +1058,193 @@ function radar_visualization(config) {
   });
 
   // make sure that blips stay inside their segment
+  // FIX #5: Use single clip() instead of clipx/clipy to avoid double-clipping
   function ticked() {
     blips.attr("transform", function(d) {
-      return translate(d.segment.clipx(d), d.segment.clipy(d));
+      var clipped = d.segment.clip(d);
+      return translate(clipped.x, clipped.y);
     })
   }
 
   // distribute blips, while avoiding collisions
+  // FIX #6: Enhanced force simulation with better convergence
   d3.forceSimulation()
     .nodes(config.entries)
-    .velocityDecay(0.19) // Reduced for more movement freedom
-    .alphaDecay(0.01) // Slower cooling for better convergence
-    .alphaMin(0.0001) // Much lower minimum to run significantly longer
+    .velocityDecay(0.15) // More movement freedom for better spreading
+    .alphaDecay(0.008) // Slower cooling for longer convergence time
+    .alphaMin(0.00005) // Lower minimum for thorough settlement
     .force("collision", d3.forceCollide()
       .radius(function(d) {
         return d.collision_radius || config.blip_collision_radius;
       })
       .strength(1.0) // Maximum collision strength for strict enforcement
-      .iterations(5)) // More iterations per tick for better collision resolution
+      .iterations(6)) // More iterations per tick for better collision resolution
     .on("tick", ticked)
-    .tick(300) // Pre-run 300 iterations to stabilize before rendering
-    .stop(); // Stop simulation to prevent ongoing position updates during user interaction
+    .tick(400); // Increased pre-run iterations for better stabilization
+
+  // DEBUG VISUALIZATIONS: Show segment boundaries, grids, and collision radii
+  if (config.debug_geometry) {
+    var debugLayer = radar.append("g")
+      .attr("id", "debug-layer");
+
+    // Get outer radius for coordinate system
+    var debug_outer_radius = rings[rings.length - 1].radius;
+
+    // Draw segment boundaries for each quadrant/ring combination
+    for (let q = 0; q < num_quadrants; q++) {
+      for (let r = 0; r < num_rings; r++) {
+        var seg_base_inner = r === 0 ? 30 : rings[r - 1].radius;
+        var seg_base_outer = rings[r].radius;
+        var seg_inner = seg_base_inner + config.segment_radial_padding;
+        var seg_outer = seg_base_outer - config.segment_radial_padding;
+        
+        // FIX: Use same angular padding calculation as segment() function
+        // segment_angular_padding is in PIXELS, convert to radians based on ring_center
+        var seg_ring_center = (seg_inner + seg_outer) / 2;
+        var seg_angular_padding = config.segment_angular_padding / Math.max(seg_ring_center, 1);
+        
+        var min_angle = quadrants[q].radial_min * Math.PI;
+        var max_angle = quadrants[q].radial_max * Math.PI;
+        var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
+        seg_angular_padding = Math.min(seg_angular_padding, angular_limit);
+        
+        var angle_min = min_angle + seg_angular_padding;
+        var angle_max = max_angle - seg_angular_padding;
+        if (angle_max <= angle_min) {
+          angle_min = min_angle;
+          angle_max = max_angle;
+        }
+        
+        // Draw polar sector boundary (actual segment shape)
+        var arcPath = d3.arc()
+          .innerRadius(seg_inner)
+          .outerRadius(seg_outer)
+          .startAngle(angle_min)
+          .endAngle(angle_max);
+        
+        debugLayer.append("path")
+          .attr("d", arcPath)
+          .attr("fill", "none")
+          .attr("stroke", r === 0 ? "#ff0000" : "#00ffff")
+          .attr("stroke-width", r === 0 ? 2 : 1)
+          .attr("stroke-dasharray", "5,5")
+          .attr("opacity", 0.5);
+        
+        // Draw Cartesian bounding box (rectangular approximation)
+        var bounds = computeQuadrantBounds(
+          quadrants[q].radial_min * Math.PI,
+          quadrants[q].radial_max * Math.PI,
+          seg_outer
+        );
+        
+        debugLayer.append("rect")
+          .attr("x", bounds.min.x)
+          .attr("y", bounds.min.y)
+          .attr("width", bounds.max.x - bounds.min.x)
+          .attr("height", bounds.max.y - bounds.min.y)
+          .attr("fill", "none")
+          .attr("stroke", "#ffff00")
+          .attr("stroke-width", 1)
+          .attr("stroke-dasharray", "3,3")
+          .attr("opacity", 0.3);
+        
+        // Add text labels for segment info (Ring 0 only for clarity)
+        if (r === 0) {
+          var mid_angle = (angle_min + angle_max) / 2;
+          var label_radius = (seg_inner + seg_outer) / 2;
+          var label_x = Math.cos(mid_angle) * label_radius;
+          var label_y = Math.sin(mid_angle) * label_radius;
+          
+          var entries_count = segmented[q][r].length;
+          var arc_length = (angle_max - angle_min) * seg_inner;
+          
+          debugLayer.append("text")
+            .attr("x", label_x)
+            .attr("y", label_y)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "10px")
+            .attr("fill", "#ff0000")
+            .attr("font-weight", "bold")
+            .text(`Q${q}R${r}: ${entries_count} items, arc=${arc_length.toFixed(0)}px`);
+        }
+      }
+    }
+    
+    // Draw collision radius circles for each blip
+    debugLayer.append("g")
+      .attr("id", "debug-collision-radii")
+      .selectAll("circle")
+      .data(config.entries)
+      .enter()
+      .append("circle")
+      .attr("cx", function(d) { return d.x; })
+      .attr("cy", function(d) { return d.y; })
+      .attr("r", function(d) { return d.collision_radius || config.blip_collision_radius; })
+      .attr("fill", "none")
+      .attr("stroke", function(d) { return d.ring === 0 ? "#00ff00" : "#0000ff"; })
+      .attr("stroke-width", 1)
+      .attr("stroke-dasharray", "2,2")
+      .attr("opacity", 0.4);
+    
+    // Draw coordinate system axes
+    debugLayer.append("line")
+      .attr("x1", -debug_outer_radius)
+      .attr("y1", 0)
+      .attr("x2", debug_outer_radius)
+      .attr("y2", 0)
+      .attr("stroke", "#666")
+      .attr("stroke-width", 0.5)
+      .attr("opacity", 0.3);
+    
+    debugLayer.append("line")
+      .attr("x1", 0)
+      .attr("y1", -debug_outer_radius)
+      .attr("x2", 0)
+      .attr("y2", debug_outer_radius)
+      .attr("stroke", "#666")
+      .attr("stroke-width", 0.5)
+      .attr("opacity", 0.3);
+    
+    // Add legend for debug colors
+    var debugLegend = debugLayer.append("g")
+      .attr("transform", translate(-debug_outer_radius + 10, -debug_outer_radius + 10));
+    
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("font-size", "11px")
+      .attr("font-weight", "bold")
+      .attr("fill", "#000")
+      .text("DEBUG MODE");
+    
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 15)
+      .attr("font-size", "9px")
+      .attr("fill", "#ff0000")
+      .text("━━ Ring 0 polar sector");
+    
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 28)
+      .attr("font-size", "9px")
+      .attr("fill", "#00ffff")
+      .text("━━ Other rings polar sector");
+    
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 41)
+      .attr("font-size", "9px")
+      .attr("fill", "#ffff00")
+      .text("━━ Cartesian bounding box");
+    
+    debugLegend.append("text")
+      .attr("x", 0)
+      .attr("y", 54)
+      .attr("font-size", "9px")
+      .attr("fill", "#00ff00")
+      .text("○ Collision radius (Ring 0)");
+  }
 
   function ringDescriptionsTable() {
     var table = d3.select("body").append("table")
