@@ -371,20 +371,21 @@ function radar_visualization(config) {
       return cartesian(p);
     }
 
-    function clampAndAssign(d) {
+    function clampAndStore(d) {
       var clipped = clampPoint({ x: d.x, y: d.y });
-      d.x = clipped.x;
-      d.y = clipped.y;
+      // Store the rendered (clamped) position for stable tooltip positioning
+      d.rendered_x = clipped.x;
+      d.rendered_y = clipped.y;
       return clipped;
     }
 
     return {
       clipx: function(d) {
-        var clipped = clampAndAssign(d);
+        var clipped = clampAndStore(d);
         return clipped.x;
       },
       clipy: function(d) {
-        var clipped = clampAndAssign(d);
+        var clipped = clampAndStore(d);
         return clipped.y;
       },
       random: function() {
@@ -938,8 +939,11 @@ function radar_visualization(config) {
       var tooltip = d3.select("#bubble text")
         .text(d.label);
       var bbox = tooltip.node().getBBox();
+      // Use rendered (clamped) position for stable tooltip positioning
+      var x = d.rendered_x !== undefined ? d.rendered_x : d.x;
+      var y = d.rendered_y !== undefined ? d.rendered_y : d.y;
       d3.select("#bubble")
-        .attr("transform", translate(d.x - bbox.width / 2, d.y - 16))
+        .attr("transform", translate(x - bbox.width / 2, y - 16))
         .style("opacity", 0.8);
       d3.select("#bubble rect")
         .attr("x", -5)
@@ -1049,7 +1053,8 @@ function radar_visualization(config) {
       .strength(1.0) // Maximum collision strength for strict enforcement
       .iterations(5)) // More iterations per tick for better collision resolution
     .on("tick", ticked)
-    .tick(300); // Pre-run 300 iterations to stabilize before rendering
+    .tick(300) // Pre-run 300 iterations to stabilize before rendering
+    .stop(); // Stop simulation to prevent ongoing position updates during user interaction
 
   function ringDescriptionsTable() {
     var table = d3.select("body").append("table")
