@@ -10,6 +10,9 @@ coverage/
 *.lcov
 test-results.xml
 
+# Build artifacts
+temp-build/
+
 # AI Coding
 .mcp.json
 CLAUDE.md
