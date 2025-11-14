@@ -256,84 +256,14 @@ function radar_visualization(config) {
     radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
   }
 
-  var grid = radar.append("g");
-
   // define default font-family
   config.font_family = config.font_family || "Arial, Helvetica";
 
-  // draw grid lines - N radial lines for N quadrants
-  for (var i = 0; i < num_quadrants; i++) {
-    var angle = -Math.PI + (i * 2 * Math.PI / num_quadrants);
-    grid.append("line")
-      .attr("x1", 0)
-      .attr("y1", 0)
-      .attr("x2", outer_radius * Math.cos(angle))
-      .attr("y2", outer_radius * Math.sin(angle))
-      .attr("class", "quadrant-line quadrant-line-" + i)
-      .style("stroke", config.colors.grid)
-      .style("stroke-width", 1.5)
-      .style("stroke-opacity", 0.3);
-  }
-
-  // background color. Usage `.attr("filter", "url(#solid)")`
-  // SOURCE: https://stackoverflow.com/a/31013492/2609980
-  var defs = grid.append("defs");
-  var filter = defs.append("filter")
-    .attr("x", 0)
-    .attr("y", 0)
-    .attr("width", 1)
-    .attr("height", 1)
-    .attr("id", "solid");
-  filter.append("feFlood")
-    .attr("flood-color", "rgb(0, 0, 0, 0.8)");
-  filter.append("feComposite")
-    .attr("in", "SourceGraphic");
-
-  // draw rings
-  for (var i = 0; i < rings.length; i++) {
-    var outer = rings[i].radius;
-    var inner = i === 0 ? 0 : rings[i - 1].radius;
-    var thickness = Math.max(outer - inner, 1);
-    var labelRadius = outer - (thickness / 2);
-    var labelFontSize = Math.max(12, Math.min(32, thickness * 0.45));
-
-    // Add subtle alternating background fills for better visual separation
-    if (i > 0) {
-      grid.append("circle")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("r", outer)
-        .attr("class", "ring ring-" + i)
-        .style("fill", i % 2 === 0 ? "rgba(0, 0, 0, 0.01)" : "rgba(0, 0, 0, 0.015)")
-        .style("stroke", "none")
-        .style("pointer-events", "none");
-    }
-
-    // Draw ring boundary with enhanced styling
-    grid.append("circle")
-      .attr("cx", 0)
-      .attr("cy", 0)
-      .attr("r", outer)
-      .attr("class", "ring-border ring-border-" + i)
-      .style("fill", "none")
-      .style("stroke", config.colors.grid)
-      .style("stroke-width", i === 0 ? 2 : 1)
-      .style("stroke-opacity", i === 0 ? 0.4 : 0.25);
-    if (config.print_layout) {
-      grid.append("text")
-        .text(config.rings[i].name)
-        .attr("y", -labelRadius)
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .style("fill", config.rings[i].color)
-        .style("opacity", 0.35)
-        .style("font-family", config.font_family)
-        .style("font-size", labelFontSize + "px")
-        .style("font-weight", "bold")
-        .style("pointer-events", "none")
-        .style("user-select", "none");
-    }
-  }
+  // ============================================================================
+  // Phase 3 Refactoring: Grid rendering now uses imported module
+  // ============================================================================
+  var grid = radar.append("g");
+  renderGrid(grid, config, quadrants, rings, outer_radius);
 
   function legend_transform(quadrant, ring, legendColumnWidth, index = null, currentHeight = 0) {
     // Determine number of columns based on ring count
@@ -361,137 +291,47 @@ function radar_visualization(config) {
     );
   }
 
-  // draw title and legend (only in print layout)
-  if (config.print_layout) {
-    // title
-    radar.append("a")
-      .attr("href", config.repo_url)
-      .attr("transform", translate(config.title_offset.x, config.title_offset.y))
-      .append("text")
-      .attr("class", "hover-underline")  // add class for hover effect
-      .text(config.title)
-      .style("font-family", config.font_family)
-      .style("font-size", "30")
-      .style("font-weight", "bold")
-
-    // date
-    radar
-      .append("text")
-      .attr("transform", translate(config.title_offset.x, config.title_offset.y + 20))
-      .text(config.date || "")
-      .style("font-family", config.font_family)
-      .style("font-size", "14")
-      .style("fill", "#999")
-
-    // footer
-    radar.append("text")
-      .attr("transform", translate(config.footer_offset.x, config.footer_offset.y))
-      .text("▲ moved up     ▼ moved down     ★ new     ⬤ no change")
-      .attr("xml:space", "preserve")
-      .style("font-family", config.font_family)
-      .style("font-size", "12px");
-
-    if (config.print_layout) {
-      legendLeftColumn.style('display', 'flex');
-      legendRightColumn.style('display', 'flex');
-      renderLegendColumns();
-    } else {
-      legendLeftColumn.style('display', 'none').html('');
-      legendRightColumn.style('display', 'none').html('');
-    }
+  // ============================================================================
+  // Phase 3 Refactoring: Title/footer rendering now uses imported module
+  // ============================================================================
+  // Set default footer text if not provided
+  if (!config.footer) {
+    config.footer = "▲ moved up     ▼ moved down     ★ new     ⬤ no change";
   }
+  renderTitleAndFooter(radar, config);
 
-  function renderLegendColumns() {
-    legendLeftColumn.html('');
-    legendRightColumn.html('');
-
-    // Calculate which quadrants go in which column for clockwise ordering
-    // Right column: clockwise from position (num_quadrants - 2)
-    // Left column: remaining quadrants in reverse order (counter-clockwise visually)
-    // This ensures legends are visually close to their radar sectors
-    var right_count = Math.ceil(num_quadrants / 2);
-    var left_count = Math.floor(num_quadrants / 2);
-    var right_start = num_quadrants - 2;
-
-    var leftQuadrants = [];
-    var rightQuadrants = [];
-
-    // Fill right column quadrants (clockwise from right_start)
-    for (var i = 0; i < right_count; i++) {
-      rightQuadrants.push((right_start + i) % num_quadrants);
-    }
-
-    // Fill left column quadrants (backward from right_start - 1)
-    for (var i = 0; i < left_count; i++) {
-      leftQuadrants.push((right_start - 1 - i + num_quadrants) % num_quadrants);
-    }
-
-    function targetColumn(quadrant) {
-      return leftQuadrants.includes(quadrant) ? legendLeftColumn : legendRightColumn;
-    }
-
-    for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
-      var column = targetColumn(quadrant);
-      var section = column.append('div')
-        .attr('class', 'legend-section')
-        .style('--legend-columns', legendSectionColumns);
-      section.append('div')
-        .attr('class', 'legend-quadrant-name')
-        .text(config.quadrants[quadrant].name);
-
-      var ringsContainer = section.append('div').attr('class', 'legend-rings');
-
-      for (let ring = 0; ring < num_rings; ring++) {
-        var entriesInRing = segmented[quadrant][ring];
-        if (!entriesInRing.length) {
-          continue;
-        }
-
-        var ringBlock = ringsContainer.append('div').attr('class', 'legend-ring');
-        ringBlock.append('div')
-          .attr('class', 'legend-ring-name')
-          .style('color', config.rings[ring].color)
-          .text(config.rings[ring].name);
-
-        var entriesList = ringBlock.append('div').attr('class', 'legend-ring-entries');
-        entriesList.selectAll('a')
-          .data(entriesInRing)
-          .enter()
-          .append('a')
-          .attr('href', function (d) { return d.link ? d.link : '#'; })
-          .attr('target', function (d) { return (d.link && config.links_in_new_tabs) ? '_blank' : null; })
-          .attr('id', function (d) { return 'legendItem' + d.id; })
-          .attr('class', 'legend-entry')
-          .text(function (d) { return d.id + '. ' + d.label; })
-          .on('mouseover', function (event, d) { showBubble(d, config); highlightLegendItem(d); })
-          .on('mouseout', function (event, d) { hideBubble(); unhighlightLegendItem(d); });
-      }
-    }
+  // ============================================================================
+  // Phase 3 Refactoring: Legend rendering now uses imported module
+  // ============================================================================
+  // Show/hide legend columns based on print layout
+  if (config.print_layout) {
+    legendLeftColumn.style('display', 'flex');
+    legendRightColumn.style('display', 'flex');
+    renderLegendColumns(
+      legendLeftColumn,
+      legendRightColumn,
+      segmented,
+      config,
+      num_quadrants,
+      num_rings,
+      showBubble,
+      hideBubble,
+      highlightLegendItem,
+      unhighlightLegendItem
+    );
+  } else {
+    legendLeftColumn.style('display', 'none').html('');
+    legendRightColumn.style('display', 'none').html('');
   }
 
   // layer for entries
   var rink = radar.append("g")
     .attr("id", "rink");
 
-  // rollover bubble (on top of everything else)
-  var bubble = radar.append("g")
-    .attr("id", "bubble")
-    .attr("x", 0)
-    .attr("y", 0)
-    .style("opacity", 0)
-    .style("pointer-events", "none")
-    .style("user-select", "none");
-  bubble.append("rect")
-    .attr("rx", 4)
-    .attr("ry", 4)
-    .style("fill", "#333");
-  bubble.append("text")
-    .style("font-family", config.font_family)
-    .style("font-size", "10px")
-    .style("fill", "#fff");
-  bubble.append("path")
-    .attr("d", "M 0,0 10,0 5,8 z")
-    .style("fill", "#333");
+  // ============================================================================
+  // Phase 3 Refactoring: Bubble creation now uses imported module
+  // ============================================================================
+  var bubble = createBubble(radar, config.font_family);
 
   // ============================================================================
   // Phase 3 Refactoring: Interaction functions now imported from rendering/interactions.js
