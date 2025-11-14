@@ -1062,6 +1062,9 @@ function radar_visualization(config) {
   function ticked() {
     blips.attr("transform", function (d) {
       var clipped = d.segment.clip(d);
+      // Store rendered position for stable tooltip positioning and to prevent jumping on hover
+      d.rendered_x = clipped.x;
+      d.rendered_y = clipped.y;
       return translate(clipped.x, clipped.y);
     });
 
