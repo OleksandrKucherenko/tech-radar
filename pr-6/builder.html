@@ -24,58 +24,61 @@
         .header {
             background: #fff;
             border-bottom: 2px solid #1976d2;
-            padding: 1.5rem 2rem;
+            padding: 1rem 1.5rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .header h1 {
             color: #1976d2;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.6rem;
+            margin-bottom: 0.3rem;
         }
 
         .header p {
             color: #666;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         .container {
             display: grid;
-            grid-template-columns: 400px 1fr;
-            gap: 2rem;
-            padding: 2rem;
-            max-width: 1800px;
-            margin: 0 auto;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            height: calc(100vh - 100px);
         }
 
-        .sidebar {
-            background: #fff;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            height: fit-content;
-            max-height: calc(100vh - 180px);
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
             overflow-y: auto;
         }
 
-        .main-content {
+        .center-column {
             display: flex;
             flex-direction: column;
-            gap: 2rem;
+            overflow-y: auto;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
         }
 
         .section {
             background: #fff;
             border-radius: 8px;
-            padding: 1.5rem;
+            padding: 1.2rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .section h2 {
             color: #1976d2;
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.4rem;
             border-bottom: 2px solid #e0e0e0;
         }
 
@@ -327,9 +330,22 @@
             color: #999;
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1400px) {
+            .container {
+                grid-template-columns: 280px 1fr 340px;
+            }
+        }
+
+        @media (max-width: 1024px) {
             .container {
                 grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .left-column,
+            .center-column,
+            .right-column {
+                overflow-y: visible;
             }
         }
     </style>
@@ -341,7 +357,8 @@
     </div>
 
     <div class="container">
-        <div class="sidebar">
+        <!-- Left Column: Configuration & Share/Export -->
+        <div class="left-column">
             <div class="section">
                 <h2>Configuration</h2>
 
@@ -377,6 +394,59 @@
                 </div>
             </div>
 
+            <div class="section">
+                <h2>Share & Export</h2>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary btn-full" id="shareUrlBtn">Copy Share URL</button>
+                </div>
+
+                <div class="btn-group" style="margin-top: 0.5rem;">
+                    <button class="btn btn-success btn-full" id="exportCodeBtn">Generate Embed Code</button>
+                </div>
+
+                <div class="btn-group" style="margin-top: 0.5rem;">
+                    <button class="btn btn-secondary btn-full" id="exportPngBtn">Download as PNG</button>
+                </div>
+
+                <div class="btn-group" style="margin-top: 0.5rem;">
+                    <button class="btn btn-secondary btn-full" id="exportPdfBtn">Download as PDF</button>
+                </div>
+
+                <div class="btn-group" style="margin-top: 0.5rem;">
+                    <button class="btn btn-secondary btn-full" id="exportJsonBtn">Export JSON Config</button>
+                </div>
+
+                <div class="btn-group" style="margin-top: 0.5rem;">
+                    <button class="btn btn-secondary btn-full" id="importJsonBtn">Import JSON Config</button>
+                </div>
+
+                <div id="embedCodeSection" style="display: none; margin-top: 1rem;">
+                    <h3 style="margin-bottom: 0.5rem;">Embed Code</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.8rem;">
+                        Copy and paste this code into your web page or Confluence page.
+                        For Confluence, use the "HTML Macro" or paste in source editor mode.
+                    </p>
+                    <div style="position: relative;">
+                        <button class="copy-btn" id="copyCodeBtn">Copy</button>
+                        <div class="code-block" id="embedCode"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Column: Preview -->
+        <div class="center-column">
+            <div class="section" style="flex: 1; display: flex; flex-direction: column;">
+                <h2>Preview</h2>
+                <div class="radar-container" id="radarContainer" style="flex: 1;">
+                    <svg id="radar"></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Add Entry & Entries List -->
+        <div class="right-column">
             <div class="section">
                 <h2>Add Entry</h2>
 
@@ -436,46 +506,6 @@
                 <h2>Entries (<span id="entryCount">0</span>)</h2>
                 <div class="entries-list" id="entriesList">
                     <div class="empty-state">No entries yet. Add your first technology!</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="section">
-                <h2>Preview</h2>
-                <div class="radar-container" id="radarContainer">
-                    <svg id="radar"></svg>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Share & Export</h2>
-
-                <div class="btn-group">
-                    <button class="btn btn-primary" id="shareUrlBtn">Copy Share URL</button>
-                    <button class="btn btn-success" id="exportCodeBtn">Generate Embed Code</button>
-                </div>
-
-                <div class="btn-group" style="margin-top: 0.5rem;">
-                    <button class="btn btn-secondary" id="exportPngBtn">Download as PNG</button>
-                    <button class="btn btn-secondary" id="exportPdfBtn">Download as PDF</button>
-                </div>
-
-                <div class="btn-group" style="margin-top: 0.5rem;">
-                    <button class="btn btn-secondary" id="exportJsonBtn">Export JSON Config</button>
-                    <button class="btn btn-secondary" id="importJsonBtn">Import JSON Config</button>
-                </div>
-
-                <div id="embedCodeSection" style="display: none; margin-top: 1rem;">
-                    <h3 style="margin-bottom: 0.5rem;">Embed Code</h3>
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        Copy and paste this code into your web page or Confluence page.
-                        For Confluence, use the "HTML Macro" or paste in source editor mode.
-                    </p>
-                    <div style="position: relative;">
-                        <button class="copy-btn" id="copyCodeBtn">Copy</button>
-                        <div class="code-block" id="embedCode"></div>
-                    </div>
                 </div>
             </div>
         </div>
