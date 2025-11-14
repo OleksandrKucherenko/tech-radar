@@ -38,15 +38,9 @@ jobs:
           else
             TAG_NAME="${GITHUB_REF#refs/tags/}"
           fi
-
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
-
-          # Remove 'v' prefix for version number
           VERSION="${TAG_NAME#v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-          echo "📦 Tag: $TAG_NAME"
-          echo "🔢 Version: $VERSION"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -58,175 +52,40 @@ jobs:
 
       - name: Validate semver format
         id: validate
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          TAG_NAME="${{ steps.version.outputs.tag }}"
-
-          # Use semver package for accurate validation
-          VALIDATION_RESULT=$(node -e "
-            const semver = require('semver');
-            const version = '$VERSION';
-            const isValid = semver.valid(version);
-
-            if (isValid) {
-              console.log('valid');
-              process.exit(0);
-            } else {
-              console.log('invalid');
-              process.exit(0);
-            }
-          ")
-
-          if [ "$VALIDATION_RESULT" = "invalid" ]; then
-            echo "ℹ️  Tag '$TAG_NAME' is not a valid semver version, skipping release"
-            echo "   Only tags matching semver format will trigger releases"
-            echo "   Examples: v0.14.1, v1.0.0-alpha.2, v0.20.0-beta+meta.1"
-            echo ""
-            echo "## ⏭️ Skipped Release" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Tag \`$TAG_NAME\` is not a valid semver version." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Only tags matching semver format will trigger releases." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Valid examples:**" >> $GITHUB_STEP_SUMMARY
-            echo "- \`v0.14.1\`" >> $GITHUB_STEP_SUMMARY
-            echo "- \`v1.0.0-alpha.2\`" >> $GITHUB_STEP_SUMMARY
-            echo "- \`v0.20.0-beta+meta.1\`" >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
-
-          echo "✅ Version format is valid semver"
-          echo "is_valid=true" >> $GITHUB_OUTPUT
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG_NAME: ${{ steps.version.outputs.tag }}
+        run: ./scripts/release.sh validate
 
       - name: Build minified release
         if: steps.validate.outputs.is_valid == 'true'
         env:
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          echo "🔨 Building radar.js version $RELEASE_VERSION..."
-          bun run build
-
-          # Verify output file exists
-          RELEASE_FILE="docs/release/radar-$RELEASE_VERSION.js"
-          if [ ! -f "$RELEASE_FILE" ]; then
-            echo "❌ Error: Release file not found at $RELEASE_FILE"
-            exit 1
-          fi
-
-          FILE_SIZE=$(stat -f%z "$RELEASE_FILE" 2>/dev/null || stat -c%s "$RELEASE_FILE")
-          echo "✅ Built $RELEASE_FILE (${FILE_SIZE} bytes)"
-          echo "release_file=$RELEASE_FILE" >> $GITHUB_ENV
+          VERSION: ${{ steps.version.outputs.version }}
+        run: ./scripts/release.sh build
 
       - name: Delete existing release if tag was reassigned
         if: steps.validate.outputs.is_valid == 'true'
-        run: |
-          TAG_NAME="${{ steps.version.outputs.tag }}"
-
-          # Check if release exists
-          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            echo "⚠️  Release $TAG_NAME already exists, deleting it..."
-            gh release delete "$TAG_NAME" --yes --cleanup-tag 2>/dev/null || true
-            echo "✅ Existing release deleted"
-          else
-            echo "ℹ️  No existing release found for $TAG_NAME"
-          fi
         env:
+          TAG_NAME: ${{ steps.version.outputs.tag }}
           GH_TOKEN: ${{ github.token }}
+        run: ./scripts/release.sh cleanup
 
       - name: Create GitHub Release
         if: steps.validate.outputs.is_valid == 'true'
         id: create_release
-        run: |
-          TAG_NAME="${{ steps.version.outputs.tag }}"
-          VERSION="${{ steps.version.outputs.version }}"
-          RELEASE_FILE="docs/release/radar-$VERSION.js"
-
-          # Generate release notes
-          RELEASE_NOTES=$(cat <<EOF
-## Tech Radar Release $TAG_NAME
-
-### 📦 Release Artifact
-
-- **Minified version:** \`radar-$VERSION.js\`
-- **Built from:** \`docs/radar.js\`
-- **D3.js version:** v7
-- **Supports:** 2-8 quadrants, 4-8 rings
-
-### 🚀 Usage
-
-\`\`\`html
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/radar-$VERSION.js"></script>
-<script>
-  radar_visualization({
-    svg_id: "radar",
-    width: 1450,
-    height: 1000,
-    colors: {
-      background: "#fff",
-      grid: "#dddde0",
-      inactive: "#ddd"
-    },
-    quadrants: [
-      { name: "Languages" },
-      { name: "Infrastructure" },
-      { name: "Datastores" },
-      { name: "Data Management" }
-    ],
-    rings: [
-      { name: "ADOPT", color: "#5ba300" },
-      { name: "TRIAL", color: "#009eb0" },
-      { name: "ASSESS", color: "#c7ba00" },
-      { name: "HOLD", color: "#e09b96" }
-    ],
-    entries: [
-      // Your technology entries here
-    ]
-  });
-</script>
-\`\`\`
-
-### 📝 Commit
-
-**SHA:** \`${GITHUB_SHA:0:7}\`
-EOF
-)
-
-          # Create release
-          gh release create "$TAG_NAME" \
-            "$RELEASE_FILE" \
-            --title "Release $TAG_NAME" \
-            --notes "$RELEASE_NOTES" \
-            --target "${GITHUB_SHA}"
-
-          echo "✅ Release $TAG_NAME created successfully"
-          echo "release_url=$(gh release view $TAG_NAME --json url -q .url)" >> $GITHUB_OUTPUT
         env:
+          TAG_NAME: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
           GH_TOKEN: ${{ github.token }}
+        run: ./scripts/release.sh create
 
       - name: Add release summary
         if: steps.validate.outputs.is_valid == 'true'
-        run: |
-          TAG_NAME="${{ steps.version.outputs.tag }}"
-          VERSION="${{ steps.version.outputs.version }}"
-          RELEASE_URL="${{ steps.create_release.outputs.release_url }}"
-
-          echo "## 🎉 Release $TAG_NAME Created Successfully!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Release:** [$TAG_NAME]($RELEASE_URL)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- \`radar-$VERSION.js\` - Minified release version" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📥 Download" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "# Direct download" >> $GITHUB_STEP_SUMMARY
-          echo "wget https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/radar-$VERSION.js" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ The release has been published to GitHub Releases." >> $GITHUB_STEP_SUMMARY
+        env:
+          TAG_NAME: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_URL: ${{ steps.create_release.outputs.release_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: ./scripts/release.sh summary
