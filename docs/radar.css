@@ -147,16 +147,15 @@ td {
 /* Enhanced SVG element styling */
 .blip {
   cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: opacity 0.15s ease, filter 0.15s ease;
 }
 
 .blip:hover {
-  transform: scale(1.4);
   filter: brightness(1.15) drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
 }
 
 .blip:active {
-  transform: scale(1.2);
+  filter: brightness(0.95);
 }
 
 /* Improved ring visibility */
