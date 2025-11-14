@@ -488,6 +488,16 @@ function radar_visualization(config) {
       var angular_index = i % angular_divisions;
       var radial_index = Math.floor(i / angular_divisions);
 
+      // P1 FIX: Clamp indices when entries exceed grid capacity
+      // This prevents radial_fraction > 1.0 which causes boundary stacking
+      if (radial_index >= radial_divisions) {
+        // Wrap excess entries back into the grid using modulo
+        var total_cells = angular_divisions * radial_divisions;
+        var cell_index = i % total_cells;
+        angular_index = cell_index % angular_divisions;
+        radial_index = Math.floor(cell_index / angular_divisions);
+      }
+
       // Position within grid cell with increased jitter for better spread
       // Use 0.15-0.85 range instead of 0.3-0.7 to fill more of each cell
       var angular_fraction = (angular_index + 0.15 + random() * 0.7) / angular_divisions;

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Collision Detection Test</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="radar.js"></script>
+  <link rel="stylesheet" href="radar.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f5f5;
+    }
+    .test-container {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .test-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+    .test-stats {
+      display: flex;
+      gap: 20px;
+    }
+    .stat {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .stat.pass {
+      background: #d4edda;
+      color: #155724;
+    }
+    .stat.warn {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .stat.fail {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .radar-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    #collision-log {
+      max-height: 300px;
+      overflow-y: auto;
+      background: #f8f8f8;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-left: 3px solid #ccc;
+      padding-left: 10px;
+    }
+    .log-entry.error {
+      border-left-color: #dc3545;
+      background: #fff5f5;
+    }
+    .log-entry.success {
+      border-left-color: #28a745;
+      background: #f0fff4;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Collision Detection Test Suite</h1>
+<p>This page tests collision detection across various density scenarios to verify no overlapping markers.</p>
+
+<div id="test-suite"></div>
+<div id="collision-log"></div>
+
+<script>
+// Collision detection utility
+function detectCollisions(entries, minDistance) {
+  const collisions = [];
+
+  for (let i = 0; i < entries.length; i++) {
+    for (let j = i + 1; j < entries.length; j++) {
+      const e1 = entries[i];
+      const e2 = entries[j];
+
+      // Calculate distance
+      const dx = e1.x - e2.x;
+      const dy = e1.y - e2.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Check if collision radius is defined
+      const r1 = e1.collision_radius || minDistance;
+      const r2 = e2.collision_radius || minDistance;
+      const requiredDistance = r1 + r2;
+
+      if (distance < requiredDistance) {
+        collisions.push({
+          entry1: e1.label,
+          entry2: e2.label,
+          distance: distance.toFixed(2),
+          required: requiredDistance.toFixed(2),
+          overlap: (requiredDistance - distance).toFixed(2),
+          quadrant: e1.quadrant,
+          ring: e1.ring
+        });
+      }
+    }
+  }
+
+  return collisions;
+}
+
+// Calculate segment density
+function calculateDensity(entries, quadrants, rings) {
+  const segments = {};
+
+  entries.forEach(e => {
+    const key = `${e.quadrant}-${e.ring}`;
+    if (!segments[key]) {
+      segments[key] = {
+        quadrant: e.quadrant,
+        ring: e.ring,
+        count: 0,
+        entries: []
+      };
+    }
+    segments[key].count++;
+    segments[key].entries.push(e);
+  });
+
+  return segments;
+}
+
+// Log to UI
+function log(message, type = 'info') {
+  const logDiv = document.getElementById('collision-log');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${type}`;
+  entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+  logDiv.appendChild(entry);
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// Test configurations
+const tests = [
+  {
+    name: "High Density - 6 Quadrants × 5 Rings (ADOPT)",
+    quadrants: 6,
+    rings: 5,
+    entriesPerSegment: { "0-0": 8, "1-0": 8, "2-0": 8, "3-0": 8, "4-0": 8, "5-0": 8 }
+  },
+  {
+    name: "Extreme Density - 8 Quadrants × 8 Rings (ADOPT)",
+    quadrants: 8,
+    rings: 8,
+    entriesPerSegment: { "0-0": 10, "1-0": 10, "2-0": 10, "3-0": 10, "4-0": 10, "5-0": 10, "6-0": 10, "7-0": 10 }
+  },
+  {
+    name: "Mixed Density - 5 Quadrants × 4 Rings",
+    quadrants: 5,
+    rings: 4,
+    entriesPerSegment: { "0-0": 12, "1-1": 8, "2-2": 5, "3-3": 3, "4-0": 10 }
+  }
+];
+
+// Run tests
+tests.forEach((test, index) => {
+  const container = document.createElement('div');
+  container.className = 'test-container';
+  container.id = `test-${index}`;
+
+  const header = document.createElement('div');
+  header.className = 'test-header';
+  header.innerHTML = `
+    <div class="test-title">${test.name}</div>
+    <div class="test-stats" id="stats-${index}"></div>
+  `;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'radar-wrapper';
+  wrapper.innerHTML = `<svg id="radar-${index}"></svg>`;
+
+  container.appendChild(header);
+  container.appendChild(wrapper);
+  document.getElementById('test-suite').appendChild(container);
+
+  // Generate test entries
+  const quadrants = [];
+  const rings = [];
+  for (let q = 0; q < test.quadrants; q++) {
+    quadrants.push({ name: `Q${q}` });
+  }
+  for (let r = 0; r < test.rings; r++) {
+    rings.push({ name: `R${r}`, color: ['#5ba300', '#009eb0', '#c7ba00', '#e09b96', '#93c', '#f80', '#0cf', '#f0f'][r] });
+  }
+
+  const entries = [];
+  let idCounter = 0;
+  Object.keys(test.entriesPerSegment).forEach(key => {
+    const [q, r] = key.split('-').map(Number);
+    const count = test.entriesPerSegment[key];
+
+    for (let i = 0; i < count; i++) {
+      entries.push({
+        label: `Entry-${idCounter++}`,
+        quadrant: q,
+        ring: r,
+        moved: i % 3 === 0 ? 2 : (i % 2 === 0 ? 1 : 0),
+        active: true
+      });
+    }
+  });
+
+  log(`Starting test: ${test.name} (${entries.length} entries)`);
+
+  // Render radar
+  setTimeout(() => {
+    radar_visualization({
+      svg_id: `radar-${index}`,
+      width: 600,
+      height: 600,
+      quadrants: quadrants,
+      rings: rings,
+      entries: entries,
+      print_layout: false
+    });
+
+    // Wait for force simulation to settle
+    setTimeout(() => {
+      // Detect collisions
+      const collisions = detectCollisions(entries, 12);
+      const segments = calculateDensity(entries, test.quadrants, test.rings);
+
+      const statsDiv = document.getElementById(`stats-${index}`);
+
+      if (collisions.length === 0) {
+        statsDiv.innerHTML = `
+          <div class="stat pass">✓ No Collisions</div>
+          <div class="stat pass">${entries.length} Entries</div>
+        `;
+        log(`✓ ${test.name}: PASS - No collisions detected`, 'success');
+      } else {
+        statsDiv.innerHTML = `
+          <div class="stat fail">✗ ${collisions.length} Collisions</div>
+          <div class="stat warn">${entries.length} Entries</div>
+        `;
+        log(`✗ ${test.name}: FAIL - ${collisions.length} collisions detected`, 'error');
+
+        collisions.slice(0, 5).forEach(c => {
+          log(`  Overlap: ${c.entry1} ↔ ${c.entry2} (Q${c.quadrant}R${c.ring}): ${c.distance}px < ${c.required}px (overlap: ${c.overlap}px)`, 'error');
+        });
+
+        if (collisions.length > 5) {
+          log(`  ... and ${collisions.length - 5} more collisions`, 'error');
+        }
+      }
+
+      // Log segment density
+      Object.values(segments).forEach(seg => {
+        if (seg.count > 0) {
+          log(`  Segment Q${seg.quadrant}R${seg.ring}: ${seg.count} entries`);
+        }
+      });
+
+    }, 3500); // Wait for force simulation + 300 pre-ticks
+  }, index * 100);
+});
+</script>
+
+</body>
+</html>
