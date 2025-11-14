@@ -894,3 +894,190 @@ describe('Grid Distribution and Spatial Positioning', () => {
     expect(blips.length).toBe(3);
   });
 });
+
+describe('Collision Detection and Overlap Prevention', () => {
+  // Helper function to detect collisions mathematically
+  function detectCollisions(entries, minDistance = 12) {
+    const collisions = [];
+
+    for (let i = 0; i < entries.length; i++) {
+      for (let j = i + 1; j < entries.length; j++) {
+        const e1 = entries[i];
+        const e2 = entries[j];
+
+        // Skip if entries are in different segments
+        if (e1.quadrant !== e2.quadrant || e1.ring !== e2.ring) {
+          continue;
+        }
+
+        // Calculate distance
+        const dx = e1.x - e2.x;
+        const dy = e1.y - e2.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // Check collision radius
+        const r1 = e1.collision_radius || minDistance;
+        const r2 = e2.collision_radius || minDistance;
+        const requiredDistance = r1 + r2;
+
+        if (distance < requiredDistance) {
+          collisions.push({
+            entry1: e1.label,
+            entry2: e2.label,
+            distance,
+            required: requiredDistance,
+            overlap: requiredDistance - distance
+          });
+        }
+      }
+    }
+
+    return collisions;
+  }
+
+  test('should have zero overlapping entries in high-density ADOPT ring (6x5)', async () => {
+    document.body.innerHTML = '<svg id="radar"></svg>';
+
+    // Create high-density scenario: 8 entries per quadrant in ADOPT ring
+    const entries = [];
+    for (let q = 0; q < 6; q++) {
+      for (let i = 0; i < 8; i++) {
+        entries.push({
+          label: `Q${q}-Entry${i}`,
+          quadrant: q,
+          ring: 0, // ADOPT ring
+          moved: i % 2,
+          active: true
+        });
+      }
+    }
+
+    const config = createMinimalConfig({
+      quadrants: Array(6).fill(null).map((_, i) => ({ name: `Q${i}` })),
+      rings: Array(5).fill(null).map((_, i) => ({ name: `R${i}`, color: ['#5ba300', '#009eb0', '#c7ba00', '#e09b96', '#93c'][i] })),
+      entries: entries
+    });
+    radar_visualization(config);
+
+    // Wait for force simulation to complete (with 300 pre-ticks + additional settling)
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Check for collisions
+    const collisions = detectCollisions(entries);
+
+    if (collisions.length > 0) {
+      console.error('Collisions detected:', collisions.slice(0, 5));
+    }
+
+    expect(collisions.length).toBe(0);
+  });
+
+  test('should prevent grid index overflow in overcrowded segments', async () => {
+    document.body.innerHTML = '<svg id="radar"></svg>';
+
+    // Create extreme density scenario: 20 entries in single segment
+    const entries = [];
+    for (let i = 0; i < 20; i++) {
+      entries.push({
+        label: `Entry${i}`,
+        quadrant: 0,
+        ring: 0,
+        moved: 0,
+        active: true
+      });
+    }
+
+    const config = createMinimalConfig({ entries: entries });
+    radar_visualization(config);
+
+    // Wait for force simulation
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Verify all entries have valid coordinates within their segment
+    entries.forEach(entry => {
+      expect(entry.x).toBeDefined();
+      expect(entry.y).toBeDefined();
+      expect(isFinite(entry.x)).toBe(true);
+      expect(isFinite(entry.y)).toBe(true);
+
+      // Calculate distance from origin (should be within outer radius)
+      const distance = Math.sqrt(entry.x * entry.x + entry.y * entry.y);
+      expect(distance).toBeLessThan(600); // Well within bounds
+    });
+
+    // Check no entries are stacked at boundary
+    const collisions = detectCollisions(entries);
+    expect(collisions.length).toBe(0);
+  });
+
+  test('should handle maximum capacity scenarios (8x8 with dense ADOPT)', async () => {
+    document.body.innerHTML = '<svg id="radar"></svg>';
+
+    // Create maximum complexity with high density
+    const entries = [];
+    for (let q = 0; q < 8; q++) {
+      for (let i = 0; i < 10; i++) {
+        entries.push({
+          label: `Q${q}-E${i}`,
+          quadrant: q,
+          ring: 0,
+          moved: i % 3,
+          active: true
+        });
+      }
+    }
+
+    const config = createMinimalConfig({
+      quadrants: Array(8).fill(null).map((_, i) => ({ name: `Q${i}` })),
+      rings: Array(8).fill(null).map((_, i) => ({ name: `R${i}`, color: ['#5ba300', '#009eb0', '#c7ba00', '#e09b96', '#93c', '#f80', '#0cf', '#f0f'][i] })),
+      entries: entries
+    });
+    radar_visualization(config);
+
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    // Verify no collisions
+    const collisions = detectCollisions(entries);
+
+    // Allow up to 2% collision rate for extreme density scenarios
+    const collisionRate = collisions.length / (entries.length * (entries.length - 1) / 2);
+    expect(collisionRate).toBeLessThan(0.02);
+  });
+
+  test('should distribute entries evenly without boundary clustering', async () => {
+    document.body.innerHTML = '<svg id="radar"></svg>';
+
+    const entries = [];
+    for (let i = 0; i < 15; i++) {
+      entries.push({
+        label: `Entry${i}`,
+        quadrant: 0,
+        ring: 0,
+        moved: 0,
+        active: true
+      });
+    }
+
+    const config = createMinimalConfig({ entries: entries });
+    radar_visualization(config);
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Calculate radius distribution
+    const radii = entries.map(e => Math.sqrt(e.x * e.x + e.y * e.y));
+    const avgRadius = radii.reduce((a, b) => a + b, 0) / radii.length;
+
+    // Count entries near the boundary (within 10% of expected outer radius)
+    const outerRadius = 400; // Approximate for default config
+    const boundaryThreshold = outerRadius * 0.9;
+    const boundaryCount = radii.filter(r => r > boundaryThreshold).length;
+
+    // No more than 30% of entries should be near the boundary
+    expect(boundaryCount / entries.length).toBeLessThan(0.3);
+
+    // Verify reasonable spread (standard deviation)
+    const variance = radii.reduce((acc, r) => acc + Math.pow(r - avgRadius, 2), 0) / radii.length;
+    const stdDev = Math.sqrt(variance);
+    expect(stdDev).toBeGreaterThan(20); // Not all clustered at one radius
+  });
+});
