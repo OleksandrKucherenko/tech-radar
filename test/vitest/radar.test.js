@@ -7,7 +7,7 @@
  */
 
 import { beforeEach, describe, expect, test } from 'bun:test';
-import radar_visualization from '../../docs/radar.js';
+import radar_visualization from '../../src/index.js';
 
 // Helper to create a minimal valid configuration
 function createMinimalConfig(options = {}) {

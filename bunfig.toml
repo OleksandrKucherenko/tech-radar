@@ -16,9 +16,13 @@ coverageReporter = ["text", "lcov"]
 coverageDir = "./coverage"
 
 # Coverage threshold (50% temporarily lowered from 70%)
-# Note: Lowered to account for bundled docs/radar.js which includes new plugin code
+# Note: Now correctly measuring source files only (not bundled radar.js)
+# Current coverage: ~69% - below 70% due to untested plugin code:
+#   - src/plugins/import-export-plugin.js: 7.32%
+#   - src/plugins/storage-plugin.js: 9.16%
+#   - src/plugins/toolbar-plugin.js: 6.53%
+#   - src/plugins/plugin-base.js: 20.69%
 # TODO: Add tests for src/plugins/ to improve coverage and raise threshold back to 0.7
-# TODO: Ideally exclude docs/radar.js from coverage (it's a build artifact)
 coverageThreshold = 0.5
 
 # Coverage scope - focus on src/ source files
