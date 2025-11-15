@@ -2,11 +2,11 @@
 
 // Copyright (c) 2017-2024 Zalando SE
 
-import { describe, test, expect } from 'vitest';
-import { EntryProcessor } from '../../../src/processing/entry-processor.js';
+import { describe, expect, test } from 'vitest';
 import { generateQuadrants } from '../../../src/geometry/quadrant-calculator.js';
 import { generateRings } from '../../../src/geometry/ring-calculator.js';
 import { SeededRandom } from '../../../src/math/random.js';
+import { EntryProcessor } from '../../../src/processing/entry-processor.js';
 
 describe('Entry Processor', () => {
   // Test fixtures
@@ -16,21 +16,16 @@ describe('Entry Processor', () => {
       segment_angular_padding: 12,
       blip_collision_radius: 14,
       print_layout: true,
-      quadrants: [
-        { name: 'Q1' },
-        { name: 'Q2' },
-        { name: 'Q3' },
-        { name: 'Q4' }
-      ],
+      quadrants: [{ name: 'Q1' }, { name: 'Q2' }, { name: 'Q3' }, { name: 'Q4' }],
       rings: [
         { name: 'ADOPT', color: '#93c47d' },
         { name: 'TRIAL', color: '#93d2c2' },
         { name: 'ASSESS', color: '#fbdb84' },
-        { name: 'HOLD', color: '#efafa9' }
+        { name: 'HOLD', color: '#efafa9' },
       ],
       colors: {
-        inactive: '#ddd'
-      }
+        inactive: '#ddd',
+      },
     };
   }
 
@@ -41,7 +36,7 @@ describe('Entry Processor', () => {
       { label: 'Tech C', quadrant: 1, ring: 0, active: true, moved: 0 },
       { label: 'Tech D', quadrant: 1, ring: 1, active: false, moved: 0 },
       { label: 'Tech E', quadrant: 2, ring: 2, active: true, moved: -1 },
-      { label: 'Tech F', quadrant: 3, ring: 3, active: true, moved: 2 }
+      { label: 'Tech F', quadrant: 3, ring: 3, active: true, moved: 2 },
     ];
   }
 
@@ -145,7 +140,7 @@ describe('Entry Processor', () => {
       processor.processEntries(entries);
 
       // THEN: IDs should be sequential starting from 1 with no duplicates
-      const ids = entries.map(e => parseInt(e.id));
+      const ids = entries.map(e => parseInt(e.id, 10));
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(entries.length);
       expect(Math.min(...ids)).toBe(1);
@@ -173,8 +168,8 @@ describe('Entry Processor', () => {
 
       // THEN: all entries should have finite coordinates within reasonable bounds
       for (const entry of entries) {
-        expect(isFinite(entry.x)).toBe(true);
-        expect(isFinite(entry.y)).toBe(true);
+        expect(Number.isFinite(entry.x)).toBe(true);
+        expect(Number.isFinite(entry.y)).toBe(true);
         expect(Math.abs(entry.x)).toBeLessThan(500);
         expect(Math.abs(entry.y)).toBeLessThan(500);
       }
@@ -269,7 +264,7 @@ describe('Entry Processor', () => {
           quadrant: 0,
           ring: 0,
           active: true,
-          moved: 0
+          moved: 0,
         });
       }
 
@@ -329,14 +324,14 @@ describe('Entry Processor', () => {
       const entries = [
         { label: 'Zebra', quadrant: 0, ring: 0, active: true, moved: 0 },
         { label: 'Apple', quadrant: 0, ring: 0, active: true, moved: 0 },
-        { label: 'Mango', quadrant: 0, ring: 0, active: true, moved: 0 }
+        { label: 'Mango', quadrant: 0, ring: 0, active: true, moved: 0 },
       ];
 
       // WHEN: processing entries
       processor.processEntries(entries);
 
       // THEN: IDs should reflect alphabetical order
-      const sorted = [...entries].sort((a, b) => parseInt(a.id) - parseInt(b.id));
+      const sorted = [...entries].sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
       expect(sorted[0].label).toBe('Apple');
       expect(sorted[1].label).toBe('Mango');
       expect(sorted[2].label).toBe('Zebra');
@@ -363,7 +358,7 @@ describe('Entry Processor', () => {
       // WHEN: processing entries with extended ranges
       const entries = [
         { label: 'Tech A', quadrant: 0, ring: 0, active: true, moved: 0 },
-        { label: 'Tech B', quadrant: 5, ring: 4, active: true, moved: 0 }
+        { label: 'Tech B', quadrant: 5, ring: 4, active: true, moved: 0 },
       ];
 
       processor.processEntries(entries);
@@ -415,16 +410,14 @@ describe('Entry Processor', () => {
       );
 
       // WHEN: processing a single entry
-      const entries = [
-        { label: 'Sole Tech', quadrant: 0, ring: 0, active: true, moved: 0 }
-      ];
+      const entries = [{ label: 'Sole Tech', quadrant: 0, ring: 0, active: true, moved: 0 }];
 
       processor.processEntries(entries);
 
       // THEN: entry should be processed with ID and valid coordinates
       expect(entries[0].id).toBe('1');
-      expect(isFinite(entries[0].x)).toBe(true);
-      expect(isFinite(entries[0].y)).toBe(true);
+      expect(Number.isFinite(entries[0].x)).toBe(true);
+      expect(Number.isFinite(entries[0].y)).toBe(true);
     });
   });
 });

@@ -30,7 +30,7 @@ export const CONFIG_DEFAULTS = {
   colors: {
     background: '#fff',
     grid: '#dddde0',
-    inactive: '#ddd'
+    inactive: '#ddd',
   },
   print_layout: true,
   links_in_new_tabs: true,
@@ -44,7 +44,7 @@ export const CONFIG_DEFAULTS = {
   blip_collision_radius: 14,
   legend_vertical_spacing: 20,
   debug_geometry: false,
-  seed: 42
+  seed: 42,
 };
 
 /**
@@ -57,14 +57,14 @@ export const CONFIG_DEFAULTS = {
 export function applyDefaults(userConfig) {
   const config = {
     ...CONFIG_DEFAULTS,
-    ...userConfig
+    ...userConfig,
   };
 
   // Deep merge colors
   if (userConfig.colors) {
     config.colors = {
       ...CONFIG_DEFAULTS.colors,
-      ...userConfig.colors
+      ...userConfig.colors,
     };
   }
 
@@ -102,7 +102,7 @@ export function applyResponsiveSizing(config, viewportWidth, viewportHeight) {
 
   if (grid_quadrants >= 5 || grid_rings >= 6) {
     // Increase base size for complex grids to prevent overcrowding
-    const complexity_multiplier = 1 + ((grid_quadrants - 4) * 0.05) + ((grid_rings - 4) * 0.03);
+    const complexity_multiplier = 1 + (grid_quadrants - 4) * 0.05 + (grid_rings - 4) * 0.03;
 
     if (!config.width_override) {
       adjusted.width = Math.round(config.width * Math.min(complexity_multiplier, 1.3));
@@ -129,16 +129,10 @@ export function applyResponsiveSizing(config, viewportWidth, viewportHeight) {
 export function calculateAvailableSpace(config) {
   const title_height = config.print_layout && config.title ? 60 : 0;
   const footer_height = config.print_layout ? 40 : 0;
-  const minimum_chart_height = (2 * config.chart_padding) + 40;
+  const minimum_chart_height = 2 * config.chart_padding + 40;
 
-  const available_height = Math.max(
-    minimum_chart_height,
-    config.height - title_height - footer_height
-  );
-  const available_width = Math.max(
-    (2 * config.chart_padding) + 40,
-    config.width
-  );
+  const available_height = Math.max(minimum_chart_height, config.height - title_height - footer_height);
+  const available_width = Math.max(2 * config.chart_padding + 40, config.width);
 
   const raw_outer_radius = Math.min(available_width, available_height) / 2 - config.chart_padding;
   const target_outer_radius = Math.max(10, raw_outer_radius);
@@ -146,6 +140,6 @@ export function calculateAvailableSpace(config) {
   return {
     available_height,
     available_width,
-    target_outer_radius
+    target_outer_radius,
   };
 }

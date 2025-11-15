@@ -36,7 +36,7 @@ export function polar(cartesian) {
   const { x, y } = cartesian;
   return {
     t: Math.atan2(y, x),
-    r: Math.sqrt(x * x + y * y)
+    r: Math.sqrt(x * x + y * y),
   };
 }
 
@@ -51,7 +51,7 @@ export function cartesian(polar) {
   const { r, t } = polar;
   return {
     x: r * Math.cos(t),
-    y: r * Math.sin(t)
+    y: r * Math.sin(t),
   };
 }
 
@@ -78,7 +78,7 @@ export function boundedInterval(value, min, max) {
 export function boundedRing(polar, r_min, r_max) {
   return {
     t: polar.t,
-    r: boundedInterval(polar.r, r_min, r_max)
+    r: boundedInterval(polar.r, r_min, r_max),
   };
 }
 
@@ -92,6 +92,6 @@ export function boundedRing(polar, r_min, r_max) {
 export function boundedBox(point, min, max) {
   return {
     x: boundedInterval(point.x, min.x, max.x),
-    y: boundedInterval(point.y, min.y, max.y)
+    y: boundedInterval(point.y, min.y, max.y),
   };
 }

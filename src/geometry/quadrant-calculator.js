@@ -30,18 +30,18 @@
 export function generateQuadrants(numQuadrants) {
   const quadrants = [];
   const anglePerQuadrant = 2 / numQuadrants; // in PI multiples
-  const rotationOffset = (numQuadrants === 2) ? -0.5 : 0; // rotate to vertical split for 2 quadrants
+  const rotationOffset = numQuadrants === 2 ? -0.5 : 0; // rotate to vertical split for 2 quadrants
 
   for (let i = 0; i < numQuadrants; i++) {
-    const startAngle = -1 + (i * anglePerQuadrant) + rotationOffset;
-    const endAngle = -1 + ((i + 1) * anglePerQuadrant) + rotationOffset;
-    const midAngle = (-Math.PI + (i + 0.5) * anglePerQuadrant * Math.PI) + (rotationOffset * Math.PI);
+    const startAngle = -1 + i * anglePerQuadrant + rotationOffset;
+    const endAngle = -1 + (i + 1) * anglePerQuadrant + rotationOffset;
+    const midAngle = -Math.PI + (i + 0.5) * anglePerQuadrant * Math.PI + rotationOffset * Math.PI;
 
     quadrants.push({
-      radial_min: startAngle,  // in PI multiples
-      radial_max: endAngle,    // in PI multiples
-      factor_x: Math.cos(midAngle),  // x direction for positioning
-      factor_y: Math.sin(midAngle)   // y direction for positioning
+      radial_min: startAngle, // in PI multiples
+      radial_max: endAngle, // in PI multiples
+      factor_x: Math.cos(midAngle), // x direction for positioning
+      factor_y: Math.sin(midAngle), // y direction for positioning
     });
   }
 
@@ -59,7 +59,7 @@ export function generateQuadrants(numQuadrants) {
  */
 export function computeQuadrantBounds(startAngle, endAngle, radius) {
   const twoPi = 2 * Math.PI;
-  let normalizedStart = startAngle;
+  const normalizedStart = startAngle;
   let normalizedEnd = endAngle;
 
   // Ensure end angle is after start angle
@@ -69,19 +69,19 @@ export function computeQuadrantBounds(startAngle, endAngle, radius) {
 
   // Check for intersections with cardinal axes
   const axisAngles = [
-    -Math.PI,           // left (-x)
-    -Math.PI / 2,       // bottom (-y)
-    0,                  // right (+x)
-    Math.PI / 2,        // top (+y)
-    Math.PI,            // left (-x, wrapped)
-    (3 * Math.PI) / 2,  // bottom (-y, wrapped)
-    2 * Math.PI         // right (+x, wrapped)
+    -Math.PI, // left (-x)
+    -Math.PI / 2, // bottom (-y)
+    0, // right (+x)
+    Math.PI / 2, // top (+y)
+    Math.PI, // left (-x, wrapped)
+    (3 * Math.PI) / 2, // bottom (-y, wrapped)
+    2 * Math.PI, // right (+x, wrapped)
   ];
 
   // Candidate angles include segment endpoints and axis intersections
   const candidates = [normalizedStart, normalizedEnd];
 
-  axisAngles.forEach(function (axisAngle) {
+  axisAngles.forEach(axisAngle => {
     let candidate = axisAngle;
     // Bring axis angle into the [normalizedStart, normalizedEnd] range
     while (candidate < normalizedStart) {
@@ -98,7 +98,7 @@ export function computeQuadrantBounds(startAngle, endAngle, radius) {
   let min_y = Infinity;
   let max_y = -Infinity;
 
-  candidates.forEach(function (angle) {
+  candidates.forEach(angle => {
     const cosA = Math.cos(angle);
     const sinA = Math.sin(angle);
     min_x = Math.min(min_x, cosA);
@@ -111,13 +111,13 @@ export function computeQuadrantBounds(startAngle, endAngle, radius) {
   const padding = 20;
   return {
     min: {
-      x: (min_x * radius) - padding,
-      y: (min_y * radius) - padding
+      x: min_x * radius - padding,
+      y: min_y * radius - padding,
     },
     max: {
-      x: (max_x * radius) + padding,
-      y: (max_y * radius) + padding
-    }
+      x: max_x * radius + padding,
+      y: max_y * radius + padding,
+    },
   };
 }
 

@@ -28,7 +28,7 @@
  * @returns {string} SVG transform string
  */
 export function translate(x, y) {
-  return "translate(" + x + "," + y + ")";
+  return `translate(${x},${y})`;
 }
 
 /**
@@ -46,8 +46,8 @@ export function viewbox(quadrantIndex, quadrants, rings) {
     Math.max(0, quadrants[quadrantIndex].factor_x * outer_radius) - (outer_radius + padding),
     Math.max(0, quadrants[quadrantIndex].factor_y * outer_radius) - (outer_radius + padding),
     outer_radius + 2 * padding,
-    outer_radius + 2 * padding
-  ].join(" ");
+    outer_radius + 2 * padding,
+  ].join(' ');
 }
 
 /**
@@ -74,12 +74,12 @@ export function computeLegendOffsets(numQuadrants, outerRadius, config) {
 
   // Alternate between right and left columns
   for (let i = 0; i < numQuadrants; i++) {
-    const targetColumn = (i % 2 === 0) ? right_column : left_column;
+    const targetColumn = i % 2 === 0 ? right_column : left_column;
     targetColumn.push(i);
   }
 
   const baseY = -outerRadius + 80;
-  const verticalAvailable = (2 * outerRadius) - 160;
+  const verticalAvailable = 2 * outerRadius - 160;
 
   function stepFor(count) {
     if (count <= 1) {
@@ -94,7 +94,7 @@ export function computeLegendOffsets(numQuadrants, outerRadius, config) {
       const qIndex = column[idx];
       offsets[qIndex] = {
         x: xPosition,
-        y: baseY + idx * step
+        y: baseY + idx * step,
       };
     }
   }
@@ -115,7 +115,7 @@ export function computeLegendOffsets(numQuadrants, outerRadius, config) {
 export function ensureLayoutStructure(svgSelection) {
   const existing = svgSelection.node().closest('.radar-layout');
   if (existing) {
-    return svgSelection.select(function() { return existing; });
+    return svgSelection.select(() => existing);
   }
 
   const svgNode = svgSelection.node();
@@ -138,7 +138,7 @@ export function ensureLayoutStructure(svgSelection) {
   wrapper.appendChild(svgContainer);
   wrapper.appendChild(rightColumn);
 
-  return svgSelection.select(function() { return wrapper; });
+  return svgSelection.select(() => wrapper);
 }
 
 /**
@@ -152,8 +152,5 @@ export function ensureLayoutStructure(svgSelection) {
  * @returns {string} SVG transform string
  */
 export function legend_transform(quadrant, ring, legendColumnWidth, index) {
-  return translate(
-    legendColumnWidth * Math.round(quadrant / 2),
-    ring * legendColumnWidth + index * 12
-  );
+  return translate(legendColumnWidth * Math.round(quadrant / 2), ring * legendColumnWidth + index * 12);
 }

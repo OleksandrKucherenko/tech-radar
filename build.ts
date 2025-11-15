@@ -9,7 +9,7 @@
 //            Always create a new version for changes.
 //            Version must follow strict semantic versioning (MAJOR.MINOR.PATCH)
 
-import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
+import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
 import semver from 'semver';
 
 // Parse command line arguments
@@ -111,7 +111,7 @@ async function buildRadar() {
     naming: 'bundle.js',
     format: 'esm',
     minify: false,
-    target: 'browser'
+    target: 'browser',
   });
 
   if (!buildResult.success) {
@@ -166,7 +166,7 @@ if (typeof global !== 'undefined') {
     outdir: './temp-build',
     naming: 'minified.js',
     minify: true,
-    target: 'browser'
+    target: 'browser',
   });
 
   if (!minifyResult.success) {

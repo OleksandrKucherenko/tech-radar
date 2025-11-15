@@ -1,5 +1,5 @@
 // Test suite for seeded random number generator
-import { describe, test, expect, beforeEach } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { SeededRandom } from '../../../src/math/random.js';
 
 describe('SeededRandom', () => {
@@ -45,7 +45,7 @@ describe('SeededRandom', () => {
       const numbers = Array.from({ length: 100 }, () => rng.next());
 
       // THEN: all should be in range [0, 1)
-      numbers.forEach((num) => {
+      numbers.forEach(num => {
         expect(num).toBeGreaterThanOrEqual(0);
         expect(num).toBeLessThan(1);
       });
@@ -100,7 +100,7 @@ describe('SeededRandom', () => {
       const numbers = Array.from({ length: 100 }, () => rng.between(10, 20));
 
       // THEN: all should be in range [10, 20)
-      numbers.forEach((num) => {
+      numbers.forEach(num => {
         expect(num).toBeGreaterThanOrEqual(10);
         expect(num).toBeLessThan(20);
       });
@@ -127,7 +127,7 @@ describe('SeededRandom', () => {
       const numbers = Array.from({ length: 100 }, () => rng.between(-20, -10));
 
       // THEN: all should be in range [-20, -10)
-      numbers.forEach((num) => {
+      numbers.forEach(num => {
         expect(num).toBeGreaterThanOrEqual(-20);
         expect(num).toBeLessThan(-10);
       });
@@ -141,7 +141,7 @@ describe('SeededRandom', () => {
       const numbers = Array.from({ length: 100 }, () => rng.between(-5, 5));
 
       // THEN: all should be in range [-5, 5)
-      numbers.forEach((num) => {
+      numbers.forEach(num => {
         expect(num).toBeGreaterThanOrEqual(-5);
         expect(num).toBeLessThan(5);
       });
@@ -155,7 +155,7 @@ describe('SeededRandom', () => {
       const numbers = Array.from({ length: 10 }, () => rng.between(5, 5));
 
       // THEN: all should be exactly 5
-      numbers.forEach((num) => {
+      numbers.forEach(num => {
         expect(num).toBe(5);
       });
     });
@@ -170,7 +170,7 @@ describe('SeededRandom', () => {
       const numbers = Array.from({ length: 100 }, () => rng.normalBetween(10, 20));
 
       // THEN: all should be in range [10, 20)
-      numbers.forEach((num) => {
+      numbers.forEach(num => {
         expect(num).toBeGreaterThanOrEqual(10);
         expect(num).toBeLessThan(20);
       });

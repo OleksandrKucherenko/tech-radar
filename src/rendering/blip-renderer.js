@@ -41,19 +41,18 @@ export function renderBlips(
   const d3 = window.d3;
 
   // Create blip groups with data binding
-  const blips = rinkSelection.selectAll(".blip")
+  const blips = rinkSelection
+    .selectAll('.blip')
     .data(entries)
     .enter()
-    .append("g")
-    .attr("class", "blip")
-    .attr("transform", function (d) {
-      return translate(d.x, d.y);
-    })
-    .on("mouseover", function (event, d) {
+    .append('g')
+    .attr('class', 'blip')
+    .attr('transform', d => translate(d.x, d.y))
+    .on('mouseover', (_event, d) => {
       showBubble(d, config);
       highlightLegendItem(d);
     })
-    .on("mouseout", function (event, d) {
+    .on('mouseout', (_event, d) => {
       hideBubble();
       unhighlightLegendItem(d);
     });
@@ -64,12 +63,11 @@ export function renderBlips(
 
     // Add link wrapper if entry is active and has a link
     let blipContainer = blip;
-    if (d.active && Object.prototype.hasOwnProperty.call(d, "link") && d.link) {
-      blipContainer = blip.append("a")
-        .attr("xlink:href", d.link);
+    if (d.active && Object.hasOwn(d, 'link') && d.link) {
+      blipContainer = blip.append('a').attr('xlink:href', d.link);
 
       if (config.links_in_new_tabs) {
-        blipContainer.attr("target", "_blank");
+        blipContainer.attr('target', '_blank');
       }
     }
 
@@ -100,24 +98,16 @@ function renderBlipShape(container, entry) {
 
   if (entry.moved === 1) {
     // Triangle pointing up - moved in
-    container.append("path")
-      .attr("d", "M -11,5 11,5 0,-13 z")
-      .style("fill", entry.color);
+    container.append('path').attr('d', 'M -11,5 11,5 0,-13 z').style('fill', entry.color);
   } else if (entry.moved === -1) {
     // Triangle pointing down - moved out
-    container.append("path")
-      .attr("d", "M -11,-5 11,-5 0,13 z")
-      .style("fill", entry.color);
+    container.append('path').attr('d', 'M -11,-5 11,-5 0,13 z').style('fill', entry.color);
   } else if (entry.moved === 2) {
     // Star - new entry
-    container.append("path")
-      .attr("d", d3.symbol().type(d3.symbolStar).size(200))
-      .style("fill", entry.color);
+    container.append('path').attr('d', d3.symbol().type(d3.symbolStar).size(200)).style('fill', entry.color);
   } else {
     // Circle - no change
-    container.append("circle")
-      .attr("r", 9)
-      .attr("fill", entry.color);
+    container.append('circle').attr('r', 9).attr('fill', entry.color);
   }
 }
 
@@ -135,16 +125,15 @@ function renderBlipText(container, entry, config) {
   if (entry.active || config.print_layout) {
     const blipText = config.print_layout ? entry.id : entry.label.match(/[a-z]/i);
 
-    container.append("text")
+    container
+      .append('text')
       .text(blipText)
-      .attr("y", 3)
-      .attr("text-anchor", "middle")
-      .style("fill", "#fff")
-      .style("font-family", config.font_family)
-      .style("font-size", function (d) {
-        return blipText.length > 2 ? "8px" : "9px";
-      })
-      .style("pointer-events", "none")
-      .style("user-select", "none");
+      .attr('y', 3)
+      .attr('text-anchor', 'middle')
+      .style('fill', '#fff')
+      .style('font-family', config.font_family)
+      .style('font-size', _d => (blipText.length > 2 ? '8px' : '9px'))
+      .style('pointer-events', 'none')
+      .style('user-select', 'none');
   }
 }

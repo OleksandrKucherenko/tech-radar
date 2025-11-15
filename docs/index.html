@@ -64,9 +64,7 @@
   <svg id="radar"></svg>
 
   <script>
-    fetch('./config.json').then(function (response) {
-      return response.json();
-    }).then(function (data) {
+    fetch('./config.json').then((response) => response.json()).then((data) => {
       radar_visualization({
         repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
         title: "Tech Radar",
@@ -85,7 +83,7 @@
         ],
         entries: data.entries
       });
-    }).catch(function (err) {
+    }).catch((err) => {
       console.log('Error loading config.json', err);
     });
   </script>

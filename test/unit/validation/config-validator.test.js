@@ -1,19 +1,11 @@
 // Test suite for configuration validation
-import { describe, test, expect } from 'vitest';
-import {
-  ConfigValidationError,
-  validateConfig,
-  validateConfigAll
-} from '../../../src/validation/config-validator.js';
+import { describe, expect, test } from 'vitest';
+import { ConfigValidationError, validateConfig, validateConfigAll } from '../../../src/validation/config-validator.js';
 
 describe('ConfigValidationError', () => {
   test('creates error with message, field, and value', () => {
     // WHEN: creating a validation error
-    const error = new ConfigValidationError(
-      'Invalid quadrant count',
-      'quadrants',
-      1
-    );
+    const error = new ConfigValidationError('Invalid quadrant count', 'quadrants', 1);
 
     // THEN: should have correct properties
     expect(error).toBeInstanceOf(Error);
@@ -35,9 +27,9 @@ describe('validateConfig()', () => {
           { name: 'R1', color: '#000' },
           { name: 'R2', color: '#111' },
           { name: 'R3', color: '#222' },
-          { name: 'R4', color: '#333' }
+          { name: 'R4', color: '#333' },
         ],
-        entries: []
+        entries: [],
       };
 
       // WHEN/THEN: validation should pass
@@ -48,9 +40,13 @@ describe('validateConfig()', () => {
     test('accepts 8 quadrants (maximum)', () => {
       // GIVEN: config with 8 quadrants
       const config = {
-        quadrants: Array(8).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        quadrants: Array(8)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should pass
@@ -61,9 +57,13 @@ describe('validateConfig()', () => {
     test('accepts 4 quadrants (standard)', () => {
       // GIVEN: config with 4 quadrants
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should pass
@@ -74,8 +74,10 @@ describe('validateConfig()', () => {
       // GIVEN: config with 1 quadrant
       const config = {
         quadrants: [{ name: 'Q1' }],
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should throw
@@ -86,9 +88,13 @@ describe('validateConfig()', () => {
     test('rejects 9 quadrants', () => {
       // GIVEN: config with 9 quadrants
       const config = {
-        quadrants: Array(9).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        quadrants: Array(9)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should throw
@@ -99,8 +105,10 @@ describe('validateConfig()', () => {
     test('rejects missing quadrants', () => {
       // GIVEN: config without quadrants
       const config = {
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should throw
@@ -112,7 +120,9 @@ describe('validateConfig()', () => {
       // GIVEN: config with invalid quadrants
       const config = {
         quadrants: [{ name: 'Q1' }],
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' }))
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
       };
 
       // WHEN: catching validation error
@@ -132,9 +142,13 @@ describe('validateConfig()', () => {
     test('accepts 4 rings (minimum)', () => {
       // GIVEN: config with 4 rings
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should pass
@@ -145,9 +159,13 @@ describe('validateConfig()', () => {
     test('accepts 8 rings (maximum)', () => {
       // GIVEN: config with 8 rings
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(8).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(8)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should pass
@@ -158,9 +176,13 @@ describe('validateConfig()', () => {
     test('rejects 3 rings', () => {
       // GIVEN: config with 3 rings
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(3).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(3)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should throw
@@ -171,9 +193,13 @@ describe('validateConfig()', () => {
     test('rejects 9 rings', () => {
       // GIVEN: config with 9 rings
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(9).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(9)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should throw
@@ -184,8 +210,10 @@ describe('validateConfig()', () => {
     test('rejects missing rings', () => {
       // GIVEN: config without rings
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        entries: []
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should throw
@@ -198,12 +226,16 @@ describe('validateConfig()', () => {
     test('accepts entries with valid quadrant and ring indices', () => {
       // GIVEN: config with valid entries
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
         entries: [
           { label: 'Tech A', quadrant: 0, ring: 0, moved: 0, active: true },
-          { label: 'Tech B', quadrant: 3, ring: 3, moved: 0, active: true }
-        ]
+          { label: 'Tech B', quadrant: 3, ring: 3, moved: 0, active: true },
+        ],
       };
 
       // WHEN/THEN: validation should pass
@@ -213,11 +245,13 @@ describe('validateConfig()', () => {
     test('rejects entry with negative quadrant index', () => {
       // GIVEN: config with entry having negative quadrant
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: [
-          { label: 'Tech A', quadrant: -1, ring: 0, moved: 0, active: true }
-        ]
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [{ label: 'Tech A', quadrant: -1, ring: 0, moved: 0, active: true }],
       };
 
       // WHEN/THEN: validation should throw
@@ -228,11 +262,13 @@ describe('validateConfig()', () => {
     test('rejects entry with quadrant index out of bounds', () => {
       // GIVEN: config with entry having quadrant >= length
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: [
-          { label: 'Tech B', quadrant: 4, ring: 0, moved: 0, active: true }
-        ]
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [{ label: 'Tech B', quadrant: 4, ring: 0, moved: 0, active: true }],
       };
 
       // WHEN/THEN: validation should throw
@@ -243,11 +279,13 @@ describe('validateConfig()', () => {
     test('rejects entry with negative ring index', () => {
       // GIVEN: config with entry having negative ring
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: [
-          { label: 'Tech C', quadrant: 0, ring: -1, moved: 0, active: true }
-        ]
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [{ label: 'Tech C', quadrant: 0, ring: -1, moved: 0, active: true }],
       };
 
       // WHEN/THEN: validation should throw
@@ -258,11 +296,13 @@ describe('validateConfig()', () => {
     test('rejects entry with ring index out of bounds', () => {
       // GIVEN: config with entry having ring >= length
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: [
-          { label: 'Tech D', quadrant: 0, ring: 4, moved: 0, active: true }
-        ]
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [{ label: 'Tech D', quadrant: 0, ring: 4, moved: 0, active: true }],
       };
 
       // WHEN/THEN: validation should throw
@@ -273,11 +313,13 @@ describe('validateConfig()', () => {
     test('includes entry label in error message', () => {
       // GIVEN: config with invalid entry
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: [
-          { label: 'MyTechnology', quadrant: 10, ring: 0, moved: 0, active: true }
-        ]
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [{ label: 'MyTechnology', quadrant: 10, ring: 0, moved: 0, active: true }],
       };
 
       // WHEN: catching validation error
@@ -293,12 +335,16 @@ describe('validateConfig()', () => {
     test('throws on first invalid entry', () => {
       // GIVEN: config with multiple invalid entries
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
         entries: [
           { label: 'First Bad', quadrant: 10, ring: 0, moved: 0, active: true },
-          { label: 'Second Bad', quadrant: 0, ring: 10, moved: 0, active: true }
-        ]
+          { label: 'Second Bad', quadrant: 0, ring: 10, moved: 0, active: true },
+        ],
       };
 
       // WHEN: catching validation error
@@ -314,9 +360,13 @@ describe('validateConfig()', () => {
     test('accepts empty entries array', () => {
       // GIVEN: config with no entries
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-        entries: []
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+        entries: [],
       };
 
       // WHEN/THEN: validation should pass
@@ -326,8 +376,12 @@ describe('validateConfig()', () => {
     test('accepts missing entries field', () => {
       // GIVEN: config without entries field
       const config = {
-        quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-        rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' }))
+        quadrants: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `Q${i}` })),
+        rings: Array(4)
+          .fill(null)
+          .map((_, i) => ({ name: `R${i}`, color: '#000' })),
       };
 
       // WHEN/THEN: validation should pass (entries are optional)
@@ -340,9 +394,13 @@ describe('validateConfigAll()', () => {
   test('returns empty array for valid config', () => {
     // GIVEN: valid config
     const config = {
-      quadrants: Array(4).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      rings: Array(4).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })),
-      entries: []
+      quadrants: Array(4)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      rings: Array(4)
+        .fill(null)
+        .map((_, i) => ({ name: `R${i}`, color: '#000' })),
+      entries: [],
     };
 
     // WHEN: validating
@@ -356,11 +414,13 @@ describe('validateConfigAll()', () => {
     // GIVEN: config with multiple issues
     const config = {
       quadrants: [{ name: 'Q1' }], // Invalid: only 1
-      rings: Array(3).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' })), // Invalid: only 3
+      rings: Array(3)
+        .fill(null)
+        .map((_, i) => ({ name: `R${i}`, color: '#000' })), // Invalid: only 3
       entries: [
         { label: 'Tech A', quadrant: 5, ring: 0, moved: 0, active: true }, // Invalid quadrant
-        { label: 'Tech B', quadrant: 0, ring: 10, moved: 0, active: true } // Invalid ring
-      ]
+        { label: 'Tech B', quadrant: 0, ring: 10, moved: 0, active: true }, // Invalid ring
+      ],
     };
 
     // WHEN: validating
@@ -378,7 +438,9 @@ describe('validateConfigAll()', () => {
     // GIVEN: invalid config
     const config = {
       quadrants: [{ name: 'Q1' }],
-      rings: Array(3).fill(null).map((_, i) => ({ name: `R${i}`, color: '#000' }))
+      rings: Array(3)
+        .fill(null)
+        .map((_, i) => ({ name: `R${i}`, color: '#000' })),
     };
 
     // WHEN: validating

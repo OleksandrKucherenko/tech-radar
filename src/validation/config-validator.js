@@ -52,20 +52,24 @@ export function validateConfig(config) {
 
   // Validate quadrants
   if (!config.quadrants || config.quadrants.length < 2 || config.quadrants.length > 8) {
-    errors.push(new ConfigValidationError(
-      `Number of quadrants must be between 2 and 8 (found: ${config.quadrants?.length || 0})`,
-      'quadrants',
-      config.quadrants?.length
-    ));
+    errors.push(
+      new ConfigValidationError(
+        `Number of quadrants must be between 2 and 8 (found: ${config.quadrants?.length || 0})`,
+        'quadrants',
+        config.quadrants?.length
+      )
+    );
   }
 
   // Validate rings
   if (!config.rings || config.rings.length < 4 || config.rings.length > 8) {
-    errors.push(new ConfigValidationError(
-      `Number of rings must be between 4 and 8 (found: ${config.rings?.length || 0})`,
-      'rings',
-      config.rings?.length
-    ));
+    errors.push(
+      new ConfigValidationError(
+        `Number of rings must be between 4 and 8 (found: ${config.rings?.length || 0})`,
+        'rings',
+        config.rings?.length
+      )
+    );
   }
 
   // Validate entries if they exist
@@ -73,20 +77,24 @@ export function validateConfig(config) {
     config.entries.forEach((entry, index) => {
       // Validate quadrant index
       if (entry.quadrant < 0 || entry.quadrant >= config.quadrants.length) {
-        errors.push(new ConfigValidationError(
-          `Entry '${entry.label}' has invalid quadrant: ${entry.quadrant} (must be 0-${config.quadrants.length - 1})`,
-          `entries[${index}].quadrant`,
-          entry.quadrant
-        ));
+        errors.push(
+          new ConfigValidationError(
+            `Entry '${entry.label}' has invalid quadrant: ${entry.quadrant} (must be 0-${config.quadrants.length - 1})`,
+            `entries[${index}].quadrant`,
+            entry.quadrant
+          )
+        );
       }
 
       // Validate ring index
       if (entry.ring < 0 || entry.ring >= config.rings.length) {
-        errors.push(new ConfigValidationError(
-          `Entry '${entry.label}' has invalid ring: ${entry.ring} (must be 0-${config.rings.length - 1})`,
-          `entries[${index}].ring`,
-          entry.ring
-        ));
+        errors.push(
+          new ConfigValidationError(
+            `Entry '${entry.label}' has invalid ring: ${entry.ring} (must be 0-${config.rings.length - 1})`,
+            `entries[${index}].ring`,
+            entry.ring
+          )
+        );
       }
     });
   }
@@ -111,20 +119,24 @@ export function validateConfigAll(config) {
 
   // Validate quadrants
   if (!config.quadrants || config.quadrants.length < 2 || config.quadrants.length > 8) {
-    errors.push(new ConfigValidationError(
-      `Number of quadrants must be between 2 and 8 (found: ${config.quadrants?.length || 0})`,
-      'quadrants',
-      config.quadrants?.length
-    ));
+    errors.push(
+      new ConfigValidationError(
+        `Number of quadrants must be between 2 and 8 (found: ${config.quadrants?.length || 0})`,
+        'quadrants',
+        config.quadrants?.length
+      )
+    );
   }
 
   // Validate rings
   if (!config.rings || config.rings.length < 4 || config.rings.length > 8) {
-    errors.push(new ConfigValidationError(
-      `Number of rings must be between 4 and 8 (found: ${config.rings?.length || 0})`,
-      'rings',
-      config.rings?.length
-    ));
+    errors.push(
+      new ConfigValidationError(
+        `Number of rings must be between 4 and 8 (found: ${config.rings?.length || 0})`,
+        'rings',
+        config.rings?.length
+      )
+    );
   }
 
   // Validate entries if they exist
@@ -132,20 +144,24 @@ export function validateConfigAll(config) {
     config.entries.forEach((entry, index) => {
       // Validate quadrant index
       if (entry.quadrant < 0 || entry.quadrant >= config.quadrants.length) {
-        errors.push(new ConfigValidationError(
-          `Entry '${entry.label}' has invalid quadrant: ${entry.quadrant} (must be 0-${config.quadrants.length - 1})`,
-          `entries[${index}].quadrant`,
-          entry.quadrant
-        ));
+        errors.push(
+          new ConfigValidationError(
+            `Entry '${entry.label}' has invalid quadrant: ${entry.quadrant} (must be 0-${config.quadrants.length - 1})`,
+            `entries[${index}].quadrant`,
+            entry.quadrant
+          )
+        );
       }
 
       // Validate ring index
       if (entry.ring < 0 || entry.ring >= config.rings.length) {
-        errors.push(new ConfigValidationError(
-          `Entry '${entry.label}' has invalid ring: ${entry.ring} (must be 0-${config.rings.length - 1})`,
-          `entries[${index}].ring`,
-          entry.ring
-        ));
+        errors.push(
+          new ConfigValidationError(
+            `Entry '${entry.label}' has invalid ring: ${entry.ring} (must be 0-${config.rings.length - 1})`,
+            `entries[${index}].ring`,
+            entry.ring
+          )
+        );
       }
     });
   }

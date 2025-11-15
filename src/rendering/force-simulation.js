@@ -32,7 +32,7 @@ export function createTickCallback(blipsSelection, config) {
 
   return function ticked() {
     // Update blip positions, ensuring they stay within segment bounds
-    blipsSelection.attr("transform", function (d) {
+    blipsSelection.attr('transform', d => {
       // Clip position to segment boundaries
       const clipped = d.segment.clip(d);
 
@@ -46,9 +46,10 @@ export function createTickCallback(blipsSelection, config) {
 
     // Update debug visualizations if enabled
     if (config.debug_geometry) {
-      d3.select("#debug-collision-radii").selectAll("circle")
-        .attr("cx", function (d) { return d.x; })
-        .attr("cy", function (d) { return d.y; });
+      d3.select('#debug-collision-radii')
+        .selectAll('circle')
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
     }
   };
 }
@@ -80,15 +81,17 @@ export function runForceSimulation(entries, blipsSelection, config) {
   // Configure and run force simulation
   d3.forceSimulation()
     .nodes(entries)
-    .velocityDecay(0.15)  // More movement freedom for better spreading
-    .alphaDecay(0.008)    // Slower cooling for longer convergence time
-    .alphaMin(0.00005)    // Lower minimum for thorough settlement
-    .force("collision", d3.forceCollide()
-      .radius(function (d) {
-        return d.collision_radius || config.blip_collision_radius;
-      })
-      .strength(1.0)      // Maximum collision strength for strict enforcement
-      .iterations(6))     // More iterations per tick for better collision resolution
-    .on("tick", tickCallback)
-    .tick(400);           // Increased pre-run iterations for better stabilization
+    .velocityDecay(0.15) // More movement freedom for better spreading
+    .alphaDecay(0.008) // Slower cooling for longer convergence time
+    .alphaMin(0.00005) // Lower minimum for thorough settlement
+    .force(
+      'collision',
+      d3
+        .forceCollide()
+        .radius(d => d.collision_radius || config.blip_collision_radius)
+        .strength(1.0) // Maximum collision strength for strict enforcement
+        .iterations(6)
+    ) // More iterations per tick for better collision resolution
+    .on('tick', tickCallback)
+    .tick(400); // Increased pre-run iterations for better stabilization
 }

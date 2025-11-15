@@ -2,10 +2,10 @@
 
 // Copyright (c) 2017-2024 Zalando SE
 
-import { describe, test, expect } from 'vitest';
-import { createSegment } from '../../../src/geometry/segment-calculator.js';
+import { describe, expect, test } from 'vitest';
 import { generateQuadrants } from '../../../src/geometry/quadrant-calculator.js';
 import { generateRings } from '../../../src/geometry/ring-calculator.js';
+import { createSegment } from '../../../src/geometry/segment-calculator.js';
 
 describe('Segment Calculator', () => {
   // Test fixtures
@@ -13,7 +13,7 @@ describe('Segment Calculator', () => {
   const rings = generateRings(4, 400);
   const config = {
     segment_radial_padding: 16,
-    segment_angular_padding: 12
+    segment_angular_padding: 12,
   };
 
   // Simple random function for testing
@@ -49,8 +49,8 @@ describe('Segment Calculator', () => {
         expect(point).toHaveProperty('y');
         expect(typeof point.x).toBe('number');
         expect(typeof point.y).toBe('number');
-        expect(isFinite(point.x)).toBe(true);
-        expect(isFinite(point.y)).toBe(true);
+        expect(Number.isFinite(point.x)).toBe(true);
+        expect(Number.isFinite(point.y)).toBe(true);
       }
     });
 
@@ -191,7 +191,7 @@ describe('Segment Calculator', () => {
       // GIVEN: a very narrow ring (5 pixels) with large padding that exceeds the ring width
       const narrowRings = [
         { radius: 100 },
-        { radius: 105 }  // Only 5 pixels wide
+        { radius: 105 }, // Only 5 pixels wide
       ];
       const largePadding = { segment_radial_padding: 10, segment_angular_padding: 12 };
 
@@ -200,8 +200,8 @@ describe('Segment Calculator', () => {
 
       // THEN: should handle gracefully without crashing and return valid point
       const point = segment.random();
-      expect(isFinite(point.x)).toBe(true);
-      expect(isFinite(point.y)).toBe(true);
+      expect(Number.isFinite(point.x)).toBe(true);
+      expect(Number.isFinite(point.y)).toBe(true);
     });
 
     test('clipping is idempotent', () => {
@@ -230,8 +230,8 @@ describe('Segment Calculator', () => {
       const point = segment.random();
 
       // THEN: should handle 6-quadrant configuration correctly
-      expect(isFinite(point.x)).toBe(true);
-      expect(isFinite(point.y)).toBe(true);
+      expect(Number.isFinite(point.x)).toBe(true);
+      expect(Number.isFinite(point.y)).toBe(true);
     });
 
     test('works with 8 rings', () => {
@@ -243,8 +243,8 @@ describe('Segment Calculator', () => {
       const point = segment.random();
 
       // THEN: should handle 8-ring configuration correctly
-      expect(isFinite(point.x)).toBe(true);
-      expect(isFinite(point.y)).toBe(true);
+      expect(Number.isFinite(point.x)).toBe(true);
+      expect(Number.isFinite(point.y)).toBe(true);
     });
 
     test('maintains point within bounds after multiple clips', () => {

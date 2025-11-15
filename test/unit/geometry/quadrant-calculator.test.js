@@ -2,11 +2,11 @@
 
 // Copyright (c) 2017-2024 Zalando SE
 
-import { describe, test, expect } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import {
-  generateQuadrants,
   computeQuadrantBounds,
-  generateQuadrantOrder
+  generateQuadrantOrder,
+  generateQuadrants,
 } from '../../../src/geometry/quadrant-calculator.js';
 
 describe('Quadrant Calculator', () => {
@@ -104,7 +104,7 @@ describe('Quadrant Calculator', () => {
 
       // THEN: should compute bounds with padding around the circle
       expect(bounds.min.x).toBeCloseTo(-120); // -100 - 20 padding
-      expect(bounds.max.x).toBeCloseTo(120);  // 100 + 20 padding
+      expect(bounds.max.x).toBeCloseTo(120); // 100 + 20 padding
       expect(bounds.min.y).toBeCloseTo(-120);
       expect(bounds.max.y).toBeCloseTo(120);
     });
@@ -114,10 +114,10 @@ describe('Quadrant Calculator', () => {
       const bounds = computeQuadrantBounds(0, Math.PI / 2, 100);
 
       // THEN: should compute bounds for right quadrant only
-      expect(bounds.min.x).toBeCloseTo(-20);  // min cos(0 to π/2) = 0
-      expect(bounds.max.x).toBeCloseTo(120);  // max cos(0) = 1
-      expect(bounds.min.y).toBeCloseTo(-20);  // min sin(0) = 0
-      expect(bounds.max.y).toBeCloseTo(120);  // max sin(π/2) = 1
+      expect(bounds.min.x).toBeCloseTo(-20); // min cos(0 to π/2) = 0
+      expect(bounds.max.x).toBeCloseTo(120); // max cos(0) = 1
+      expect(bounds.min.y).toBeCloseTo(-20); // min sin(0) = 0
+      expect(bounds.max.y).toBeCloseTo(120); // max sin(π/2) = 1
     });
 
     test('computes bounds for top quadrant (π/2 to π)', () => {
@@ -126,9 +126,9 @@ describe('Quadrant Calculator', () => {
 
       // THEN: should compute bounds for top quadrant only
       expect(bounds.min.x).toBeCloseTo(-120); // min cos(π) = -1
-      expect(bounds.max.x).toBeCloseTo(20);   // max cos(π/2) = 0
-      expect(bounds.min.y).toBeCloseTo(-20);  // min sin at π/2 or π
-      expect(bounds.max.y).toBeCloseTo(120);  // max sin(π/2) = 1
+      expect(bounds.max.x).toBeCloseTo(20); // max cos(π/2) = 0
+      expect(bounds.min.y).toBeCloseTo(-20); // min sin at π/2 or π
+      expect(bounds.max.y).toBeCloseTo(120); // max sin(π/2) = 1
     });
 
     test('handles angles wrapping around 2π', () => {

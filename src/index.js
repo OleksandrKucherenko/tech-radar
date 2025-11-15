@@ -1,26 +1,30 @@
 // The MIT License (MIT)
 // Copyright (c) 2017-2024 Zalando SE
 
-import { polar, cartesian, boundedInterval, boundedRing, boundedBox } from './math/coordinates.js';
-import { SeededRandom } from './math/random.js';
-import { validateConfig } from './validation/config-validator.js';
-import { generateQuadrants, computeQuadrantBounds } from './geometry/quadrant-calculator.js';
+import { applyConfigDefaults, calculateDimensions, configureOffsets } from './config/config-defaults.js';
+import { computeQuadrantBounds, generateQuadrants } from './geometry/quadrant-calculator.js';
 import { generateRings } from './geometry/ring-calculator.js';
 import { createSegment } from './geometry/segment-calculator.js';
+import { boundedBox, boundedInterval, boundedRing } from './math/coordinates.js';
+import { SeededRandom } from './math/random.js';
 import { EntryProcessor } from './processing/entry-processor.js';
-import { translate, viewbox, computeLegendOffsets, ensureLayoutStructure, legend_transform } from './rendering/helpers.js';
-import { renderGrid, renderTitleAndFooter } from './rendering/grid-renderer.js';
-import { renderLegendColumns } from './rendering/legend-renderer.js';
-import { createBubble, showBubble, hideBubble, highlightLegendItem, unhighlightLegendItem, createBlipInteractions } from './rendering/interactions.js';
 import { renderBlips } from './rendering/blip-renderer.js';
-import { runForceSimulation } from './rendering/force-simulation.js';
 import { renderDebugVisualization } from './rendering/debug-renderer.js';
-import { applyConfigDefaults, calculateDimensions, configureOffsets } from './config/config-defaults.js';
+import { runForceSimulation } from './rendering/force-simulation.js';
+import { renderGrid, renderTitleAndFooter } from './rendering/grid-renderer.js';
+import {
+  createBubble,
+  hideBubble,
+  highlightLegendItem,
+  showBubble,
+  unhighlightLegendItem,
+} from './rendering/interactions.js';
+import { renderLegendColumns } from './rendering/legend-renderer.js';
 import { setupSvg } from './rendering/svg-setup.js';
 import { renderRingDescriptionsTable } from './rendering/table-renderer.js';
+import { validateConfig } from './validation/config-validator.js';
 
 function radar_visualization(config) {
-
   applyConfigDefaults(config);
   const dimensions = calculateDimensions(config);
   const target_outer_radius = dimensions.target_outer_radius;
@@ -30,7 +34,7 @@ function radar_visualization(config) {
   const rng = new SeededRandom(42);
   const random = () => rng.next();
   const random_between = (min, max) => rng.between(min, max);
-  const normal_between = (min, max) => rng.normalBetween(min, max);
+  const _normal_between = (min, max) => rng.normalBetween(min, max);
 
   const num_quadrants = config.quadrants.length;
   const quadrants = generateQuadrants(num_quadrants);
@@ -39,17 +43,17 @@ function radar_visualization(config) {
   const rings = generateRings(num_rings, target_outer_radius);
   const outer_radius = rings[rings.length - 1].radius;
 
-  const quadrant_bounds = quadrants.map(function (q) {
-    return computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius);
-  });
+  const _quadrant_bounds = quadrants.map(q =>
+    computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius)
+  );
 
   configureOffsets(config, outer_radius, num_quadrants);
 
-  const bounded_interval = boundedInterval;
-  const bounded_ring = boundedRing;
-  const bounded_box = boundedBox;
+  const _bounded_interval = boundedInterval;
+  const _bounded_ring = boundedRing;
+  const _bounded_box = boundedBox;
 
-  function segment(quadrant, ring) {
+  function _segment(quadrant, ring) {
     return createSegment(quadrant, ring, quadrants, rings, config, random_between);
   }
 
@@ -69,12 +73,12 @@ function radar_visualization(config) {
   }
 
   const svgElements = setupSvg(config, quadrants, rings, dimensions);
-  const { svg, radar, legendLeftColumn, legendRightColumn, grid } = svgElements;
+  const { radar, legendLeftColumn, legendRightColumn, grid } = svgElements;
 
   renderGrid(grid, config, quadrants, rings, outer_radius);
 
   if (!config.footer) {
-    config.footer = "▲ moved up     ▼ moved down     ★ new     ⬤ no change";
+    config.footer = '▲ moved up     ▼ moved down     ★ new     ⬤ no change';
   }
   renderTitleAndFooter(radar, config);
 
@@ -98,10 +102,10 @@ function radar_visualization(config) {
     legendRightColumn.style('display', 'none').html('');
   }
 
-  var rink = radar.append("g").attr("id", "rink");
-  var bubble = createBubble(radar, config.font_family);
+  const rink = radar.append('g').attr('id', 'rink');
+  const _bubble = createBubble(radar, config.font_family);
 
-  var blips = renderBlips(
+  const blips = renderBlips(
     rink,
     config.entries,
     config,
@@ -114,15 +118,7 @@ function radar_visualization(config) {
   runForceSimulation(config.entries, blips, config);
 
   if (config.debug_geometry) {
-    renderDebugVisualization(
-      radar,
-      config,
-      quadrants,
-      rings,
-      num_quadrants,
-      num_rings,
-      segmented
-    );
+    renderDebugVisualization(radar, config, quadrants, rings, num_quadrants, num_rings, segmented);
   }
 
   if (config.print_ring_descriptions_table) {

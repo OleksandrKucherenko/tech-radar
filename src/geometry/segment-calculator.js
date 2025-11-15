@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import { polar, cartesian, boundedInterval, boundedBox } from '../math/coordinates.js';
+import { boundedBox, boundedInterval, cartesian, polar } from '../math/coordinates.js';
 import { computeQuadrantBounds } from './quadrant-calculator.js';
 
 /**
@@ -109,7 +109,7 @@ export function createSegment(quadrantIndex, ringIndex, quadrants, rings, config
      * @param {Object} d - Data object with x, y properties
      * @returns {number} Clipped x-coordinate
      */
-    clipx: function (d) {
+    clipx: d => {
       const clipped = clampAndAssign(d);
       return clipped.x;
     },
@@ -119,7 +119,7 @@ export function createSegment(quadrantIndex, ringIndex, quadrants, rings, config
      * @param {Object} d - Data object with x, y properties
      * @returns {number} Clipped y-coordinate
      */
-    clipy: function (d) {
+    clipy: d => {
       const clipped = clampAndAssign(d);
       return clipped.y;
     },
@@ -130,7 +130,7 @@ export function createSegment(quadrantIndex, ringIndex, quadrants, rings, config
      * @param {Object} d - Data object with x, y properties
      * @returns {Object} Clipped point with x, y coordinates
      */
-    clip: function (d) {
+    clip: d => {
       const clipped = clampPoint({ x: d.x, y: d.y });
       d.x = clipped.x;
       d.y = clipped.y;
@@ -141,11 +141,10 @@ export function createSegment(quadrantIndex, ringIndex, quadrants, rings, config
      * Generates a random point within the segment bounds.
      * @returns {Object} Random point with x, y coordinates
      */
-    random: function () {
-      return cartesian({
+    random: () =>
+      cartesian({
         t: randomBetween(angle_min, angle_max),
-        r: randomBetween(inner_radius, outer_radius)
-      });
-    }
+        r: randomBetween(inner_radius, outer_radius),
+      }),
   };
 }

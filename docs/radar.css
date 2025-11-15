@@ -1,5 +1,5 @@
 body {
-  font-family: 'Source Sans Pro', arial, helvetica, sans-serif;
+  font-family: "Source Sans Pro", arial, helvetica, sans-serif;
   padding-bottom: 50px;
 }
 
@@ -66,13 +66,13 @@ td {
 .left {
   position: absolute;
   left: 0;
-  width: 25% !important;
+  width: 25%;
 }
 
 .right {
   position: absolute;
   right: 0;
-  width: 25% !important;
+  width: 25%;
 }
 
 .legend-section {
@@ -126,7 +126,7 @@ td {
 
 .legend-highlight {
   background: #333;
-  color: #fff !important;
+  color: #fff;
 }
 
 .demo-links {
@@ -147,7 +147,9 @@ td {
 /* Enhanced SVG element styling */
 .blip {
   cursor: pointer;
-  transition: opacity 0.15s ease, filter 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    filter 0.15s ease;
 }
 
 .blip:hover {
@@ -187,7 +189,10 @@ td {
 }
 
 #bubble text {
-  text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;
+  text-shadow:
+    0 0 3px white,
+    0 0 3px white,
+    0 0 3px white;
   font-weight: 500;
 }
 
@@ -247,7 +252,8 @@ td {
     filter: none;
   }
 
-  nav, footer {
+  nav,
+  footer {
     page-break-inside: avoid;
   }
 }

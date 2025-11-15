@@ -24,45 +24,42 @@ import { computeLegendOffsets } from '../rendering/helpers.js';
  */
 export function applyConfigDefaults(config) {
   // SVG element configuration
-  config.svg_id = config.svg || "radar";
+  config.svg_id = config.svg || 'radar';
   config.width = config.width || 1450;
   config.height = config.height || 1000;
 
   // Color scheme
-  config.colors = ("colors" in config) ? config.colors : {
-    background: "#fff",
-    grid: '#dddde0',
-    inactive: "#ddd"
-  };
+  config.colors =
+    'colors' in config
+      ? config.colors
+      : {
+          background: '#fff',
+          grid: '#dddde0',
+          inactive: '#ddd',
+        };
 
   // Layout flags
-  config.print_layout = ("print_layout" in config) ? config.print_layout : true;
-  config.links_in_new_tabs = ("links_in_new_tabs" in config) ? config.links_in_new_tabs : true;
+  config.print_layout = 'print_layout' in config ? config.print_layout : true;
+  config.links_in_new_tabs = 'links_in_new_tabs' in config ? config.links_in_new_tabs : true;
   config.repo_url = config.repo_url || '#';
-  config.print_ring_descriptions_table = ("print_ring_descriptions_table" in config)
-    ? config.print_ring_descriptions_table
-    : false;
+  config.print_ring_descriptions_table =
+    'print_ring_descriptions_table' in config ? config.print_ring_descriptions_table : false;
 
   // Spacing and sizing
   config.legend_column_width = config.legend_column_width || 140;
   config.legend_line_height = config.legend_line_height || 10;
-  config.segment_radial_padding = ("segment_radial_padding" in config)
-    ? config.segment_radial_padding
-    : 16;
-  config.segment_angular_padding = ("segment_angular_padding" in config)
-    ? config.segment_angular_padding
-    : 12;
-  config.chart_padding = ("chart_padding" in config) ? config.chart_padding : 60;
-  config.blip_collision_radius = ("blip_collision_radius" in config)
-    ? config.blip_collision_radius
-    : 14;
+  config.segment_radial_padding = 'segment_radial_padding' in config ? config.segment_radial_padding : 16;
+  config.segment_angular_padding = 'segment_angular_padding' in config ? config.segment_angular_padding : 12;
+  config.chart_padding = 'chart_padding' in config ? config.chart_padding : 60;
+  config.blip_collision_radius = 'blip_collision_radius' in config ? config.blip_collision_radius : 14;
   config.legend_vertical_spacing = config.legend_vertical_spacing || 20;
-  config.radar_horizontal_offset = ("radar_horizontal_offset" in config)
-    ? config.radar_horizontal_offset
-    : Math.round(config.legend_column_width * 0.25);
+  config.radar_horizontal_offset =
+    'radar_horizontal_offset' in config
+      ? config.radar_horizontal_offset
+      : Math.round(config.legend_column_width * 0.25);
 
   // Debug mode
-  config.debug_geometry = ("debug_geometry" in config) ? config.debug_geometry : false;
+  config.debug_geometry = 'debug_geometry' in config ? config.debug_geometry : false;
 
   // Apply responsive scaling for smaller viewports
   const viewport_width = window.innerWidth || document.documentElement.clientWidth;
@@ -80,7 +77,7 @@ export function applyConfigDefaults(config) {
 
   if (grid_quadrants >= 5 || grid_rings >= 6) {
     // Increase base size for complex grids to prevent overcrowding
-    const complexity_multiplier = 1 + ((grid_quadrants - 4) * 0.05) + ((grid_rings - 4) * 0.03);
+    const complexity_multiplier = 1 + (grid_quadrants - 4) * 0.05 + (grid_rings - 4) * 0.03;
 
     if (!config.width_override) {
       config.width = Math.round(config.width * Math.min(complexity_multiplier, 1.3));
@@ -114,13 +111,10 @@ export function calculateDimensions(config) {
   // Calculate space for title and footer
   const title_height = config.print_layout && config.title ? 60 : 0;
   const footer_height = config.print_layout ? 40 : 0;
-  const minimum_chart_height = (2 * config.chart_padding) + 40;
+  const minimum_chart_height = 2 * config.chart_padding + 40;
 
-  const available_height = Math.max(
-    minimum_chart_height,
-    config.height - title_height - footer_height
-  );
-  const available_width = Math.max((2 * config.chart_padding) + 40, config.width);
+  const available_height = Math.max(minimum_chart_height, config.height - title_height - footer_height);
+  const available_width = Math.max(2 * config.chart_padding + 40, config.width);
 
   const raw_outer_radius = Math.min(available_width, available_height) / 2 - config.chart_padding;
   const target_outer_radius = Math.max(10, raw_outer_radius);
@@ -130,7 +124,7 @@ export function calculateDimensions(config) {
     footer_height,
     available_height,
     available_width,
-    target_outer_radius
+    target_outer_radius,
   };
 }
 
@@ -149,7 +143,7 @@ export function configureOffsets(config, outerRadius, numQuadrants) {
   if (!config.title_offset) {
     config.title_offset = {
       x: -outerRadius,
-      y: -outerRadius - 40
+      y: -outerRadius - 40,
     };
   }
 
@@ -157,7 +151,7 @@ export function configureOffsets(config, outerRadius, numQuadrants) {
   if (!config.footer_offset) {
     config.footer_offset = {
       x: -outerRadius,
-      y: outerRadius + 60
+      y: outerRadius + 60,
     };
   }
 

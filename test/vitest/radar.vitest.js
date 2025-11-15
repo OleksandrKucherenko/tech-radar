@@ -6,7 +6,7 @@
  * Tests follow GIVEN/WHEN/THEN pattern for clarity and maintainability.
  */
 
-import { describe, test, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 import radar_visualization from '../../docs/radar.js';
 
 // Helper to create a minimal valid configuration
@@ -21,16 +21,16 @@ function createMinimalConfig(options = {}) {
       { name: 'Languages' },
       { name: 'Infrastructure' },
       { name: 'Datastores' },
-      { name: 'Data Management' }
+      { name: 'Data Management' },
     ],
     rings: options.rings || [
       { name: 'ADOPT', color: '#5ba300' },
       { name: 'TRIAL', color: '#009eb0' },
       { name: 'ASSESS', color: '#c7ba00' },
-      { name: 'HOLD', color: '#e09b96' }
+      { name: 'HOLD', color: '#e09b96' },
     ],
     entries: options.entries || [],
-    ...options
+    ...options,
   };
 }
 
@@ -47,7 +47,7 @@ describe('Configuration Validation', () => {
   test('should throw error for less than 2 quadrants', () => {
     // GIVEN: a configuration with only 1 quadrant
     const config = createMinimalConfig({
-      quadrants: [{ name: 'Only One' }]
+      quadrants: [{ name: 'Only One' }],
     });
 
     // WHEN: the radar visualization is initialized
@@ -58,7 +58,9 @@ describe('Configuration Validation', () => {
   test('should throw error for more than 8 quadrants', () => {
     // GIVEN: a configuration with 9 quadrants
     const config = createMinimalConfig({
-      quadrants: Array(9).fill(null).map((_, i) => ({ name: `Q${i}` }))
+      quadrants: Array(9)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
     });
 
     // WHEN: the radar visualization is initialized
@@ -72,8 +74,8 @@ describe('Configuration Validation', () => {
       rings: [
         { name: 'ADOPT', color: '#5ba300' },
         { name: 'TRIAL', color: '#009eb0' },
-        { name: 'ASSESS', color: '#c7ba00' }
-      ]
+        { name: 'ASSESS', color: '#c7ba00' },
+      ],
     });
 
     // WHEN: the radar visualization is initialized
@@ -84,7 +86,9 @@ describe('Configuration Validation', () => {
   test('should throw error for more than 8 rings', () => {
     // GIVEN: a configuration with 9 rings
     const config = createMinimalConfig({
-      rings: Array(9).fill(null).map((_, i) => ({ name: `Ring${i}`, color: '#000' }))
+      rings: Array(9)
+        .fill(null)
+        .map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
     });
 
     // WHEN: the radar visualization is initialized
@@ -95,11 +99,8 @@ describe('Configuration Validation', () => {
   test('should accept 2 quadrants (minimum)', () => {
     // GIVEN: a configuration with 2 quadrants (minimum allowed)
     const config = createMinimalConfig({
-      quadrants: [
-        { name: 'Frontend' },
-        { name: 'Backend' }
-      ],
-      entries: []
+      quadrants: [{ name: 'Frontend' }, { name: 'Backend' }],
+      entries: [],
     });
 
     // WHEN: the radar visualization is initialized
@@ -110,8 +111,10 @@ describe('Configuration Validation', () => {
   test('should accept 8 quadrants (maximum)', () => {
     // GIVEN: a configuration with 8 quadrants (maximum allowed)
     const config = createMinimalConfig({
-      quadrants: Array(8).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      entries: []
+      quadrants: Array(8)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      entries: [],
     });
 
     // WHEN: the radar visualization is initialized
@@ -122,8 +125,10 @@ describe('Configuration Validation', () => {
   test('should accept 4 rings (minimum)', () => {
     // GIVEN: a configuration with 4 rings (minimum allowed)
     const config = createMinimalConfig({
-      rings: Array(4).fill(null).map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
-      entries: []
+      rings: Array(4)
+        .fill(null)
+        .map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
+      entries: [],
     });
 
     // WHEN: the radar visualization is initialized
@@ -134,8 +139,10 @@ describe('Configuration Validation', () => {
   test('should accept 8 rings (maximum)', () => {
     // GIVEN: a configuration with 8 rings (maximum allowed)
     const config = createMinimalConfig({
-      rings: Array(8).fill(null).map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
-      entries: []
+      rings: Array(8)
+        .fill(null)
+        .map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
+      entries: [],
     });
 
     // WHEN: the radar visualization is initialized
@@ -148,9 +155,7 @@ describe('Entry Validation', () => {
   test('should throw error for entry with invalid quadrant index', () => {
     // GIVEN: a configuration with an entry having quadrant index 5 when only 4 quadrants exist
     const config = createMinimalConfig({
-      entries: [
-        { label: 'Test Tech', quadrant: 5, ring: 0, moved: 0, active: true }
-      ]
+      entries: [{ label: 'Test Tech', quadrant: 5, ring: 0, moved: 0, active: true }],
     });
 
     // WHEN: the radar visualization is initialized
@@ -161,9 +166,7 @@ describe('Entry Validation', () => {
   test('should throw error for entry with negative quadrant index', () => {
     // GIVEN: a configuration with an entry having negative quadrant index
     const config = createMinimalConfig({
-      entries: [
-        { label: 'Test Tech', quadrant: -1, ring: 0, moved: 0, active: true }
-      ]
+      entries: [{ label: 'Test Tech', quadrant: -1, ring: 0, moved: 0, active: true }],
     });
 
     // WHEN: the radar visualization is initialized
@@ -174,9 +177,7 @@ describe('Entry Validation', () => {
   test('should throw error for entry with invalid ring index', () => {
     // GIVEN: a configuration with an entry having ring index 5 when only 4 rings exist
     const config = createMinimalConfig({
-      entries: [
-        { label: 'Test Tech', quadrant: 0, ring: 5, moved: 0, active: true }
-      ]
+      entries: [{ label: 'Test Tech', quadrant: 0, ring: 5, moved: 0, active: true }],
     });
 
     // WHEN: the radar visualization is initialized
@@ -187,9 +188,7 @@ describe('Entry Validation', () => {
   test('should throw error for entry with negative ring index', () => {
     // GIVEN: a configuration with an entry having negative ring index
     const config = createMinimalConfig({
-      entries: [
-        { label: 'Test Tech', quadrant: 0, ring: -1, moved: 0, active: true }
-      ]
+      entries: [{ label: 'Test Tech', quadrant: 0, ring: -1, moved: 0, active: true }],
     });
 
     // WHEN: the radar visualization is initialized
@@ -203,8 +202,8 @@ describe('Entry Validation', () => {
       entries: [
         { label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true },
         { label: 'TypeScript', quadrant: 0, ring: 1, moved: 1, active: true },
-        { label: 'Python', quadrant: 1, ring: 2, moved: 0, active: true }
-      ]
+        { label: 'Python', quadrant: 1, ring: 2, moved: 0, active: true },
+      ],
     });
 
     // WHEN: the radar visualization is initialized
@@ -219,7 +218,7 @@ describe('Entry Positioning and Layout', () => {
     const entries = [
       { label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true },
       { label: 'TypeScript', quadrant: 0, ring: 0, moved: 0, active: true },
-      { label: 'Python', quadrant: 1, ring: 1, moved: 0, active: true }
+      { label: 'Python', quadrant: 1, ring: 1, moved: 0, active: true },
     ];
     const config = createMinimalConfig({ entries });
 
@@ -237,7 +236,7 @@ describe('Entry Positioning and Layout', () => {
     // THEN: IDs should be strings of positive numbers
     ids.forEach(id => {
       expect(typeof id).toBe('string');
-      expect(parseInt(id)).toBeGreaterThan(0);
+      expect(parseInt(id, 10)).toBeGreaterThan(0);
     });
   });
 
@@ -246,7 +245,7 @@ describe('Entry Positioning and Layout', () => {
     const entries = [
       { label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true },
       { label: 'TypeScript', quadrant: 1, ring: 1, moved: 0, active: true },
-      { label: 'Python', quadrant: 2, ring: 2, moved: 0, active: true }
+      { label: 'Python', quadrant: 2, ring: 2, moved: 0, active: true },
     ];
     const config = createMinimalConfig({ entries });
 
@@ -257,8 +256,8 @@ describe('Entry Positioning and Layout', () => {
     entries.forEach(entry => {
       expect(typeof entry.x).toBe('number');
       expect(typeof entry.y).toBe('number');
-      expect(isFinite(entry.x)).toBe(true);
-      expect(isFinite(entry.y)).toBe(true);
+      expect(Number.isFinite(entry.x)).toBe(true);
+      expect(Number.isFinite(entry.y)).toBe(true);
     });
   });
 
@@ -267,7 +266,7 @@ describe('Entry Positioning and Layout', () => {
     const entries = [
       { label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true },
       { label: 'TypeScript', quadrant: 0, ring: 1, moved: 0, active: true },
-      { label: 'Python', quadrant: 0, ring: 2, moved: 0, active: true }
+      { label: 'Python', quadrant: 0, ring: 2, moved: 0, active: true },
     ];
     const config = createMinimalConfig({ entries });
 
@@ -285,7 +284,7 @@ describe('Entry Positioning and Layout', () => {
     const entries = [
       { label: 'Zebra', quadrant: 0, ring: 0, moved: 0, active: true },
       { label: 'Apple', quadrant: 0, ring: 0, moved: 0, active: true },
-      { label: 'Mango', quadrant: 0, ring: 0, moved: 0, active: true }
+      { label: 'Mango', quadrant: 0, ring: 0, moved: 0, active: true },
     ];
     const config = createMinimalConfig({ entries });
 
@@ -295,7 +294,7 @@ describe('Entry Positioning and Layout', () => {
     // THEN: entries should be sorted alphabetically by label
     // (IDs are assigned after sorting, so we check ID order)
     const sortedLabels = entries.map(e => e.label).sort();
-    const entryLabelsById = entries.sort((a, b) => parseInt(a.id) - parseInt(b.id)).map(e => e.label);
+    const entryLabelsById = entries.sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10)).map(e => e.label);
     expect(entryLabelsById).toEqual(sortedLabels);
   });
 });
@@ -304,9 +303,7 @@ describe('SVG Generation', () => {
   test('should create SVG elements in the DOM', () => {
     // GIVEN: a configuration with an entry
     const config = createMinimalConfig({
-      entries: [
-        { label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true }
-      ]
+      entries: [{ label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true }],
     });
 
     // WHEN: the radar visualization is created
@@ -326,7 +323,7 @@ describe('SVG Generation', () => {
     const config = createMinimalConfig({
       width: 800,
       height: 600,
-      entries: []
+      entries: [],
     });
 
     // WHEN: the radar visualization is created
@@ -341,7 +338,7 @@ describe('SVG Generation', () => {
   test('should create grid with quadrant lines', () => {
     // GIVEN: a standard 4-quadrant configuration
     const config = createMinimalConfig({
-      entries: []
+      entries: [],
     });
 
     // WHEN: the radar visualization is created
@@ -358,7 +355,7 @@ describe('SVG Generation', () => {
     const entries = [
       { label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true },
       { label: 'TypeScript', quadrant: 1, ring: 1, moved: 1, active: true },
-      { label: 'Python', quadrant: 2, ring: 2, moved: 0, active: true }
+      { label: 'Python', quadrant: 2, ring: 2, moved: 0, active: true },
     ];
     const config = createMinimalConfig({ entries });
 
@@ -374,9 +371,7 @@ describe('SVG Generation', () => {
 describe('Movement Indicators', () => {
   test('should render circle for entries with moved=0 (no change)', () => {
     // GIVEN: an entry with moved=0 indicating no change
-    const entries = [
-      { label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true }
-    ];
+    const entries = [{ label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true }];
     const config = createMinimalConfig({ entries });
 
     // WHEN: the radar visualization is created
@@ -390,9 +385,7 @@ describe('Movement Indicators', () => {
 
   test('should render triangle pointing up for entries with moved=1', () => {
     // GIVEN: an entry with moved=1 indicating moved inward
-    const entries = [
-      { label: 'JavaScript', quadrant: 0, ring: 0, moved: 1, active: true }
-    ];
+    const entries = [{ label: 'JavaScript', quadrant: 0, ring: 0, moved: 1, active: true }];
     const config = createMinimalConfig({ entries });
 
     // WHEN: the radar visualization is created
@@ -407,9 +400,7 @@ describe('Movement Indicators', () => {
 
   test('should render triangle pointing down for entries with moved=-1', () => {
     // GIVEN: an entry with moved=-1 indicating moved outward
-    const entries = [
-      { label: 'JavaScript', quadrant: 0, ring: 0, moved: -1, active: true }
-    ];
+    const entries = [{ label: 'JavaScript', quadrant: 0, ring: 0, moved: -1, active: true }];
     const config = createMinimalConfig({ entries });
 
     // WHEN: the radar visualization is created
@@ -424,9 +415,7 @@ describe('Movement Indicators', () => {
 
   test('should render star for entries with moved=2 (new)', () => {
     // GIVEN: an entry with moved=2 indicating new entry
-    const entries = [
-      { label: 'JavaScript', quadrant: 0, ring: 0, moved: 2, active: true }
-    ];
+    const entries = [{ label: 'JavaScript', quadrant: 0, ring: 0, moved: 2, active: true }];
     const config = createMinimalConfig({ entries });
 
     // WHEN: the radar visualization is created
@@ -445,7 +434,7 @@ describe('Basic Functionality', () => {
   test('should handle empty entries array', () => {
     // GIVEN: a configuration with no entries
     const config = createMinimalConfig({
-      entries: []
+      entries: [],
     });
 
     // WHEN: the radar visualization is created
@@ -458,7 +447,7 @@ describe('Basic Functionality', () => {
     const config = createMinimalConfig({
       width: 800,
       height: 600,
-      entries: []
+      entries: [],
     });
 
     // WHEN: the radar visualization is created
@@ -473,17 +462,14 @@ describe('Basic Functionality', () => {
   test('should apply default values for missing config properties', () => {
     // GIVEN: a minimal configuration without optional properties
     const config = {
-      quadrants: [
-        { name: 'Q1' },
-        { name: 'Q2' }
-      ],
+      quadrants: [{ name: 'Q1' }, { name: 'Q2' }],
       rings: [
         { name: 'R1', color: '#000' },
         { name: 'R2', color: '#111' },
         { name: 'R3', color: '#222' },
-        { name: 'R4', color: '#333' }
+        { name: 'R4', color: '#333' },
       ],
-      entries: []
+      entries: [],
     };
 
     // WHEN: the radar visualization is created
@@ -500,7 +486,7 @@ describe('Basic Functionality', () => {
     const entries = [
       { label: 'C++', quadrant: 0, ring: 0, moved: 0, active: true },
       { label: 'F#', quadrant: 0, ring: 1, moved: 0, active: true },
-      { label: 'Node.js', quadrant: 1, ring: 0, moved: 0, active: true }
+      { label: 'Node.js', quadrant: 1, ring: 0, moved: 0, active: true },
     ];
     const config = createMinimalConfig({ entries });
 
@@ -521,7 +507,7 @@ describe('Reproducible Positioning', () => {
     const entries1 = [
       { label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true },
       { label: 'TypeScript', quadrant: 0, ring: 1, moved: 0, active: true },
-      { label: 'Python', quadrant: 1, ring: 0, moved: 0, active: true }
+      { label: 'Python', quadrant: 1, ring: 0, moved: 0, active: true },
     ];
     const config1 = createMinimalConfig({ entries: entries1 });
 
@@ -536,7 +522,7 @@ describe('Reproducible Positioning', () => {
     const entries2 = [
       { label: 'JavaScript', quadrant: 0, ring: 0, moved: 0, active: true },
       { label: 'TypeScript', quadrant: 0, ring: 1, moved: 0, active: true },
-      { label: 'Python', quadrant: 1, ring: 0, moved: 0, active: true }
+      { label: 'Python', quadrant: 1, ring: 0, moved: 0, active: true },
     ];
     const config2 = createMinimalConfig({ entries: entries2 });
 
@@ -553,14 +539,11 @@ describe('Variable Quadrant Configurations', () => {
   test('should correctly render 2 quadrants', () => {
     // GIVEN: a configuration with 2 quadrants
     const config = createMinimalConfig({
-      quadrants: [
-        { name: 'Frontend' },
-        { name: 'Backend' }
-      ],
+      quadrants: [{ name: 'Frontend' }, { name: 'Backend' }],
       entries: [
         { label: 'React', quadrant: 0, ring: 0, moved: 0, active: true },
-        { label: 'Node.js', quadrant: 1, ring: 0, moved: 0, active: true }
-      ]
+        { label: 'Node.js', quadrant: 1, ring: 0, moved: 0, active: true },
+      ],
     });
 
     // WHEN: the radar visualization is created
@@ -574,14 +557,18 @@ describe('Variable Quadrant Configurations', () => {
   test('should correctly render 6 quadrants', () => {
     // GIVEN: a configuration with 6 quadrants
     const config = createMinimalConfig({
-      quadrants: Array(6).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      entries: Array(6).fill(null).map((_, i) => ({
-        label: `Tech${i}`,
-        quadrant: i,
-        ring: 0,
-        moved: 0,
-        active: true
-      }))
+      quadrants: Array(6)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      entries: Array(6)
+        .fill(null)
+        .map((_, i) => ({
+          label: `Tech${i}`,
+          quadrant: i,
+          ring: 0,
+          moved: 0,
+          active: true,
+        })),
     });
 
     // WHEN: the radar visualization is created
@@ -597,14 +584,18 @@ describe('Variable Ring Configurations', () => {
   test('should correctly render 5 rings', () => {
     // GIVEN: a configuration with 5 rings
     const config = createMinimalConfig({
-      rings: Array(5).fill(null).map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
-      entries: Array(5).fill(null).map((_, i) => ({
-        label: `Tech${i}`,
-        quadrant: 0,
-        ring: i,
-        moved: 0,
-        active: true
-      }))
+      rings: Array(5)
+        .fill(null)
+        .map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
+      entries: Array(5)
+        .fill(null)
+        .map((_, i) => ({
+          label: `Tech${i}`,
+          quadrant: 0,
+          ring: i,
+          moved: 0,
+          active: true,
+        })),
     });
 
     // WHEN: the radar visualization is created
@@ -618,14 +609,18 @@ describe('Variable Ring Configurations', () => {
   test('should correctly render 8 rings', () => {
     // GIVEN: a configuration with 8 rings (maximum)
     const config = createMinimalConfig({
-      rings: Array(8).fill(null).map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
-      entries: Array(8).fill(null).map((_, i) => ({
-        label: `Tech${i}`,
-        quadrant: 0,
-        ring: i,
-        moved: 0,
-        active: true
-      }))
+      rings: Array(8)
+        .fill(null)
+        .map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
+      entries: Array(8)
+        .fill(null)
+        .map((_, i) => ({
+          label: `Tech${i}`,
+          quadrant: 0,
+          ring: i,
+          moved: 0,
+          active: true,
+        })),
     });
 
     // WHEN: the radar visualization is created
@@ -641,14 +636,18 @@ describe('Grid Distribution and Spatial Positioning', () => {
   test('should distribute entries without extreme clustering in narrow sectors (8 quadrants)', () => {
     // GIVEN: 8 quadrant configuration with 10 entries per quadrant/ring
     const config = createMinimalConfig({
-      quadrants: Array(8).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      entries: Array(80).fill(null).map((_, i) => ({
-        label: `Tech${i}`,
-        quadrant: Math.floor(i / 10),
-        ring: i % 4,
-        moved: 0,
-        active: true
-      }))
+      quadrants: Array(8)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      entries: Array(80)
+        .fill(null)
+        .map((_, i) => ({
+          label: `Tech${i}`,
+          quadrant: Math.floor(i / 10),
+          ring: i % 4,
+          moved: 0,
+          active: true,
+        })),
     });
 
     // WHEN: the radar visualization is created
@@ -667,7 +666,7 @@ describe('Grid Distribution and Spatial Positioning', () => {
 
     // Calculate standard deviation to measure spread
     const mean = xPositions.reduce((a, b) => a + b, 0) / xPositions.length;
-    const variance = xPositions.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / xPositions.length;
+    const variance = xPositions.reduce((a, b) => a + (b - mean) ** 2, 0) / xPositions.length;
     const stdDev = Math.sqrt(variance);
 
     // Standard deviation should be significant (not all clustered at same position)
@@ -677,15 +676,21 @@ describe('Grid Distribution and Spatial Positioning', () => {
   test('should use available white space in 6 quadrant configuration', () => {
     // GIVEN: 6 quadrant configuration with entries in each segment
     const config = createMinimalConfig({
-      quadrants: Array(6).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      rings: Array(5).fill(null).map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
-      entries: Array(60).fill(null).map((_, i) => ({
-        label: `Tech${i}`,
-        quadrant: i % 6,
-        ring: Math.floor(i / 12),
-        moved: 0,
-        active: true
-      }))
+      quadrants: Array(6)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      rings: Array(5)
+        .fill(null)
+        .map((_, i) => ({ name: `Ring${i}`, color: '#000' })),
+      entries: Array(60)
+        .fill(null)
+        .map((_, i) => ({
+          label: `Tech${i}`,
+          quadrant: i % 6,
+          ring: Math.floor(i / 12),
+          moved: 0,
+          active: true,
+        })),
     });
 
     // WHEN: the radar visualization is created
@@ -717,17 +722,21 @@ describe('Grid Distribution and Spatial Positioning', () => {
 
   test('should maintain minimum angular divisions for narrow sectors', () => {
     // GIVEN: 8 quadrant configuration (narrowest sectors)
-    const entries = Array(20).fill(null).map((_, i) => ({
-      label: `Tech${i}`,
-      quadrant: 0, // All in one narrow quadrant
-      ring: 0,     // All in one ring
-      moved: 0,
-      active: true
-    }));
+    const entries = Array(20)
+      .fill(null)
+      .map((_, i) => ({
+        label: `Tech${i}`,
+        quadrant: 0, // All in one narrow quadrant
+        ring: 0, // All in one ring
+        moved: 0,
+        active: true,
+      }));
 
     const config = createMinimalConfig({
-      quadrants: Array(8).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      entries
+      quadrants: Array(8)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      entries,
     });
 
     // WHEN: the radar visualization is created
@@ -753,14 +762,18 @@ describe('Grid Distribution and Spatial Positioning', () => {
   test('should handle 5 quadrant configuration with balanced distribution', () => {
     // GIVEN: 5 quadrant configuration
     const config = createMinimalConfig({
-      quadrants: Array(5).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      entries: Array(50).fill(null).map((_, i) => ({
-        label: `Tech${i}`,
-        quadrant: i % 5,
-        ring: Math.floor(i / 13),
-        moved: 0,
-        active: true
-      }))
+      quadrants: Array(5)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      entries: Array(50)
+        .fill(null)
+        .map((_, i) => ({
+          label: `Tech${i}`,
+          quadrant: i % 5,
+          ring: Math.floor(i / 13),
+          moved: 0,
+          active: true,
+        })),
     });
 
     // WHEN: the radar visualization is created
@@ -796,14 +809,18 @@ describe('Grid Distribution and Spatial Positioning', () => {
   test('should handle 7 quadrant configuration without vertical striping', () => {
     // GIVEN: 7 quadrant configuration
     const config = createMinimalConfig({
-      quadrants: Array(7).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      entries: Array(35).fill(null).map((_, i) => ({
-        label: `Tech${i}`,
-        quadrant: i % 7,
-        ring: Math.floor(i / 9),
-        moved: 0,
-        active: true
-      }))
+      quadrants: Array(7)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      entries: Array(35)
+        .fill(null)
+        .map((_, i) => ({
+          label: `Tech${i}`,
+          quadrant: i % 7,
+          ring: Math.floor(i / 9),
+          moved: 0,
+          active: true,
+        })),
     });
 
     // WHEN: the radar visualization is created
@@ -832,13 +849,15 @@ describe('Grid Distribution and Spatial Positioning', () => {
   test('should assign collision radius to all entries', () => {
     // GIVEN: configuration with multiple entries
     const config = createMinimalConfig({
-      entries: Array(20).fill(null).map((_, i) => ({
-        label: `Tech${i}`,
-        quadrant: i % 4,
-        ring: Math.floor(i / 5),
-        moved: 0,
-        active: true
-      }))
+      entries: Array(20)
+        .fill(null)
+        .map((_, i) => ({
+          label: `Tech${i}`,
+          quadrant: i % 4,
+          ring: Math.floor(i / 5),
+          moved: 0,
+          active: true,
+        })),
     });
 
     // WHEN: the radar visualization is created
@@ -858,13 +877,15 @@ describe('Grid Distribution and Spatial Positioning', () => {
   test('should handle edge case of single entry without errors', () => {
     // GIVEN: configuration with only one entry
     const config = createMinimalConfig({
-      entries: [{
-        label: 'Single Tech',
-        quadrant: 0,
-        ring: 0,
-        moved: 0,
-        active: true
-      }]
+      entries: [
+        {
+          label: 'Single Tech',
+          quadrant: 0,
+          ring: 0,
+          moved: 0,
+          active: true,
+        },
+      ],
     });
 
     // WHEN: the radar visualization is created
@@ -878,12 +899,14 @@ describe('Grid Distribution and Spatial Positioning', () => {
   test('should handle segments with zero entries gracefully', () => {
     // GIVEN: configuration where some segments have no entries
     const config = createMinimalConfig({
-      quadrants: Array(6).fill(null).map((_, i) => ({ name: `Q${i}` })),
+      quadrants: Array(6)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
       entries: [
         { label: 'Tech1', quadrant: 0, ring: 0, moved: 0, active: true },
         { label: 'Tech2', quadrant: 2, ring: 1, moved: 0, active: true },
-        { label: 'Tech3', quadrant: 4, ring: 2, moved: 0, active: true }
-      ]
+        { label: 'Tech3', quadrant: 4, ring: 2, moved: 0, active: true },
+      ],
     });
 
     // WHEN: the radar visualization is created
@@ -897,7 +920,7 @@ describe('Grid Distribution and Spatial Positioning', () => {
 
 describe('Collision Detection and Overlap Prevention', () => {
   // Helper function to detect collisions mathematically
-  function detectCollisions(entries, minDistance = 12) {
+  function _detectCollisions(entries, minDistance = 12) {
     const collisions = [];
 
     for (let i = 0; i < entries.length; i++) {
@@ -926,7 +949,7 @@ describe('Collision Detection and Overlap Prevention', () => {
             entry2: e2.label,
             distance,
             required: requiredDistance,
-            overlap: requiredDistance - distance
+            overlap: requiredDistance - distance,
           });
         }
       }
@@ -948,15 +971,19 @@ describe('Collision Detection and Overlap Prevention', () => {
           quadrant: q,
           ring: 0, // ADOPT ring
           moved: i % 2,
-          active: true
+          active: true,
         });
       }
     }
 
     const config = createMinimalConfig({
-      quadrants: Array(6).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      rings: Array(5).fill(null).map((_, i) => ({ name: `R${i}`, color: ['#5ba300', '#009eb0', '#c7ba00', '#e09b96', '#93c'][i] })),
-      entries: entries
+      quadrants: Array(6)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      rings: Array(5)
+        .fill(null)
+        .map((_, i) => ({ name: `R${i}`, color: ['#5ba300', '#009eb0', '#c7ba00', '#e09b96', '#93c'][i] })),
+      entries: entries,
     });
 
     // Should not crash
@@ -969,8 +996,8 @@ describe('Collision Detection and Overlap Prevention', () => {
     entries.forEach(entry => {
       expect(entry.x).toBeDefined();
       expect(entry.y).toBeDefined();
-      expect(isFinite(entry.x)).toBe(true);
-      expect(isFinite(entry.y)).toBe(true);
+      expect(Number.isFinite(entry.x)).toBe(true);
+      expect(Number.isFinite(entry.y)).toBe(true);
     });
 
     // Verify entries are distributed (not all at same point)
@@ -992,7 +1019,7 @@ describe('Collision Detection and Overlap Prevention', () => {
         quadrant: 0,
         ring: 0,
         moved: 0,
-        active: true
+        active: true,
       });
     }
 
@@ -1006,8 +1033,8 @@ describe('Collision Detection and Overlap Prevention', () => {
     entries.forEach(entry => {
       expect(entry.x).toBeDefined();
       expect(entry.y).toBeDefined();
-      expect(isFinite(entry.x)).toBe(true);
-      expect(isFinite(entry.y)).toBe(true);
+      expect(Number.isFinite(entry.x)).toBe(true);
+      expect(Number.isFinite(entry.y)).toBe(true);
 
       // Calculate distance from origin (should be within outer radius)
       const distance = Math.sqrt(entry.x * entry.x + entry.y * entry.y);
@@ -1036,15 +1063,22 @@ describe('Collision Detection and Overlap Prevention', () => {
           quadrant: q,
           ring: 0,
           moved: i % 3,
-          active: true
+          active: true,
         });
       }
     }
 
     const config = createMinimalConfig({
-      quadrants: Array(8).fill(null).map((_, i) => ({ name: `Q${i}` })),
-      rings: Array(8).fill(null).map((_, i) => ({ name: `R${i}`, color: ['#5ba300', '#009eb0', '#c7ba00', '#e09b96', '#93c', '#f80', '#0cf', '#f0f'][i] })),
-      entries: entries
+      quadrants: Array(8)
+        .fill(null)
+        .map((_, i) => ({ name: `Q${i}` })),
+      rings: Array(8)
+        .fill(null)
+        .map((_, i) => ({
+          name: `R${i}`,
+          color: ['#5ba300', '#009eb0', '#c7ba00', '#e09b96', '#93c', '#f80', '#0cf', '#f0f'][i],
+        })),
+      entries: entries,
     });
 
     // Should handle extreme scenarios without crashing
@@ -1056,8 +1090,8 @@ describe('Collision Detection and Overlap Prevention', () => {
     entries.forEach(entry => {
       expect(entry.x).toBeDefined();
       expect(entry.y).toBeDefined();
-      expect(isFinite(entry.x)).toBe(true);
-      expect(isFinite(entry.y)).toBe(true);
+      expect(Number.isFinite(entry.x)).toBe(true);
+      expect(Number.isFinite(entry.y)).toBe(true);
     });
 
     // Verify entries are spread across the space (not all at identical coordinates)
@@ -1080,7 +1114,7 @@ describe('Collision Detection and Overlap Prevention', () => {
         quadrant: 0,
         ring: 0,
         moved: 0,
-        active: true
+        active: true,
       });
     }
 
@@ -1102,7 +1136,7 @@ describe('Collision Detection and Overlap Prevention', () => {
     expect(boundaryCount / entries.length).toBeLessThan(0.3);
 
     // Verify reasonable spread (standard deviation)
-    const variance = radii.reduce((acc, r) => acc + Math.pow(r - avgRadius, 2), 0) / radii.length;
+    const variance = radii.reduce((acc, r) => acc + (r - avgRadius) ** 2, 0) / radii.length;
     const stdDev = Math.sqrt(variance);
     expect(stdDev).toBeGreaterThan(20); // Not all clustered at one radius
   });

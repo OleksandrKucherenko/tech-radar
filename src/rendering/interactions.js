@@ -30,27 +30,20 @@ import { translate } from './helpers.js';
  * @returns {Object} D3 selection of the bubble element
  */
 export function createBubble(radarSelection, fontFamily) {
-  const bubble = radarSelection.append("g")
-    .attr("id", "bubble")
-    .attr("x", 0)
-    .attr("y", 0)
-    .style("opacity", 0)
-    .style("pointer-events", "none")
-    .style("user-select", "none");
+  const bubble = radarSelection
+    .append('g')
+    .attr('id', 'bubble')
+    .attr('x', 0)
+    .attr('y', 0)
+    .style('opacity', 0)
+    .style('pointer-events', 'none')
+    .style('user-select', 'none');
 
-  bubble.append("rect")
-    .attr("rx", 4)
-    .attr("ry", 4)
-    .style("fill", "#333");
+  bubble.append('rect').attr('rx', 4).attr('ry', 4).style('fill', '#333');
 
-  bubble.append("text")
-    .style("font-family", fontFamily)
-    .style("font-size", "10px")
-    .style("fill", "#fff");
+  bubble.append('text').style('font-family', fontFamily).style('font-size', '10px').style('fill', '#fff');
 
-  bubble.append("path")
-    .attr("d", "M 0,0 10,0 5,8 z")
-    .style("fill", "#333");
+  bubble.append('path').attr('d', 'M 0,0 10,0 5,8 z').style('fill', '#333');
 
   return bubble;
 }
@@ -65,26 +58,24 @@ export function createBubble(radarSelection, fontFamily) {
 export function showBubble(d, config) {
   if (d.active || config.print_layout) {
     const d3 = window.d3; // Access global d3
-    const tooltip = d3.select("#bubble text")
-      .text(d.label);
+    const tooltip = d3.select('#bubble text').text(d.label);
     const bbox = tooltip.node().getBBox();
 
     // Use rendered (clamped) position for stable tooltip positioning
     const x = d.rendered_x !== undefined ? d.rendered_x : d.x;
     const y = d.rendered_y !== undefined ? d.rendered_y : d.y;
 
-    d3.select("#bubble")
-      .attr("transform", translate(x - bbox.width / 2, y - 16))
-      .style("opacity", 0.8);
+    d3.select('#bubble')
+      .attr('transform', translate(x - bbox.width / 2, y - 16))
+      .style('opacity', 0.8);
 
-    d3.select("#bubble rect")
-      .attr("x", -5)
-      .attr("y", -bbox.height)
-      .attr("width", bbox.width + 10)
-      .attr("height", bbox.height + 4);
+    d3.select('#bubble rect')
+      .attr('x', -5)
+      .attr('y', -bbox.height)
+      .attr('width', bbox.width + 10)
+      .attr('height', bbox.height + 4);
 
-    d3.select("#bubble path")
-      .attr("transform", translate(bbox.width / 2 - 5, 3));
+    d3.select('#bubble path').attr('transform', translate(bbox.width / 2 - 5, 3));
   }
 }
 
@@ -93,9 +84,7 @@ export function showBubble(d, config) {
  */
 export function hideBubble() {
   const d3 = window.d3; // Access global d3
-  d3.select("#bubble")
-    .attr("transform", translate(0, 0))
-    .style("opacity", 0);
+  d3.select('#bubble').attr('transform', translate(0, 0)).style('opacity', 0);
 }
 
 /**
@@ -104,7 +93,7 @@ export function hideBubble() {
  * @param {Object} d - Entry data object with id property
  */
 export function highlightLegendItem(d) {
-  const legendItem = document.getElementById("legendItem" + d.id);
+  const legendItem = document.getElementById(`legendItem${d.id}`);
   if (legendItem) {
     legendItem.classList.add('legend-highlight');
   }
@@ -116,7 +105,7 @@ export function highlightLegendItem(d) {
  * @param {Object} d - Entry data object with id property
  */
 export function unhighlightLegendItem(d) {
-  const legendItem = document.getElementById("legendItem" + d.id);
+  const legendItem = document.getElementById(`legendItem${d.id}`);
   if (legendItem) {
     legendItem.classList.remove('legend-highlight');
   }
@@ -131,13 +120,13 @@ export function unhighlightLegendItem(d) {
  */
 export function createBlipInteractions(config) {
   return {
-    mouseover: function(event, d) {
+    mouseover: (_event, d) => {
       showBubble(d, config);
       highlightLegendItem(d);
     },
-    mouseout: function(event, d) {
+    mouseout: (_event, d) => {
       hideBubble();
       unhighlightLegendItem(d);
-    }
+    },
   };
 }

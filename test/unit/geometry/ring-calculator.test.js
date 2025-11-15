@@ -2,7 +2,7 @@
 
 // Copyright (c) 2017-2024 Zalando SE
 
-import { describe, test, expect } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { generateRings } from '../../../src/geometry/ring-calculator.js';
 
 describe('Ring Calculator', () => {
@@ -26,10 +26,10 @@ describe('Ring Calculator', () => {
       // THEN: all radii should be scaled by 50%
       expect(rings).toHaveLength(4);
       // All radii should be scaled by 200/400 = 0.5
-      expect(rings[0].radius).toBe(65);   // 130 * 0.5
-      expect(rings[1].radius).toBe(110);  // 220 * 0.5
-      expect(rings[2].radius).toBe(155);  // 310 * 0.5
-      expect(rings[3].radius).toBe(200);  // 400 * 0.5
+      expect(rings[0].radius).toBe(65); // 130 * 0.5
+      expect(rings[1].radius).toBe(110); // 220 * 0.5
+      expect(rings[2].radius).toBe(155); // 310 * 0.5
+      expect(rings[3].radius).toBe(200); // 400 * 0.5
     });
 
     test('generates 5 rings with interpolated spacing', () => {
@@ -161,8 +161,8 @@ describe('Ring Calculator', () => {
 
       // THEN: should scale correctly up to the target radius
       expect(rings).toHaveLength(4);
-      expect(rings[0].radius).toBe(3250);   // 130 * 25
-      expect(rings[3].radius).toBe(10000);  // 400 * 25
+      expect(rings[0].radius).toBe(3250); // 130 * 25
+      expect(rings[3].radius).toBe(10000); // 400 * 25
     });
 
     test('maintains proper spacing ratios across different configurations', () => {

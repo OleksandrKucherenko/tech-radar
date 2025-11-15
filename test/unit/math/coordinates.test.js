@@ -1,12 +1,6 @@
 // Test suite for coordinate transformation utilities
-import { describe, test, expect } from 'vitest';
-import {
-  polar,
-  cartesian,
-  boundedInterval,
-  boundedRing,
-  boundedBox
-} from '../../../src/math/coordinates.js';
+import { describe, expect, test } from 'vitest';
+import { boundedBox, boundedInterval, boundedRing, cartesian, polar } from '../../../src/math/coordinates.js';
 
 describe('Coordinate Transformations', () => {
   describe('polar()', () => {

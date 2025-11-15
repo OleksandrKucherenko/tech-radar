@@ -609,7 +609,7 @@
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.ring-option').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    state.ringCount = parseInt(btn.dataset.rings);
+                    state.ringCount = parseInt(btn.dataset.rings, 10);
                     state.ringNames = RING_CONFIGS[state.ringCount].names;
                     updateUI();
                     renderRadar();
@@ -619,7 +619,7 @@
 
             // Quadrant count
             document.getElementById('quadrantCount').addEventListener('change', (e) => {
-                const count = parseInt(e.target.value);
+                const count = parseInt(e.target.value, 10);
                 if (count >= 2 && count <= 8) {
                     state.quadrantCount = count;
                     // Adjust quadrant names array
@@ -713,7 +713,7 @@
             // Add event listeners to quadrant name inputs
             document.querySelectorAll('.quadrant-name-input').forEach(input => {
                 input.addEventListener('input', (e) => {
-                    const index = parseInt(e.target.dataset.index);
+                    const index = parseInt(e.target.dataset.index, 10);
                     state.quadrantNames[index] = e.target.value;
                     updateQuadrantDropdown();
                     renderRadar();
@@ -738,7 +738,7 @@
                 select.appendChild(option);
             }
 
-            if (currentValue !== '' && parseInt(currentValue) < state.quadrantCount) {
+            if (currentValue !== '' && parseInt(currentValue, 10) < state.quadrantCount) {
                 select.value = currentValue;
             }
         }
@@ -755,7 +755,7 @@
                 select.appendChild(option);
             }
 
-            if (currentValue !== '' && parseInt(currentValue) < state.ringCount) {
+            if (currentValue !== '' && parseInt(currentValue, 10) < state.ringCount) {
                 select.value = currentValue;
             }
         }
@@ -791,9 +791,9 @@
 
         function addOrUpdateEntry() {
             const label = document.getElementById('entryLabel').value.trim();
-            const quadrant = parseInt(document.getElementById('entryQuadrant').value);
-            const ring = parseInt(document.getElementById('entryRing').value);
-            const moved = parseInt(document.getElementById('entryMoved').value);
+            const quadrant = parseInt(document.getElementById('entryQuadrant').value, 10);
+            const ring = parseInt(document.getElementById('entryRing').value, 10);
+            const moved = parseInt(document.getElementById('entryMoved').value, 10);
             const active = document.getElementById('entryActive').value === 'true';
             const link = document.getElementById('entryLink').value.trim();
 
@@ -833,7 +833,7 @@
             saveToLocalStorage();
         }
 
-        function editEntry(index) {
+        function _editEntry(index) {
             const entry = state.entries[index];
             state.editingIndex = index;
 
@@ -863,7 +863,7 @@
             document.getElementById('entryLink').value = '';
         }
 
-        function deleteEntry(index) {
+        function _deleteEntry(index) {
             if (confirm('Are you sure you want to delete this entry?')) {
                 state.entries.splice(index, 1);
                 updateEntriesList();
@@ -993,8 +993,8 @@
                     btn.textContent = originalText;
                     btn.style.background = '';
                 }, 2000);
-            }).catch(err => {
-                alert('Failed to copy URL. Please copy manually: ' + url);
+            }).catch(_err => {
+                alert(`Failed to copy URL. Please copy manually: ${url}`);
             });
         }
 
@@ -1021,7 +1021,7 @@
                 return clean;
             });
 
-            const config = {
+            const _config = {
                 svg_id: 'radar',
                 width: 1000,
                 height: 800,
@@ -1036,13 +1036,13 @@
                 entries: cleanEntries
             };
 
-            const code = `<!DOCTYPE html>
+            const _code = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Technology Radar</title>
-    <script src="https://d3js.org/d3.v7.min.js"><\/script>
-    <script src="https://raw.githubusercontent.com/OleksandrKucherenko/tech-radar/main/docs/radar.js"><\/script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://raw.githubusercontent.com/OleksandrKucherenko/tech-radar/main/docs/radar.js"></script>
     <link rel="stylesheet" href="https://raw.githubusercontent.com/OleksandrKucherenko/tech-radar/main/docs/radar.css">
     <style>
         body { margin: 0; padding: 20px; font-family: Arial, Helvetica, sans-serif; }
@@ -1056,7 +1056,7 @@
 
     <script>
         radar_visualization(${JSON.stringify(config, null, 2)});
-    <\/script>
+    </script>
 </body>
 </html>`;
 
@@ -1103,9 +1103,9 @@
                 backgroundColor: '#ffffff',
                 scale: 2, // Higher quality
                 logging: false
-            }).then(function (canvas) {
+            }).then((canvas) => {
                 // Convert to PNG and download
-                canvas.toBlob(function (blob) {
+                canvas.toBlob((blob) => {
                     const link = document.createElement('a');
                     link.download = 'tech-radar.png';
                     link.href = URL.createObjectURL(blob);
@@ -1114,7 +1114,7 @@
                     btn.textContent = 'Download as PNG';
                     btn.disabled = false;
                 });
-            }).catch(function (error) {
+            }).catch((error) => {
                 console.error('Export error:', error);
                 alert('Failed to export PNG. Please try again.');
                 btn.textContent = 'Download as PNG';
@@ -1143,7 +1143,7 @@
                 backgroundColor: '#ffffff',
                 scale: 2, // Higher quality
                 logging: false
-            }).then(function (canvas) {
+            }).then((canvas) => {
                 // Convert to data URL
                 const imgData = canvas.toDataURL('image/png');
 
@@ -1164,7 +1164,7 @@
 
                 btn.textContent = 'Download as PDF';
                 btn.disabled = false;
-            }).catch(function (error) {
+            }).catch((error) => {
                 console.error('Export error:', error);
                 alert('Failed to export PDF. Please try again.');
                 btn.textContent = 'Download as PDF';
@@ -1221,12 +1221,12 @@
             input.type = 'file';
             input.accept = 'application/json,.json';
 
-            input.onchange = function (e) {
+            input.onchange = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
                 const reader = new FileReader();
-                reader.onload = function (event) {
+                reader.onload = (event) => {
                     try {
                         const config = JSON.parse(event.target.result);
 
@@ -1293,7 +1293,7 @@
                     }
                 };
 
-                reader.onerror = function () {
+                reader.onerror = () => {
                     alert('Failed to read file.');
                 };
 

@@ -82,13 +82,12 @@ export function renderLegendColumns(
   // Render each quadrant's legend section
   for (let quadrant = 0; quadrant < numQuadrants; quadrant++) {
     const column = targetColumn(quadrant);
-    const section = column.append('div')
+    const section = column
+      .append('div')
       .attr('class', 'legend-section')
       .style('--legend-columns', legendSectionColumns);
 
-    section.append('div')
-      .attr('class', 'legend-quadrant-name')
-      .text(config.quadrants[quadrant].name);
+    section.append('div').attr('class', 'legend-quadrant-name').text(config.quadrants[quadrant].name);
 
     const ringsContainer = section.append('div').attr('class', 'legend-rings');
 
@@ -100,26 +99,28 @@ export function renderLegendColumns(
       }
 
       const ringBlock = ringsContainer.append('div').attr('class', 'legend-ring');
-      ringBlock.append('div')
+      ringBlock
+        .append('div')
         .attr('class', 'legend-ring-name')
         .style('color', config.rings[ring].color)
         .text(config.rings[ring].name);
 
       const entriesList = ringBlock.append('div').attr('class', 'legend-ring-entries');
-      entriesList.selectAll('a')
+      entriesList
+        .selectAll('a')
         .data(entriesInRing)
         .enter()
         .append('a')
-        .attr('href', function (d) { return d.link ? d.link : '#'; })
-        .attr('target', function (d) { return (d.link && config.links_in_new_tabs) ? '_blank' : null; })
-        .attr('id', function (d) { return 'legendItem' + d.id; })
+        .attr('href', d => (d.link ? d.link : '#'))
+        .attr('target', d => (d.link && config.links_in_new_tabs ? '_blank' : null))
+        .attr('id', d => `legendItem${d.id}`)
         .attr('class', 'legend-entry')
-        .text(function (d) { return d.id + '. ' + d.label; })
-        .on('mouseover', function (event, d) {
+        .text(d => `${d.id}. ${d.label}`)
+        .on('mouseover', (_event, d) => {
           showBubble(d, config);
           highlightLegendItem(d);
         })
-        .on('mouseout', function (event, d) {
+        .on('mouseout', (_event, d) => {
           hideBubble();
           unhighlightLegendItem(d);
         });

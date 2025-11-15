@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import { cartesian } from '../math/coordinates.js';
-import { createSegment } from '../geometry/segment-calculator.js';
 import { generateQuadrantOrder } from '../geometry/quadrant-calculator.js';
+import { createSegment } from '../geometry/segment-calculator.js';
+import { cartesian } from '../math/coordinates.js';
 
 /**
  * Entry Processor - Handles positioning, segmentation, ID assignment, and collision radius calculation.
@@ -112,9 +112,8 @@ export class EntryProcessor {
         this.config,
         this.randomBetween
       );
-      entry.color = entry.active || this.config.print_layout
-        ? this.config.rings[entry.ring].color
-        : this.config.colors.inactive;
+      entry.color =
+        entry.active || this.config.print_layout ? this.config.rings[entry.ring].color : this.config.colors.inactive;
     }
   }
 
@@ -171,7 +170,7 @@ export class EntryProcessor {
 
     // Calculate segment dimensions in pixels
     // Use inner_radius for ring 0 to avoid overestimating angular capacity
-    const effective_radius = (ring === 0) ? inner_radius : ring_center;
+    const effective_radius = ring === 0 ? inner_radius : ring_center;
     const segment_arc_length = angle_range * effective_radius;
     const segment_radial_depth = radius_range;
 
@@ -206,7 +205,7 @@ export class EntryProcessor {
         radial_divisions = Math.ceil(count / angular_divisions);
       } else if (aspect_ratio < 0.5) {
         // Much taller than wide - balanced approach for narrow segments
-        const radial_bias = (ring === 0) ? 0.85 : 0.7;
+        const radial_bias = ring === 0 ? 0.85 : 0.7;
         angular_divisions = Math.min(max_angular_items, Math.max(3, Math.floor(base * radial_bias)));
         radial_divisions = Math.ceil(count / angular_divisions);
       } else {
@@ -263,9 +262,9 @@ export class EntryProcessor {
       for (let ring = 0; ring < this.numRings; ring++) {
         const entries = segmented[quadrant][ring];
         // Sort alphabetically within each segment
-        entries.sort(function (a, b) { return a.label.localeCompare(b.label); });
+        entries.sort((a, b) => a.label.localeCompare(b.label));
         for (let i = 0; i < entries.length; i++) {
-          entries[i].id = "" + id++;
+          entries[i].id = `${id++}`;
         }
       }
     }

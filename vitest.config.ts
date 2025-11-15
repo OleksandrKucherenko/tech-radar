@@ -12,17 +12,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'lcov', 'html'],
-      exclude: [
-        'node_modules/**',
-        'test/**',
-        'coverage/**',
-        'dist/**',
-        '**/*.config.*',
-        '**/*.d.ts',
-      ],
-      include: [
-        'docs/radar.js',
-      ],
+      exclude: ['node_modules/**', 'test/**', 'coverage/**', 'dist/**', '**/*.config.*', '**/*.d.ts'],
+      include: ['docs/radar.js'],
       thresholds: {
         global: {
           branches: 70,

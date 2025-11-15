@@ -64,8 +64,7 @@ export function generateRings(numRings, targetOuterRadius) {
         radius = MAX_BASE_RADIUS;
       } else {
         // Interpolate between pattern values
-        radius = BASE_PATTERN[patternIndex] +
-          (BASE_PATTERN[patternIndex + 1] - BASE_PATTERN[patternIndex]) * fraction;
+        radius = BASE_PATTERN[patternIndex] + (BASE_PATTERN[patternIndex + 1] - BASE_PATTERN[patternIndex]) * fraction;
       }
 
       ringTemplate.push(radius);
@@ -74,7 +73,5 @@ export function generateRings(numRings, targetOuterRadius) {
 
   // Scale all radii to match target outer radius
   const radiusScale = targetOuterRadius / MAX_BASE_RADIUS;
-  return ringTemplate.map(function (r) {
-    return { radius: Math.max(10, Math.round(r * radiusScale)) };
-  });
+  return ringTemplate.map(r => ({ radius: Math.max(10, Math.round(r * radiusScale)) }));
 }
