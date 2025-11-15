@@ -631,17 +631,25 @@
     </div>
 
     <script>
-        // Debug: Check what's available
-        console.log('DEBUG: window.radar_visualization:', typeof window.radar_visualization);
-        console.log('DEBUG: window.radar_visualization.jsonIO:', window.radar_visualization?.jsonIO);
+        // Get jsonIO helpers from radar_visualization
+        // Note: radar.js is loaded in <head>, so it should be available here
+        let exportConfig = null;
+        let importConfig = null;
         
-        const jsonIOHelpers = window.radar_visualization && window.radar_visualization.jsonIO;
-        if (!jsonIOHelpers) {
-            console.warn('radar_visualization.jsonIO is unavailable. JSON import/export helpers will be disabled.');
+        // Try to get jsonIO helpers
+        if (window.radar_visualization && window.radar_visualization.jsonIO) {
+            const jsonIOHelpers = window.radar_visualization.jsonIO;
+            exportConfig = jsonIOHelpers.exportConfig;
+            importConfig = jsonIOHelpers.importConfig;
+            console.log('✓ JSON import/export helpers loaded successfully');
+        } else {
+            console.error('✗ radar_visualization.jsonIO is unavailable. JSON import/export will be disabled.');
+            console.log('  window.radar_visualization:', typeof window.radar_visualization);
+            if (window.radar_visualization) {
+                console.log('  radar_visualization.jsonIO:', window.radar_visualization.jsonIO);
+            }
         }
-        const { exportConfig, importConfig } = jsonIOHelpers || {};
-        console.log('DEBUG: exportConfig:', typeof exportConfig, exportConfig);
-        console.log('DEBUG: importConfig:', typeof importConfig, importConfig);
+        
         // State management
         const state = {
             ringCount: 4,
