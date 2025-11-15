@@ -1,21 +1,23 @@
 # Demo Pages Upgrade Plan
 
-## 1. JSON Import/Export Everywhere
+## 1. JSON Import/Export Everywhere ✅ **COMPLETE**
 - **Scope**: All demo entry points under `docs/` (index, builder, specialized examples).
-- **Todo**:
+- **Completed**:
   - [x] Extract shared helpers in `src/integration/json-io.js` (bundled into `radar_visualization`) with `importConfig(fileInput, applyConfig)` and `exportConfig(button, currentConfigProvider)`.
   - [x] Create reusable `src/ui/demo-toolbar.js` module with `initDemoToolbar()` helper to eliminate duplication.
-  - [x] Add toolbar CSS styles to `radar.css` for consistent UI across all demos.
+  - [x] Add floating toolbar CSS styles to `radar.css` with glassmorphic design.
   - [x] Embed toolbar controls in `index.html` with full import/export functionality.
   - [x] Embed toolbar controls in `demo-2x4.html` with full import/export functionality.
   - [x] Embed toolbar controls in `demo-3x4.html` using new `initDemoToolbar()` helper.
-  - [ ] Embed toolbar controls in remaining demos: `demo-4x8.html`, `demo-5x4.html`, `demo-6x5.html`, `demo-7x4.html`, `demo-8x8.html`, `ai.html`.
+  - [x] Embed toolbar controls in `demo-4x8.html`, `demo-5x4.html`, `demo-6x5.html`, `demo-7x4.html`, `demo-8x8.html`, `ai.html` - ALL COMPLETE!
   - [x] Add user-friendly error handling for malformed JSON and name downloads `<demoSlug>-<timestamp>.json`.
+  - [x] Floating toolbar design with top-right positioning, backdrop blur, and smooth animations.
   - [ ] **Optional:** Refactor `index.html` and `demo-2x4.html` to use `initDemoToolbar()` helper (currently use inline code).
 - **Validation**:
   - [x] Bun unit tests covering helper behavior with mocked `FileReader`.
+  - [x] Toolbar visible and functional on all demo pages.
   - [ ] Manual smoke verification that configs round-trip across all demos.
-- **Reference**: See `TOOLBAR_UPDATE_GUIDE.md` for detailed implementation pattern.
+- **Reference**: See `TOOLBAR_UPDATE_GUIDE.md` for implementation details.
 
 ## 2. Local Storage Customization
 - **Scope**: Persist per-demo overrides so users can edit radars locally.
