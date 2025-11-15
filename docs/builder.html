@@ -631,11 +631,17 @@
     </div>
 
     <script>
+        // Debug: Check what's available
+        console.log('DEBUG: window.radar_visualization:', typeof window.radar_visualization);
+        console.log('DEBUG: window.radar_visualization.jsonIO:', window.radar_visualization?.jsonIO);
+        
         const jsonIOHelpers = window.radar_visualization && window.radar_visualization.jsonIO;
         if (!jsonIOHelpers) {
             console.warn('radar_visualization.jsonIO is unavailable. JSON import/export helpers will be disabled.');
         }
         const { exportConfig, importConfig } = jsonIOHelpers || {};
+        console.log('DEBUG: exportConfig:', typeof exportConfig, exportConfig);
+        console.log('DEBUG: importConfig:', typeof importConfig, importConfig);
         // State management
         const state = {
             ringCount: 4,
