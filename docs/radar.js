@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.16.0
+// Version: 0.17.0
 // License: MIT
 // Source: https://github.com/zalando/tech-radar
 
