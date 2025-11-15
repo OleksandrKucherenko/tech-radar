@@ -151,6 +151,15 @@
         >
           <i class="fas fa-file-export"></i>
         </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonResetButton"
+          title="Reset to Initial Configuration"
+          aria-label="Reset Configuration"
+        >
+          <i class="fas fa-undo"></i>
+        </button>
         <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
       </div>
       <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
@@ -161,13 +170,8 @@
     </div>
 
     <script>
-      let currentConfig = null;
-      function renderRadar(config) {
-        currentConfig = config;
-        radar_visualization(config);
-      }
-
-      const initialConfig = {
+      // Initialize radar instance with configuration
+      let radarInstance = radar_visualization({
         repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
         svg_id: "radar",
         colors: {
@@ -189,7 +193,7 @@
           { name: "ASSESS", color: "#c7ba00" },
           { name: "HOLD", color: "#e09b96" },
           { name: "WATCH", color: "#bb6bd9" },
-          { name: "HOLD", color: "#e09b96" },
+          { name: "AVOID", color: "#e09b96" },
         ],
         print_layout: true,
         links_in_new_tabs: true,
@@ -225,7 +229,7 @@
           { label: "Z.AI", link: "https://z.ai/", quadrant: 0, ring: 2, moved: 0, active: true },
 
           // AI Coding Tools - IDEs (Quadrant 1)
-          { label: "Cursor", link: "https://cursor.sh", quadrant: 1, ring: 3, moved: 1, active: true },
+          { label: "Cursor", link: "https://cursor.sh", quadrant: 1, ring: 5, moved: -1, active: true },
           { label: "Windsurf", link: "https://codeium.com/windsurf", quadrant: 1, ring: 1, moved: 2, active: true },
           {
             label: "Windsurf IntelliJ",
@@ -335,18 +339,16 @@
           { label: "OpenSearch", link: "https://opensearch.org", quadrant: 3, ring: 2, moved: 0, active: true },
           { label: "Memgraph", link: "https://memgraph.com", quadrant: 3, ring: 0, moved: 1, active: true },
         ],
-      };
-
-      renderRadar(initialConfig);
-
-      radar_visualization.initDemoToolbar({
-        demoSlug: "ai-demo",
-        getCurrentConfig: () => currentConfig,
-        onConfigImport: config => renderRadar(config),
-        jsonIO: radar_visualization.jsonIO,
       });
+
+      // Assign import/export capability to instance
+      radarInstance.importExport = radar_visualization.jsonIO;
+
+      // Initialize and assign toolbar to instance
+      // Toolbar automatically wires to instance methods (render, reset, getConfig)
+      radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
     </script>
 
-    <footer>Build: <code>ab43075</code></footer>
+    <footer>Build: <code>61cb2d0</code></footer>
   </body>
 </html>

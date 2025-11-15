@@ -106,6 +106,15 @@
         >
           <i class="fas fa-file-export"></i>
         </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonResetButton"
+          title="Reset to Initial Configuration"
+          aria-label="Reset Configuration"
+        >
+          <i class="fas fa-undo"></i>
+        </button>
         <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
       </div>
       <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
@@ -116,11 +125,12 @@
     <script>
       // Configuration state
       let currentConfig = null;
+      let initialConfig = null;
       const demoSlug = "tech-radar";
 
       // Get JSON I/O helpers from radar_visualization
       const jsonIOHelpers = radar_visualization && radar_visualization.jsonIO;
-      const { exportConfig, importConfig } = jsonIOHelpers || {};
+      const { exportConfig, importConfig, mergeConfigs } = jsonIOHelpers || {};
 
       // Toolbar message handling
       const jsonToolbarMessageEl = document.getElementById("jsonToolbarMessage");
@@ -140,7 +150,7 @@
       // Render visualization with given config
       function renderRadar(config) {
         currentConfig = config;
-        radar_visualization(config);
+        radar_visualization.render(config);
       }
 
       // Load and render initial configuration
@@ -174,12 +184,15 @@
             links_in_new_tabs: true,
             entries: data.entries,
           };
+          // Store initial config for reset
+          initialConfig = JSON.parse(JSON.stringify(config));
           renderRadar(config);
 
           // Initialize JSON import/export if available
           if (exportConfig && importConfig) {
             const importButton = document.getElementById("jsonImportButton");
             const exportButton = document.getElementById("jsonExportButton");
+            const resetButton = document.getElementById("jsonResetButton");
             const importInput = document.getElementById("jsonImportInput");
 
             importButton.addEventListener("click", () => importInput.click());
@@ -187,7 +200,10 @@
             importConfig(
               importInput,
               importedConfig => {
-                renderRadar(importedConfig);
+                // Merge imported config with initial config
+                const configToApply =
+                  mergeConfigs && initialConfig ? mergeConfigs(initialConfig, importedConfig) : importedConfig;
+                renderRadar(configToApply);
               },
               {
                 demoSlug,
@@ -209,6 +225,16 @@
                 showToolbarMessage(message, "error");
               },
             });
+
+            // Setup reset button
+            if (resetButton && initialConfig) {
+              resetButton.addEventListener("click", () => {
+                if (confirm("Reset to initial configuration? This will discard all changes.")) {
+                  renderRadar(JSON.parse(JSON.stringify(initialConfig)));
+                  showToolbarMessage("Configuration reset to initial state", "success");
+                }
+              });
+            }
           } else {
             showToolbarMessage("JSON helpers unavailable.", "error");
           }
@@ -302,7 +328,7 @@
         font-size: 12px;
       "
     >
-      Build: <code>ab43075</code>
+      Build: <code>61cb2d0</code>
     </footer>
   </body>
 </html>

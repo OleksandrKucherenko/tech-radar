@@ -151,6 +151,15 @@
         >
           <i class="fas fa-file-export"></i>
         </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonResetButton"
+          title="Reset to Initial Configuration"
+          aria-label="Reset Configuration"
+        >
+          <i class="fas fa-undo"></i>
+        </button>
         <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
       </div>
       <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
@@ -164,7 +173,7 @@
       let currentConfig = null;
       function renderRadar(config) {
         currentConfig = config;
-        radar_visualization(config);
+        radar_visualization.render(config);
       }
 
       const initialConfig = {
@@ -277,10 +286,12 @@
         demoSlug: "demo-3x4",
         getCurrentConfig: () => currentConfig,
         onConfigImport: config => renderRadar(config),
+        onConfigReset: config => renderRadar(config),
+        initialConfig: initialConfig,
         jsonIO: radar_visualization.jsonIO,
       });
     </script>
 
-    <footer>Build: <code>ab43075</code></footer>
+    <footer>Build: <code>61cb2d0</code></footer>
   </body>
 </html>
