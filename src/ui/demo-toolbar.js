@@ -96,11 +96,11 @@ function showToolbarMessage(message, state = 'info') {
 
 /**
  * Get the standard toolbar HTML markup
- * @returns {string} HTML string for the toolbar
+ * @returns {string} HTML string for the floating toolbar
  */
 export function getToolbarHTML() {
   return `
-    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools" style="position: relative;">
       <div class="demo-toolbar__controls">
         <button type="button" class="demo-toolbar__button" id="jsonImportButton">Import JSON</button>
         <button type="button" class="demo-toolbar__button" id="jsonExportButton">Export JSON</button>

@@ -241,56 +241,112 @@ td {
   outline-offset: 1px;
 }
 
-/* JSON Toolbar styles */
+/* JSON Toolbar styles - Floating overlay */
 .demo-toolbar {
-  background: #fff;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 0.75rem 1.5rem;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
   gap: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.demo-toolbar:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .demo-toolbar__controls {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .demo-toolbar__button {
   background: #1976d2;
   border: none;
   color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.5rem 0.875rem;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.875rem;
-  transition: background 0.2s ease;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .demo-toolbar__button:hover {
   background: #1565c0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
 }
 
 .demo-toolbar__button:active {
   background: #0d47a1;
+  transform: translateY(0);
 }
 
 .demo-toolbar__message {
-  font-size: 0.85rem;
+  position: absolute;
+  bottom: -36px;
+  right: 0;
+  left: 0;
+  font-size: 0.8125rem;
   color: #1976d2;
-  min-height: 1rem;
-  flex: 1;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.demo-toolbar__message:empty {
+  display: none;
 }
 
 .demo-toolbar__message[data-state="error"] {
   color: #d32f2f;
+  border-color: rgba(211, 47, 47, 0.2);
 }
 
 .demo-toolbar__message[data-state="success"] {
   color: #2e7d32;
+  border-color: rgba(46, 125, 50, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .demo-toolbar {
+    top: 10px;
+    right: 10px;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .demo-toolbar__button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
 }
 
 /* Print styles */

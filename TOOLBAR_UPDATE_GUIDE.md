@@ -1,5 +1,15 @@
 # Toolbar Update Guide
 
+## 🎨 Design: Floating Overlay Toolbar
+
+The toolbar now floats as an overlay in the **top-right corner** of the page:
+- ✅ **Fixed positioning** - stays visible while scrolling
+- ✅ **Glassmorphic design** - semi-transparent with backdrop blur
+- ✅ **Hover effects** - subtle animations and shadow changes
+- ✅ **Floating messages** - success/error messages appear below toolbar
+- ✅ **Print-friendly** - automatically hidden when printing
+- ✅ **Responsive** - adapts on mobile devices
+
 ## Status
 ✅ **Completed:**
 - `docs/index.html` - Uses inline toolbar code (can be refactored later)
