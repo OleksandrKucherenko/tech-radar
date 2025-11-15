@@ -27,7 +27,17 @@ import { renderRingDescriptionsTable } from './rendering/table-renderer.js';
 import { initDemoToolbar } from './ui/demo-toolbar.js';
 import { validateConfig } from './validation/config-validator.js';
 
-function radar_visualization(config) {
+/**
+ * Internal rendering function - performs the actual SVG rendering
+ * @param {Object} config - Radar configuration
+ */
+function _renderRadar(config) {
+  // Clear existing SVG content
+  const svg = document.getElementById(config.svg_id || 'radar');
+  if (svg) {
+    svg.innerHTML = '';
+  }
+
   applyConfigDefaults(config);
   const dimensions = calculateDimensions(config);
   const target_outer_radius = dimensions.target_outer_radius;
@@ -41,7 +51,7 @@ function radar_visualization(config) {
       getCurrentConfig: () => config,
       applyConfig: newConfig => {
         // Re-render with new config
-        radar_visualization(newConfig);
+        _renderRadar(newConfig);
       },
       demoSlug: config.demoSlug || config.svg_id || 'radar',
     };
@@ -148,9 +158,76 @@ function radar_visualization(config) {
   }
 }
 
+/**
+ * Factory function - creates a Tech Radar instance
+ * @param {Object} initialConfig - Initial radar configuration
+ * @returns {Object} Radar instance with methods
+ */
+function radar_visualization(initialConfig) {
+  // Store current config
+  let currentConfig = { ...initialConfig };
+
+  // Render initial state
+  _renderRadar(currentConfig);
+
+  // Create instance with methods
+  const instance = {
+    /**
+     * Get current configuration
+     * @returns {Object} Current config
+     */
+    getConfig() {
+      return { ...currentConfig };
+    },
+
+    /**
+     * Render with new configuration
+     * @param {Object} newConfig - New configuration (merged with current)
+     * @returns {Object} Instance for chaining
+     */
+    render(newConfig) {
+      currentConfig = { ...currentConfig, ...newConfig };
+      _renderRadar(currentConfig);
+      return this;
+    },
+
+    /**
+     * Reset to initial configuration
+     * @returns {Object} Instance for chaining
+     */
+    reset() {
+      currentConfig = { ...initialConfig };
+      _renderRadar(currentConfig);
+      return this;
+    },
+
+    /**
+     * Import/Export capability (assign radar_visualization.jsonIO)
+     * Usage: instance.importExport = radar_visualization.jsonIO
+     */
+    importExport: null,
+
+    /**
+     * Persistent storage capability (assign radar_visualization.localStorageIO)
+     * Usage: instance.persistentStorage = radar_visualization.localStorageIO
+     * Default: in-memory storage (currentConfig)
+     */
+    persistentStorage: null,
+  };
+
+  return instance;
+}
+
+// Static helpers - available for assignment to instances
 const jsonIO = createJsonIOHelpers();
 radar_visualization.jsonIO = jsonIO;
 radar_visualization.initDemoToolbar = initDemoToolbar;
+
+// Backward compatibility: keep render as static method
+radar_visualization.render = config => {
+  _renderRadar(config);
+  return config;
+};
 
 // Export plugin system
 export {

@@ -8,6 +8,8 @@ const defaultOptions = {
     }
   },
   onSuccess: () => {},
+  sanitizeData: true,
+  mergeOnImport: true,
 };
 
 const readerErrorMessages = {
@@ -53,6 +55,71 @@ function handleError(message, options) {
   options.onError(message);
 }
 
+/**
+ * Sanitizes configuration data by removing rendering properties from entries.
+ * Only keeps the essential data properties: label, quadrant, ring, moved, active, link.
+ * @param {Object} config - Configuration object to sanitize
+ * @returns {Object} Sanitized configuration
+ */
+function sanitizeConfigForExport(config) {
+  if (!config) return config;
+
+  const sanitized = { ...config };
+
+  // Sanitize entries - remove rendering properties
+  if (Array.isArray(config.entries)) {
+    sanitized.entries = config.entries.map(entry => {
+      const clean = {
+        label: entry.label,
+        quadrant: entry.quadrant,
+        ring: entry.ring,
+        moved: entry.moved,
+        active: entry.active,
+      };
+
+      // Include link only if it exists
+      if (entry.link) {
+        clean.link = entry.link;
+      }
+
+      return clean;
+    });
+  }
+
+  // Remove any plugin instances or internal state using destructuring
+  const { _pluginInstances, _internalState, ...cleanConfig } = sanitized;
+  return cleanConfig;
+}
+
+/**
+ * Merges imported configuration with base configuration.
+ * Preserves base config structure but uses imported entries and key properties.
+ * @param {Object} baseConfig - Base configuration to merge into
+ * @param {Object} importedConfig - Imported configuration
+ * @returns {Object} Merged configuration
+ */
+function mergeConfigs(baseConfig, importedConfig) {
+  if (!baseConfig) return importedConfig;
+  if (!importedConfig) return baseConfig;
+
+  const merged = { ...baseConfig };
+
+  // Always use imported entries if provided
+  if (importedConfig.entries) {
+    merged.entries = importedConfig.entries;
+  }
+
+  // Merge key properties from imported config
+  const mergeableProps = ['title', 'date', 'quadrants', 'rings', 'print_layout', 'links_in_new_tabs'];
+  mergeableProps.forEach(prop => {
+    if (importedConfig[prop] !== undefined) {
+      merged[prop] = importedConfig[prop];
+    }
+  });
+
+  return merged;
+}
+
 function exportConfig(button, currentConfigProvider, options = {}) {
   if (!button) {
     throw new Error('exportConfig requires a button element');
@@ -71,7 +138,10 @@ function exportConfig(button, currentConfigProvider, options = {}) {
         throw new Error('No radar configuration is available to export.');
       }
 
-      const json = JSON.stringify(config, null, 2);
+      // Sanitize config if enabled (default: true)
+      const configToExport = merged.sanitizeData ? sanitizeConfigForExport(config) : config;
+
+      const json = JSON.stringify(configToExport, null, 2);
       const timestamp = formatTimestamp();
       const fileName = `${demoSlug}-${timestamp}.json`;
       const { link, url } = buildDownloadLink(json, fileName);
@@ -141,5 +211,7 @@ export function createJsonIOHelpers() {
   return {
     exportConfig,
     importConfig,
+    sanitizeConfigForExport,
+    mergeConfigs,
   };
 }

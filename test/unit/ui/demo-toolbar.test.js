@@ -1,9 +1,21 @@
 /**
- * Tests for demo-toolbar.js - Legacy toolbar helper
+ * Tests for demo-toolbar.js - Instance-based toolbar helper
  */
 
-import { describe, expect, test } from 'bun:test';
+import { beforeEach, describe, expect, test } from 'bun:test';
 import { getToolbarHTML, initDemoToolbar } from '../../../src/ui/demo-toolbar.js';
+
+// Mock radar_visualization.jsonIO
+beforeEach(() => {
+  // Setup global radar_visualization with jsonIO
+  globalThis.radar_visualization = {
+    jsonIO: {
+      importConfig: () => {},
+      exportConfig: () => {},
+      mergeConfigs: (base, imported) => ({ ...base, ...imported }),
+    },
+  };
+});
 
 describe('Demo Toolbar', () => {
   describe('getToolbarHTML', () => {
@@ -46,29 +58,96 @@ describe('Demo Toolbar', () => {
       expect(typeof initDemoToolbar).toBe('function');
     });
 
-    test('should accept config parameter', () => {
-      // GIVEN: A radar config
-      const config = {
-        title: 'Test Radar',
-        quadrants: [{ name: 'Q1' }, { name: 'Q2' }],
-        entries: [],
+    test('should accept radarInstance and options parameters', () => {
+      // GIVEN: A mock radar instance and options
+      const mockInstance = {
+        getConfig: () => ({ title: 'Test' }),
+        render: () => {},
+        reset: () => {},
       };
+      const options = { demoSlug: 'test' };
 
       // WHEN: Initializing toolbar
       // THEN: Should not throw
-      expect(() => initDemoToolbar(config)).not.toThrow();
+      expect(() => initDemoToolbar(mockInstance, options)).not.toThrow();
     });
 
-    test('should handle minimal config', () => {
-      // GIVEN: Minimal config with required properties
-      const config = {
-        demoSlug: 'test',
-        title: 'Test',
+    test('should return toolbar instance object', () => {
+      // GIVEN: Mock radar instance
+      const mockInstance = {
+        getConfig: () => ({}),
+        render: () => {},
+        reset: () => {},
       };
 
-      // WHEN: Initializing with minimal config
-      // THEN: Should not throw
-      expect(() => initDemoToolbar(config)).not.toThrow();
+      // WHEN: Initializing toolbar
+      const toolbar = initDemoToolbar(mockInstance, { demoSlug: 'test' });
+
+      // THEN: Should return toolbar instance
+      expect(toolbar).toBeDefined();
+      expect(typeof toolbar).toBe('object');
+    });
+
+    test('should auto-wire callbacks when instance provided', () => {
+      // GIVEN: A radar instance
+      const mockInstance = {
+        getConfig: () => ({ title: 'Test' }),
+        render: () => {},
+        reset: () => {},
+      };
+
+      // WHEN: Initializing toolbar with instance (DOM elements missing)
+      const toolbar = initDemoToolbar(mockInstance, { demoSlug: 'test' });
+
+      // THEN: Should return early warning object due to missing DOM elements
+      // But the concept of auto-wiring is still valid when DOM is present
+      expect(toolbar).toBeDefined();
+      expect(toolbar.getCurrentConfig).toBeDefined();
+      expect(toolbar.onConfigImport).toBeDefined();
+      expect(toolbar.onConfigReset).toBeDefined();
+    });
+
+    test('should allow null instance for manual wiring', () => {
+      // GIVEN: No radar instance (null)
+      // WHEN: Initializing toolbar without instance
+      const toolbar = initDemoToolbar(null, { demoSlug: 'test' });
+
+      // THEN: Callbacks should be null (for manual assignment)
+      expect(toolbar.getCurrentConfig).toBeNull();
+      expect(toolbar.onConfigImport).toBeNull();
+      expect(toolbar.onConfigReset).toBeNull();
+    });
+
+    test('should include showMessage method', () => {
+      // GIVEN: Mock radar instance
+      const mockInstance = {
+        getConfig: () => ({}),
+        render: () => {},
+        reset: () => {},
+      };
+
+      // WHEN: Initializing toolbar
+      const toolbar = initDemoToolbar(mockInstance, { demoSlug: 'test' });
+
+      // THEN: Should have showMessage method
+      expect(toolbar.showMessage).toBeDefined();
+      expect(typeof toolbar.showMessage).toBe('function');
+    });
+
+    test('should include cleanup method', () => {
+      // GIVEN: Mock radar instance
+      const mockInstance = {
+        getConfig: () => ({}),
+        render: () => {},
+        reset: () => {},
+      };
+
+      // WHEN: Initializing toolbar
+      const toolbar = initDemoToolbar(mockInstance, { demoSlug: 'test' });
+
+      // THEN: Should have cleanup method
+      expect(toolbar.cleanup).toBeDefined();
+      expect(typeof toolbar.cleanup).toBe('function');
     });
   });
 });

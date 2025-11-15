@@ -151,6 +151,15 @@
         >
           <i class="fas fa-file-export"></i>
         </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonResetButton"
+          title="Reset to Initial Configuration"
+          aria-label="Reset Configuration"
+        >
+          <i class="fas fa-undo"></i>
+        </button>
         <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
       </div>
       <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
@@ -167,7 +176,7 @@
 
       // Get JSON I/O helpers
       const jsonIOHelpers = radar_visualization && radar_visualization.jsonIO;
-      const { exportConfig, importConfig } = jsonIOHelpers || {};
+      const { exportConfig, importConfig, mergeConfigs } = jsonIOHelpers || {};
 
       // Toolbar message handling
       const jsonToolbarMessageEl = document.getElementById("jsonToolbarMessage");
@@ -187,10 +196,10 @@
       // Render visualization
       function renderRadar(config) {
         currentConfig = config;
-        radar_visualization(config);
+        radar_visualization.render(config);
       }
 
-      // Initial config
+      // Store initial config for reset
       const initialConfig = {
         repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
         svg_id: "radar",
@@ -272,10 +281,11 @@
 
       renderRadar(initialConfig);
 
-      // Initialize JSON import/export
+      // Initialize JSON import/export if available
       if (exportConfig && importConfig) {
         const importButton = document.getElementById("jsonImportButton");
         const exportButton = document.getElementById("jsonExportButton");
+        const resetButton = document.getElementById("jsonResetButton");
         const importInput = document.getElementById("jsonImportInput");
 
         importButton.addEventListener("click", () => importInput.click());
@@ -283,7 +293,10 @@
         importConfig(
           importInput,
           importedConfig => {
-            renderRadar(importedConfig);
+            // Merge imported config with initial config
+            const configToApply =
+              mergeConfigs && initialConfig ? mergeConfigs(initialConfig, importedConfig) : importedConfig;
+            renderRadar(configToApply);
           },
           {
             demoSlug,
@@ -305,6 +318,16 @@
             showToolbarMessage(message, "error");
           },
         });
+
+        // Setup reset button
+        if (resetButton && initialConfig) {
+          resetButton.addEventListener("click", () => {
+            if (confirm("Reset to initial configuration? This will discard all changes.")) {
+              renderRadar(JSON.parse(JSON.stringify(initialConfig)));
+              showToolbarMessage("Configuration reset to initial state", "success");
+            }
+          });
+        }
       } else {
         showToolbarMessage("JSON helpers unavailable.", "error");
       }

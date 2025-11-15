@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.2
+// Version: 0.0.1-dev+893b19d
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -366,7 +366,9 @@ var defaultOptions = {
       console.error(message);
     }
   },
-  onSuccess: () => {}
+  onSuccess: () => {},
+  sanitizeData: true,
+  mergeOnImport: true
 };
 var readerErrorMessages = {
   read: "Failed to read the selected file. Please try again.",
@@ -403,6 +405,45 @@ function buildDownloadLink(json, fileName) {
 function handleError(message, options) {
   options.onError(message);
 }
+function sanitizeConfigForExport(config) {
+  if (!config)
+    return config;
+  const sanitized = { ...config };
+  if (Array.isArray(config.entries)) {
+    sanitized.entries = config.entries.map((entry) => {
+      const clean = {
+        label: entry.label,
+        quadrant: entry.quadrant,
+        ring: entry.ring,
+        moved: entry.moved,
+        active: entry.active
+      };
+      if (entry.link) {
+        clean.link = entry.link;
+      }
+      return clean;
+    });
+  }
+  const { _pluginInstances, _internalState, ...cleanConfig } = sanitized;
+  return cleanConfig;
+}
+function mergeConfigs(baseConfig, importedConfig) {
+  if (!baseConfig)
+    return importedConfig;
+  if (!importedConfig)
+    return baseConfig;
+  const merged = { ...baseConfig };
+  if (importedConfig.entries) {
+    merged.entries = importedConfig.entries;
+  }
+  const mergeableProps = ["title", "date", "quadrants", "rings", "print_layout", "links_in_new_tabs"];
+  mergeableProps.forEach((prop) => {
+    if (importedConfig[prop] !== undefined) {
+      merged[prop] = importedConfig[prop];
+    }
+  });
+  return merged;
+}
 function exportConfig(button, currentConfigProvider, options = {}) {
   if (!button) {
     throw new Error("exportConfig requires a button element");
@@ -418,7 +459,8 @@ function exportConfig(button, currentConfigProvider, options = {}) {
       if (!config) {
         throw new Error("No radar configuration is available to export.");
       }
-      const json = JSON.stringify(config, null, 2);
+      const configToExport = merged.sanitizeData ? sanitizeConfigForExport(config) : config;
+      const json = JSON.stringify(configToExport, null, 2);
       const timestamp = formatTimestamp();
       const fileName = `${demoSlug}-${timestamp}.json`;
       const { link, url } = buildDownloadLink(json, fileName);
@@ -477,7 +519,9 @@ function importConfig(fileInput, applyConfig, options = {}) {
 function createJsonIOHelpers() {
   return {
     exportConfig,
-    importConfig
+    importConfig,
+    sanitizeConfigForExport,
+    mergeConfigs
   };
 }
 
@@ -1466,26 +1510,51 @@ function renderRingDescriptionsTable(config) {
 }
 
 // src/ui/demo-toolbar.js
-function initDemoToolbar(options) {
-  const { demoSlug, getCurrentConfig, onConfigImport, jsonIO } = options;
+function initDemoToolbar(radarInstance = null, options = {}) {
+  const { demoSlug = "tech-radar" } = options;
+  const jsonIO = typeof radar_visualization !== "undefined" && radar_visualization.jsonIO || radarInstance?.importExport;
   if (!jsonIO || !jsonIO.importConfig || !jsonIO.exportConfig) {
     console.warn("JSON I/O helpers not available. Toolbar will not be initialized.");
     showToolbarMessage2("JSON helpers unavailable.", "error");
-    return () => {};
+    return {
+      onConfigImport: null,
+      onConfigReset: null,
+      getCurrentConfig: null,
+      cleanup: () => {},
+      showMessage: () => {}
+    };
   }
-  const { importConfig: importConfig2, exportConfig: exportConfig2 } = jsonIO;
+  const { importConfig: importConfig2, exportConfig: exportConfig2, mergeConfigs: mergeConfigs2 } = jsonIO;
   const importButton = document.getElementById("jsonImportButton");
   const exportButton = document.getElementById("jsonExportButton");
+  const resetButton = document.getElementById("jsonResetButton");
   const importInput = document.getElementById("jsonImportInput");
   if (!importButton || !exportButton || !importInput) {
     console.warn("Toolbar elements not found in DOM");
-    return () => {};
+    return {
+      onConfigImport: null,
+      onConfigReset: null,
+      getCurrentConfig: null,
+      cleanup: () => {},
+      showMessage: () => {}
+    };
   }
+  const toolbarInstance = {
+    onConfigImport: radarInstance ? (config) => radarInstance.render(config) : null,
+    onConfigReset: radarInstance ? () => radarInstance.reset() : null,
+    getCurrentConfig: radarInstance ? () => radarInstance.getConfig() : null,
+    showMessage(message, state = "info") {
+      showToolbarMessage2(message, state);
+    },
+    cleanup: null
+  };
   const handleImportClick = () => importInput.click();
   importButton.addEventListener("click", handleImportClick);
-  const disposeImport = importConfig2(importInput, (config) => {
-    if (onConfigImport) {
-      onConfigImport(config);
+  const disposeImport = importConfig2(importInput, (importedConfig) => {
+    if (toolbarInstance.onConfigImport) {
+      const currentConfig = toolbarInstance.getCurrentConfig ? toolbarInstance.getCurrentConfig() : null;
+      const configToApply = mergeConfigs2 && currentConfig ? mergeConfigs2(currentConfig, importedConfig) : importedConfig;
+      toolbarInstance.onConfigImport(configToApply);
     }
   }, {
     demoSlug,
@@ -1496,7 +1565,7 @@ function initDemoToolbar(options) {
       showToolbarMessage2(message, "error");
     }
   });
-  const disposeExport = exportConfig2(exportButton, getCurrentConfig, {
+  const disposeExport = exportConfig2(exportButton, () => toolbarInstance.getCurrentConfig ? toolbarInstance.getCurrentConfig() : {}, {
     demoSlug,
     onSuccess: ({ fileName }) => {
       showToolbarMessage2(`Exported ${fileName}`, "success");
@@ -1505,13 +1574,29 @@ function initDemoToolbar(options) {
       showToolbarMessage2(message, "error");
     }
   });
-  return () => {
+  let handleResetClick = null;
+  if (resetButton) {
+    handleResetClick = () => {
+      if (toolbarInstance.onConfigReset) {
+        if (confirm("Reset to initial configuration? This will discard all changes.")) {
+          toolbarInstance.onConfigReset();
+          showToolbarMessage2("Configuration reset to initial state", "success");
+        }
+      }
+    };
+    resetButton.addEventListener("click", handleResetClick);
+  }
+  toolbarInstance.cleanup = () => {
     importButton.removeEventListener("click", handleImportClick);
+    if (handleResetClick && resetButton) {
+      resetButton.removeEventListener("click", handleResetClick);
+    }
     if (disposeImport)
       disposeImport();
     if (disposeExport)
       disposeExport();
   };
+  return toolbarInstance;
 }
 function showToolbarMessage2(message, state = "info") {
   const messageEl = document.getElementById("jsonToolbarMessage");
@@ -1561,7 +1646,11 @@ function validateConfig(config) {
 }
 
 // src/index.js
-function radar_visualization(config) {
+function _renderRadar(config) {
+  const svg = document.getElementById(config.svg_id || "radar");
+  if (svg) {
+    svg.innerHTML = "";
+  }
   applyConfigDefaults(config);
   const dimensions = calculateDimensions(config);
   const target_outer_radius = dimensions.target_outer_radius;
@@ -1571,7 +1660,7 @@ function radar_visualization(config) {
     const pluginContext = {
       getCurrentConfig: () => config,
       applyConfig: (newConfig) => {
-        radar_visualization(newConfig);
+        _renderRadar(newConfig);
       },
       demoSlug: config.demoSlug || config.svg_id || "radar"
     };
@@ -1635,15 +1724,41 @@ function radar_visualization(config) {
     renderRingDescriptionsTable(config);
   }
 }
+function radar_visualization2(initialConfig) {
+  let currentConfig = { ...initialConfig };
+  _renderRadar(currentConfig);
+  const instance = {
+    getConfig() {
+      return { ...currentConfig };
+    },
+    render(newConfig) {
+      currentConfig = { ...currentConfig, ...newConfig };
+      _renderRadar(currentConfig);
+      return this;
+    },
+    reset() {
+      currentConfig = { ...initialConfig };
+      _renderRadar(currentConfig);
+      return this;
+    },
+    importExport: null,
+    persistentStorage: null
+  };
+  return instance;
+}
 var jsonIO = createJsonIOHelpers();
-radar_visualization.jsonIO = jsonIO;
-radar_visualization.initDemoToolbar = initDemoToolbar;
-var src_default = radar_visualization;
+radar_visualization2.jsonIO = jsonIO;
+radar_visualization2.initDemoToolbar = initDemoToolbar;
+radar_visualization2.render = (config) => {
+  _renderRadar(config);
+  return config;
+};
+var src_default = radar_visualization2;
 
 
 
-  // Return the main function
-  return radar_visualization;
+  // Return the main function (bundler may rename it, so use src_default)
+  return typeof src_default !== 'undefined' ? src_default : radar_visualization;
 })();
 
 // Export for all environments
