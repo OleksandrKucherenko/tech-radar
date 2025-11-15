@@ -10,20 +10,21 @@ The toolbar now floats as an overlay in the **top-right corner** of the page:
 - ✅ **Print-friendly** - automatically hidden when printing
 - ✅ **Responsive** - adapts on mobile devices
 
-## Status
-✅ **Completed:**
-- `docs/index.html` - Uses inline toolbar code (can be refactored later)
-- `docs/demo-2x4.html` - Uses inline toolbar code (can be refactored later) 
-- `docs/demo-3x4.html` - ✨ Uses new `initDemoToolbar()` helper
-- `docs/builder.html` - Already had toolbar functionality
+## Status: ✅ **100% COMPLETE!**
 
-❌ **Remaining:**
-- `docs/demo-4x8.html`
-- `docs/demo-5x4.html`
-- `docs/demo-6x5.html`
-- `docs/demo-7x4.html`
-- `docs/demo-8x8.html`
-- `docs/ai.html`
+All demo pages now have the floating toolbar:
+- ✅ `docs/index.html` - Inline toolbar code (working)
+- ✅ `docs/demo-2x4.html` - Inline toolbar code (working)
+- ✅ `docs/demo-3x4.html` - Uses `initDemoToolbar()` helper
+- ✅ `docs/demo-4x8.html` - Uses `initDemoToolbar()` helper
+- ✅ `docs/demo-5x4.html` - Uses `initDemoToolbar()` helper
+- ✅ `docs/demo-6x5.html` - Uses `initDemoToolbar()` helper
+- ✅ `docs/demo-7x4.html` - Uses `initDemoToolbar()` helper
+- ✅ `docs/demo-8x8.html` - Uses `initDemoToolbar()` helper
+- ✅ `docs/ai.html` - Uses `initDemoToolbar()` helper
+- ✅ `docs/builder.html` - Already had toolbar functionality
+
+🎉 **All demos support JSON import/export with floating toolbar!**
 
 ## Pattern to Apply
 
