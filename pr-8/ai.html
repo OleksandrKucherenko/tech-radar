@@ -123,12 +123,27 @@
       <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
     </nav>
 
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button type="button" class="demo-toolbar__button" id="jsonImportButton">Import JSON</button>
+        <button type="button" class="demo-toolbar__button" id="jsonExportButton">Export JSON</button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
+
     <div class="radar-container">
       <svg id="radar"></svg>
     </div>
 
     <script>
-      radar_visualization({
+      let currentConfig = null;
+      function renderRadar(config) {
+        currentConfig = config;
+        radar_visualization(config);
+      }
+
+      const initialConfig = {
         svg_id: "radar",
         title: "AI Tech Radar (2025-11)",
         quadrants: [
@@ -286,9 +301,18 @@
           { label: "OpenSearch", link: "https://opensearch.org", quadrant: 3, ring: 2, moved: 0, active: true },
           { label: "Memgraph", link: "https://memgraph.com", quadrant: 3, ring: 0, moved: 1, active: true },
         ],
+      };
+
+      renderRadar(initialConfig);
+
+      radar_visualization.initDemoToolbar({
+        demoSlug: "ai-demo",
+        getCurrentConfig: () => currentConfig,
+        onConfigImport: config => renderRadar(config),
+        jsonIO: radar_visualization.jsonIO,
       });
     </script>
 
-    <footer>Build: <code>30175e9</code></footer>
+    <footer>Build: <code>ce886c1</code></footer>
   </body>
 </html>

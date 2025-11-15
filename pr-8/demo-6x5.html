@@ -120,12 +120,27 @@
       <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
     </nav>
 
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button type="button" class="demo-toolbar__button" id="jsonImportButton">Import JSON</button>
+        <button type="button" class="demo-toolbar__button" id="jsonExportButton">Export JSON</button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
+
     <div class="radar-container">
       <svg id="radar" width="100%"></svg>
     </div>
 
     <script>
-      radar_visualization({
+      let currentConfig = null;
+      function renderRadar(config) {
+        currentConfig = config;
+        radar_visualization(config);
+      }
+
+      const initialConfig = {
         svg_id: "radar",
         title: "6 Quadrants × 5 Rings",
         quadrants: [
@@ -210,9 +225,18 @@
           { label: "Physical Tape", quadrant: 5, ring: 4, moved: -1, active: true },
           { label: "Hand-built Servers", quadrant: 5, ring: 4, moved: 2, active: true },
         ],
+      };
+
+      renderRadar(initialConfig);
+
+      radar_visualization.initDemoToolbar({
+        demoSlug: "demo-6x5",
+        getCurrentConfig: () => currentConfig,
+        onConfigImport: config => renderRadar(config),
+        jsonIO: radar_visualization.jsonIO,
       });
     </script>
 
-    <footer>Build: <code>30175e9</code></footer>
+    <footer>Build: <code>ce886c1</code></footer>
   </body>
 </html>
