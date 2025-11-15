@@ -8,6 +8,7 @@ import { createSegment } from './geometry/segment-calculator.js';
 import { createJsonIOHelpers } from './integration/json-io.js';
 import { boundedBox, boundedInterval, boundedRing } from './math/coordinates.js';
 import { SeededRandom } from './math/random.js';
+import { initializePlugins } from './plugins/index.js';
 import { EntryProcessor } from './processing/entry-processor.js';
 import { renderBlips } from './rendering/blip-renderer.js';
 import { renderDebugVisualization } from './rendering/debug-renderer.js';
@@ -32,6 +33,25 @@ function radar_visualization(config) {
   const target_outer_radius = dimensions.target_outer_radius;
 
   validateConfig(config);
+
+  // Initialize plugins if provided
+  let _pluginCleanup = null;
+  if (config.plugins) {
+    const pluginContext = {
+      getCurrentConfig: () => config,
+      applyConfig: newConfig => {
+        // Re-render with new config
+        radar_visualization(newConfig);
+      },
+      demoSlug: config.demoSlug || config.svg_id || 'radar',
+    };
+
+    const result = initializePlugins(config.plugins, pluginContext);
+    _pluginCleanup = result.cleanup;
+
+    // Store plugin instances for access
+    config._pluginInstances = result.plugins;
+  }
 
   const rng = new SeededRandom(42);
   const random = () => rng.next();
@@ -131,6 +151,15 @@ function radar_visualization(config) {
 const jsonIO = createJsonIOHelpers();
 radar_visualization.jsonIO = jsonIO;
 radar_visualization.initDemoToolbar = initDemoToolbar;
+
+// Export plugin system
+export {
+  storagePlugin,
+  importExportPlugin,
+  toolbarPlugin,
+  registerPlugin,
+  initializePlugins,
+} from './plugins/index.js';
 
 export default radar_visualization;
 export { radar_visualization, jsonIO, initDemoToolbar };

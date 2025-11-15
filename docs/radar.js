@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+ee3a3c3
+// Version: 0.0.1-dev+2548a95
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -502,6 +502,472 @@ class SeededRandom {
   }
 }
 
+// src/plugins/plugin-base.js
+var pluginRegistry = new Map;
+function registerPlugin(name, plugin) {
+  pluginRegistry.set(name, plugin);
+}
+function getPlugin(name) {
+  return pluginRegistry.get(name) || null;
+}
+function initializePlugins(pluginConfig = {}, context = {}) {
+  const initialized = {};
+  const cleanupFunctions = [];
+  for (const [pluginName, config] of Object.entries(pluginConfig)) {
+    if (!config || config.enabled === false) {
+      continue;
+    }
+    const plugin = getPlugin(pluginName);
+    if (!plugin) {
+      console.warn(`Plugin "${pluginName}" not registered, skipping...`);
+      continue;
+    }
+    try {
+      const instance = plugin.init(config, context);
+      initialized[pluginName] = instance;
+      if (instance && typeof instance.cleanup === "function") {
+        cleanupFunctions.push(instance.cleanup);
+      }
+    } catch (error) {
+      console.error(`Failed to initialize plugin "${pluginName}":`, error);
+    }
+  }
+  return {
+    plugins: initialized,
+    cleanup: () => {
+      cleanupFunctions.forEach((fn) => {
+        try {
+          fn();
+        } catch (error) {
+          console.error("Plugin cleanup error:", error);
+        }
+      });
+    }
+  };
+}
+function definePlugin({ name, init, defaults = {} }) {
+  return {
+    name,
+    defaults,
+    init: (config, context) => {
+      const mergedConfig = { ...defaults, ...config };
+      return init(mergedConfig, context);
+    }
+  };
+}
+// src/plugins/storage-plugin.js
+class LocalStorageAdapter {
+  constructor(key, options = {}) {
+    this.key = key;
+    this.version = options.version || 1;
+    this.namespace = options.namespace || "tech-radar";
+    this.fullKey = `${this.namespace}:${this.key}`;
+  }
+  async save(config) {
+    try {
+      const data = {
+        version: this.version,
+        timestamp: Date.now(),
+        config
+      };
+      localStorage.setItem(this.fullKey, JSON.stringify(data));
+    } catch (error) {
+      console.error("localStorage save error:", error);
+      throw new Error("Failed to save to localStorage");
+    }
+  }
+  async load() {
+    try {
+      const item = localStorage.getItem(this.fullKey);
+      if (!item)
+        return null;
+      const data = JSON.parse(item);
+      if (data.version !== this.version) {
+        console.warn(`Storage version mismatch: expected ${this.version}, got ${data.version}`);
+      }
+      return data.config;
+    } catch (error) {
+      console.error("localStorage load error:", error);
+      return null;
+    }
+  }
+  async clear() {
+    try {
+      localStorage.removeItem(this.fullKey);
+    } catch (error) {
+      console.error("localStorage clear error:", error);
+    }
+  }
+  async exists() {
+    return localStorage.getItem(this.fullKey) !== null;
+  }
+}
+
+class SessionStorageAdapter {
+  constructor(key, options = {}) {
+    this.key = key;
+    this.namespace = options.namespace || "tech-radar";
+    this.fullKey = `${this.namespace}:${this.key}`;
+  }
+  async save(config) {
+    try {
+      const data = {
+        timestamp: Date.now(),
+        config
+      };
+      sessionStorage.setItem(this.fullKey, JSON.stringify(data));
+    } catch (error) {
+      console.error("sessionStorage save error:", error);
+      throw new Error("Failed to save to sessionStorage");
+    }
+  }
+  async load() {
+    try {
+      const item = sessionStorage.getItem(this.fullKey);
+      if (!item)
+        return null;
+      const data = JSON.parse(item);
+      return data.config;
+    } catch (error) {
+      console.error("sessionStorage load error:", error);
+      return null;
+    }
+  }
+  async clear() {
+    try {
+      sessionStorage.removeItem(this.fullKey);
+    } catch (error) {
+      console.error("sessionStorage clear error:", error);
+    }
+  }
+  async exists() {
+    return sessionStorage.getItem(this.fullKey) !== null;
+  }
+}
+
+class IndexedDBAdapter {
+  constructor(key, options = {}) {
+    this.key = key;
+    this.dbName = options.dbName || "tech-radar-db";
+    this.storeName = options.storeName || "configurations";
+    this.version = options.version || 1;
+  }
+  async save(_config) {
+    throw new Error("IndexedDB adapter not yet implemented");
+  }
+  async load() {
+    throw new Error("IndexedDB adapter not yet implemented");
+  }
+  async clear() {
+    throw new Error("IndexedDB adapter not yet implemented");
+  }
+  async exists() {
+    return false;
+  }
+}
+function createStorageAdapter(type, key, options = {}) {
+  switch (type) {
+    case "localStorage":
+      return new LocalStorageAdapter(key, options);
+    case "sessionStorage":
+      return new SessionStorageAdapter(key, options);
+    case "indexedDB":
+      return new IndexedDBAdapter(key, options);
+    case "custom":
+      if (!options.save || !options.load || !options.clear) {
+        throw new Error("Custom storage requires save, load, and clear functions");
+      }
+      return {
+        save: options.save,
+        load: options.load,
+        clear: options.clear,
+        exists: options.exists || (() => Promise.resolve(false))
+      };
+    default:
+      throw new Error(`Unknown storage type: ${type}`);
+  }
+}
+var storagePlugin = definePlugin({
+  name: "storage",
+  defaults: {
+    type: "localStorage",
+    key: "default",
+    autoLoad: false,
+    autoSave: false,
+    namespace: "tech-radar",
+    version: 1
+  },
+  init: (config, context) => {
+    const { type, key, autoLoad, autoSave, ...options } = config;
+    const { getCurrentConfig, onConfigChange } = context;
+    const storage = createStorageAdapter(type, key, options);
+    let loadPromise = null;
+    if (autoLoad) {
+      loadPromise = storage.load().then((loadedConfig) => {
+        if (loadedConfig && context.applyConfig) {
+          context.applyConfig(loadedConfig);
+        }
+        return loadedConfig;
+      });
+    }
+    let unsubscribe = null;
+    if (autoSave && onConfigChange) {
+      unsubscribe = onConfigChange((config2) => {
+        storage.save(config2).catch((error) => {
+          console.error("Auto-save failed:", error);
+        });
+      });
+    }
+    return {
+      storage,
+      save: async () => {
+        const config2 = getCurrentConfig ? getCurrentConfig() : null;
+        if (!config2) {
+          throw new Error("No configuration to save");
+        }
+        return storage.save(config2);
+      },
+      load: async () => {
+        return storage.load();
+      },
+      clear: async () => {
+        return storage.clear();
+      },
+      exists: async () => {
+        return storage.exists();
+      },
+      cleanup: () => {
+        if (unsubscribe) {
+          unsubscribe();
+        }
+      },
+      _loadPromise: loadPromise
+    };
+  }
+});
+// src/plugins/import-export-plugin.js
+var importExportPlugin = definePlugin({
+  name: "importExport",
+  defaults: {
+    enabled: true,
+    formats: ["json"],
+    fileNamePattern: "{slug}-{timestamp}",
+    pretty: true
+  },
+  init: (config, context) => {
+    const { formats: _formats, fileNamePattern, pretty } = config;
+    const { getCurrentConfig, onConfigChange: _onConfigChange, demoSlug } = context;
+    const jsonIO = createJsonIOHelpers();
+    const operations = {
+      imports: 0,
+      exports: 0,
+      lastImport: null,
+      lastExport: null
+    };
+    const generateFileName = (operation) => {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+      const slug = demoSlug || "radar-config";
+      return fileNamePattern.replace("{slug}", slug).replace("{timestamp}", timestamp).replace("{operation}", operation);
+    };
+    const exportJSON = async (options = {}) => {
+      const configToExport = options.config || getCurrentConfig?.();
+      if (!configToExport) {
+        throw new Error("No configuration to export");
+      }
+      const fileName = options.fileName || `${generateFileName("export")}.json`;
+      const jsonString = pretty ? JSON.stringify(configToExport, null, 2) : JSON.stringify(configToExport);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      operations.exports++;
+      operations.lastExport = {
+        timestamp: Date.now(),
+        fileName,
+        size: blob.size
+      };
+      return { fileName, blob };
+    };
+    const importJSON = async (source) => {
+      let data;
+      if (source instanceof File || source instanceof Blob) {
+        const text = await source.text();
+        data = JSON.parse(text);
+      } else if (typeof source === "string") {
+        data = JSON.parse(source);
+      } else {
+        throw new Error("Invalid import source");
+      }
+      operations.imports++;
+      operations.lastImport = {
+        timestamp: Date.now(),
+        fileName: source.name || "unknown"
+      };
+      return data;
+    };
+    const setupExport = (button, getConfig, options = {}) => {
+      return jsonIO.exportConfig(button, getConfig, {
+        ...options,
+        demoSlug: demoSlug || options.demoSlug
+      });
+    };
+    const setupImport = (input, onImport, options = {}) => {
+      return jsonIO.importConfig(input, onImport, {
+        ...options,
+        demoSlug: demoSlug || options.demoSlug
+      });
+    };
+    return {
+      jsonIO,
+      export: exportJSON,
+      import: importJSON,
+      setupExport,
+      setupImport,
+      getStats: () => ({ ...operations }),
+      cleanup: () => {}
+    };
+  }
+});
+// src/plugins/toolbar-plugin.js
+function showToolbarMessage(messageEl, message, state = "info") {
+  if (!messageEl)
+    return;
+  messageEl.textContent = message;
+  messageEl.dataset.state = state;
+  if (state !== "error") {
+    setTimeout(() => {
+      messageEl.textContent = "";
+      delete messageEl.dataset.state;
+    }, 3000);
+  }
+}
+function getDefaultToolbarHTML() {
+  return `
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button type="button" class="demo-toolbar__button" id="jsonImportButton">Import JSON</button>
+        <button type="button" class="demo-toolbar__button" id="jsonExportButton">Export JSON</button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
+  `.trim();
+}
+var toolbarPlugin = definePlugin({
+  name: "toolbar",
+  defaults: {
+    enabled: true,
+    position: "top-right",
+    buttons: ["import", "export"],
+    containerId: null,
+    autoRender: true
+  },
+  init: (config, context) => {
+    const { enabled, containerId, autoRender, buttons } = config;
+    const { importExportPlugin: importExportPlugin2, getCurrentConfig, onConfigImport, demoSlug } = context;
+    if (!enabled) {
+      return { cleanup: () => {} };
+    }
+    let toolbarContainer = null;
+    let cleanupFunctions = [];
+    const render = (container = null) => {
+      if (container) {
+        toolbarContainer = container;
+      } else if (containerId) {
+        toolbarContainer = document.getElementById(containerId);
+      } else {
+        toolbarContainer = document.querySelector(".demo-toolbar");
+        if (!toolbarContainer) {
+          const nav = document.querySelector("nav.demo-links");
+          if (nav) {
+            toolbarContainer = document.createElement("div");
+            nav.insertAdjacentElement("afterend", toolbarContainer);
+          }
+        }
+      }
+      if (!toolbarContainer) {
+        console.warn("Toolbar container not found");
+        return;
+      }
+      if (!toolbarContainer.querySelector(".demo-toolbar__controls")) {
+        toolbarContainer.innerHTML = getDefaultToolbarHTML();
+      }
+      const importButton = document.getElementById("jsonImportButton");
+      const exportButton = document.getElementById("jsonExportButton");
+      const importInput = document.getElementById("jsonImportInput");
+      const messageEl = document.getElementById("jsonToolbarMessage");
+      if (!importButton || !exportButton || !importInput) {
+        console.warn("Toolbar elements not found");
+        return;
+      }
+      if (!buttons.includes("import")) {
+        importButton.style.display = "none";
+      }
+      if (!buttons.includes("export")) {
+        exportButton.style.display = "none";
+      }
+      if (importExportPlugin2) {
+        const { setupImport, setupExport } = importExportPlugin2;
+        const handleImportClick = () => importInput.click();
+        importButton.addEventListener("click", handleImportClick);
+        const disposeImport = setupImport(importInput, (importedConfig) => {
+          if (onConfigImport) {
+            onConfigImport(importedConfig);
+          }
+        }, {
+          demoSlug,
+          onSuccess: ({ fileName }) => {
+            showToolbarMessage(messageEl, `Imported ${fileName || "configuration"} successfully`, "success");
+          },
+          onError: (message) => {
+            showToolbarMessage(messageEl, message, "error");
+          }
+        });
+        const disposeExport = setupExport(exportButton, getCurrentConfig, {
+          demoSlug,
+          onSuccess: ({ fileName }) => {
+            showToolbarMessage(messageEl, `Exported ${fileName}`, "success");
+          },
+          onError: (message) => {
+            showToolbarMessage(messageEl, message, "error");
+          }
+        });
+        cleanupFunctions.push(() => importButton.removeEventListener("click", handleImportClick), disposeImport, disposeExport);
+      } else {
+        console.warn("Import/Export plugin not available for toolbar");
+      }
+    };
+    if (autoRender) {
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => render());
+      } else {
+        render();
+      }
+    }
+    return {
+      render,
+      showMessage: (message, state = "info") => {
+        const messageEl = document.getElementById("jsonToolbarMessage");
+        showToolbarMessage(messageEl, message, state);
+      },
+      getContainer: () => toolbarContainer,
+      cleanup: () => {
+        cleanupFunctions.forEach((fn) => {
+          if (typeof fn === "function") {
+            try {
+              fn();
+            } catch (error) {
+              console.error("Toolbar cleanup error:", error);
+            }
+          }
+        });
+        cleanupFunctions = [];
+      }
+    };
+  }
+});
+// src/plugins/index.js
+registerPlugin("storage", storagePlugin);
+registerPlugin("importExport", importExportPlugin);
+registerPlugin("toolbar", toolbarPlugin);
+
 // src/processing/entry-processor.js
 class EntryProcessor {
   constructor(config, quadrants, rings, randomNext, randomBetween) {
@@ -999,7 +1465,7 @@ function initDemoToolbar(options) {
   const { demoSlug, getCurrentConfig, onConfigImport, jsonIO } = options;
   if (!jsonIO || !jsonIO.importConfig || !jsonIO.exportConfig) {
     console.warn("JSON I/O helpers not available. Toolbar will not be initialized.");
-    showToolbarMessage("JSON helpers unavailable.", "error");
+    showToolbarMessage2("JSON helpers unavailable.", "error");
     return () => {};
   }
   const { importConfig: importConfig2, exportConfig: exportConfig2 } = jsonIO;
@@ -1019,19 +1485,19 @@ function initDemoToolbar(options) {
   }, {
     demoSlug,
     onSuccess: ({ fileName }) => {
-      showToolbarMessage(`Imported ${fileName || "configuration"} successfully`, "success");
+      showToolbarMessage2(`Imported ${fileName || "configuration"} successfully`, "success");
     },
     onError: (message) => {
-      showToolbarMessage(message, "error");
+      showToolbarMessage2(message, "error");
     }
   });
   const disposeExport = exportConfig2(exportButton, getCurrentConfig, {
     demoSlug,
     onSuccess: ({ fileName }) => {
-      showToolbarMessage(`Exported ${fileName}`, "success");
+      showToolbarMessage2(`Exported ${fileName}`, "success");
     },
     onError: (message) => {
-      showToolbarMessage(message, "error");
+      showToolbarMessage2(message, "error");
     }
   });
   return () => {
@@ -1042,7 +1508,7 @@ function initDemoToolbar(options) {
       disposeExport();
   };
 }
-function showToolbarMessage(message, state = "info") {
+function showToolbarMessage2(message, state = "info") {
   const messageEl = document.getElementById("jsonToolbarMessage");
   if (messageEl) {
     messageEl.textContent = message;
@@ -1095,6 +1561,19 @@ function radar_visualization(config) {
   const dimensions = calculateDimensions(config);
   const target_outer_radius = dimensions.target_outer_radius;
   validateConfig(config);
+  let _pluginCleanup = null;
+  if (config.plugins) {
+    const pluginContext = {
+      getCurrentConfig: () => config,
+      applyConfig: (newConfig) => {
+        radar_visualization(newConfig);
+      },
+      demoSlug: config.demoSlug || config.svg_id || "radar"
+    };
+    const result = initializePlugins(config.plugins, pluginContext);
+    _pluginCleanup = result.cleanup;
+    config._pluginInstances = result.plugins;
+  }
   const rng = new SeededRandom(42);
   const random = () => rng.next();
   const random_between = (min, max) => rng.between(min, max);
