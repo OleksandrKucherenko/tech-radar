@@ -631,11 +631,25 @@
     </div>
 
     <script>
-        const jsonIOHelpers = window.radar_visualization && window.radar_visualization.jsonIO;
-        if (!jsonIOHelpers) {
-            console.warn('radar_visualization.jsonIO is unavailable. JSON import/export helpers will be disabled.');
+        // Get jsonIO helpers from radar_visualization
+        // Note: radar.js is loaded in <head>, so it should be available here
+        let exportConfig = null;
+        let importConfig = null;
+        
+        // Try to get jsonIO helpers
+        if (window.radar_visualization && window.radar_visualization.jsonIO) {
+            const jsonIOHelpers = window.radar_visualization.jsonIO;
+            exportConfig = jsonIOHelpers.exportConfig;
+            importConfig = jsonIOHelpers.importConfig;
+            console.log('✓ JSON import/export helpers loaded successfully');
+        } else {
+            console.error('✗ radar_visualization.jsonIO is unavailable. JSON import/export will be disabled.');
+            console.log('  window.radar_visualization:', typeof window.radar_visualization);
+            if (window.radar_visualization) {
+                console.log('  radar_visualization.jsonIO:', window.radar_visualization.jsonIO);
+            }
         }
-        const { exportConfig, importConfig } = jsonIOHelpers || {};
+        
         // State management
         const state = {
             ringCount: 4,
