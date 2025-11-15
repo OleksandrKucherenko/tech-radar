@@ -11,6 +11,7 @@
 
 import { $ } from 'bun';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import semver from 'semver';
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -33,10 +34,11 @@ if (!version) {
   process.exit(1);
 }
 
-// Validate version format (strict semver: MAJOR.MINOR.PATCH)
+// Validate version format using semver library
 // See https://semver.org/ for specification
-const versionRegex = /^\d+\.\d+\.\d+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$/;
-if (!versionRegex.test(version)) {
+// Note: We reject 'v' prefix to keep filenames clean (use semver.clean() to normalize)
+const cleanedVersion = semver.clean(version);
+if (!cleanedVersion) {
   console.error(`❌ ERROR: Invalid version format: ${version}`);
   console.error('');
   console.error('Version must follow strict semantic versioning: MAJOR.MINOR.PATCH');
@@ -52,7 +54,15 @@ if (!versionRegex.test(version)) {
   console.error('Invalid examples:');
   console.error('  ✗ 0.14             - Missing PATCH version');
   console.error('  ✗ 1.0              - Missing PATCH version');
-  console.error('  ✗ v1.0.0           - Prefix not allowed');
+  console.error('');
+  process.exit(1);
+}
+
+// Reject 'v' prefix to ensure consistent filenames
+if (version !== cleanedVersion) {
+  console.error(`❌ ERROR: Version should not include 'v' prefix: ${version}`);
+  console.error('');
+  console.error(`Use: ${cleanedVersion} instead of ${version}`);
   console.error('');
   process.exit(1);
 }
@@ -74,9 +84,8 @@ async function buildRadar() {
       console.error('Released versions should NEVER be modified.');
       console.error('');
 
-      // Parse version to suggest next version
-      const [major, minor, patch] = version.split(/[-+]/)[0].split('.').map(Number);
-      const nextVersion = `${major}.${minor}.${patch + 1}`;
+      // Use semver to suggest next patch version
+      const nextVersion = semver.inc(version, 'patch');
 
       console.error('Options:');
       console.error('  1. Use a new version number (recommended):');
