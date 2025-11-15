@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+1ddea13
+// Version: 0.0.1-dev+ee3a3c3
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
