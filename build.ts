@@ -9,7 +9,8 @@
 //            Always create a new version for changes.
 //            Version must follow strict semantic versioning (MAJOR.MINOR.PATCH)
 
-import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import semver from 'semver';
 
 // Parse command line arguments
@@ -64,6 +65,39 @@ if (version !== cleanedVersion) {
   console.error(`Use: ${cleanedVersion} instead of ${version}`);
   console.error('');
   process.exit(1);
+}
+
+// Get repository URL from package.json
+function getRepositoryUrl(): string {
+  const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8'));
+  const repo = packageJson.repository;
+  if (typeof repo === 'string') {
+    // Convert git URL to https URL if needed
+    return repo.replace(/^git\+/, '').replace(/\.git$/, '');
+  }
+  if (typeof repo === 'object' && repo.url) {
+    return repo.url.replace(/^git\+/, '').replace(/\.git$/, '');
+  }
+  return 'https://github.com/zalando/tech-radar'; // fallback
+}
+
+// Get current git commit hash (short version)
+function getGitCommitHash(): string {
+  try {
+    return execSync('git log -1 --format=%h', { encoding: 'utf-8' }).trim();
+  } catch {
+    return 'unknown';
+  }
+}
+
+// Format version with commit hash for dev builds
+function formatVersion(version: string): string {
+  if (version.includes('-dev')) {
+    const hash = getGitCommitHash();
+    // Replace -dev with -dev+hash or append +hash if it ends with -dev
+    return version.replace(/-dev$/, `-dev+${hash}`);
+  }
+  return version;
 }
 
 async function buildRadar() {
@@ -122,11 +156,15 @@ async function buildRadar() {
   // Get the bundled ESM output
   const bundledCode = await buildResult.outputs[0].text();
 
+  // Get repository URL and format version
+  const repositoryUrl = getRepositoryUrl();
+  const displayVersion = formatVersion(version);
+
   // Wrap in IIFE to make it browser-compatible and expose globally
   const wrappedCode = `// Tech Radar Visualization - Bundled from ES6 modules
-// Version: ${version}
+// Version: ${displayVersion}
 // License: MIT
-// Source: https://github.com/zalando/tech-radar
+// Source: ${repositoryUrl}
 
 var radar_visualization = (function() {
   'use strict';

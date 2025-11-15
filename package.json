@@ -2,8 +2,8 @@
   "name": "zalando-tech-radar",
   "version": "2024.1.0",
   "description": "Visualizing our technology choices",
-  "homepage": "https://github.com/zalando/tech-radar#readme",
-  "repository": "https://github.com/zalando/tech-radar.git",
+  "homepage": "https://github.com/OleksandrKucherenko/tech-radar#readme",
+  "repository": "https://github.com/OleksandrKucherenko/tech-radar.git",
   "license": "MIT",
   "type": "module",
   "private": true,
@@ -44,7 +44,7 @@
     "format": "biome format --write . && prettier --write '**/*.html'",
     "format:check": "biome format . && prettier --check '**/*.html'",
     "format:html": "prettier --write '**/*.html'",
-    "rebuild-radar": "RELEASE_VERSION=0.0.0-dev bun run build --force 2>&1 | grep -E '(✓|✅|❌)' || true && git add docs/radar.js",
+    "rebuild-radar": "RELEASE_VERSION=0.0.1-dev bun run build --force 2>&1 | grep -E '(✓|✅|❌)' || true && git add docs/radar.js",
     "prepare": "husky"
   }
 }

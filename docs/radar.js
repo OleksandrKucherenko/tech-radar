@@ -1,7 +1,7 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.0-dev
+// Version: 0.0.1-dev+0583ae2
 // License: MIT
-// Source: https://github.com/zalando/tech-radar
+// Source: https://github.com/OleksandrKucherenko/tech-radar
 
 var radar_visualization = (function() {
   'use strict';
