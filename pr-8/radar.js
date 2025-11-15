@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+238e7aa
+// Version: 0.0.1-dev+1ddea13
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -994,6 +994,68 @@ function renderRingDescriptionsTable(config) {
   descriptionRow.selectAll("td").data(config.rings).enter().append("td").style("padding", "8px").style("border", "1px solid #ddd").style("width", columnWidth).text((d) => d.description);
 }
 
+// src/ui/demo-toolbar.js
+function initDemoToolbar(options) {
+  const { demoSlug, getCurrentConfig, onConfigImport, jsonIO } = options;
+  if (!jsonIO || !jsonIO.importConfig || !jsonIO.exportConfig) {
+    console.warn("JSON I/O helpers not available. Toolbar will not be initialized.");
+    showToolbarMessage("JSON helpers unavailable.", "error");
+    return () => {};
+  }
+  const { importConfig: importConfig2, exportConfig: exportConfig2 } = jsonIO;
+  const importButton = document.getElementById("jsonImportButton");
+  const exportButton = document.getElementById("jsonExportButton");
+  const importInput = document.getElementById("jsonImportInput");
+  if (!importButton || !exportButton || !importInput) {
+    console.warn("Toolbar elements not found in DOM");
+    return () => {};
+  }
+  const handleImportClick = () => importInput.click();
+  importButton.addEventListener("click", handleImportClick);
+  const disposeImport = importConfig2(importInput, (config) => {
+    if (onConfigImport) {
+      onConfigImport(config);
+    }
+  }, {
+    demoSlug,
+    onSuccess: ({ fileName }) => {
+      showToolbarMessage(`Imported ${fileName || "configuration"} successfully`, "success");
+    },
+    onError: (message) => {
+      showToolbarMessage(message, "error");
+    }
+  });
+  const disposeExport = exportConfig2(exportButton, getCurrentConfig, {
+    demoSlug,
+    onSuccess: ({ fileName }) => {
+      showToolbarMessage(`Exported ${fileName}`, "success");
+    },
+    onError: (message) => {
+      showToolbarMessage(message, "error");
+    }
+  });
+  return () => {
+    importButton.removeEventListener("click", handleImportClick);
+    if (disposeImport)
+      disposeImport();
+    if (disposeExport)
+      disposeExport();
+  };
+}
+function showToolbarMessage(message, state = "info") {
+  const messageEl = document.getElementById("jsonToolbarMessage");
+  if (messageEl) {
+    messageEl.textContent = message;
+    messageEl.dataset.state = state;
+    if (state !== "error") {
+      setTimeout(() => {
+        messageEl.textContent = "";
+        delete messageEl.dataset.state;
+      }, 3000);
+    }
+  }
+}
+
 // src/validation/config-validator.js
 class ConfigValidationError extends Error {
   constructor(message, field, value) {
@@ -1091,6 +1153,7 @@ function radar_visualization(config) {
 }
 var jsonIO = createJsonIOHelpers();
 radar_visualization.jsonIO = jsonIO;
+radar_visualization.initDemoToolbar = initDemoToolbar;
 var src_default = radar_visualization;
 
 

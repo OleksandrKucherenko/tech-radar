@@ -4,11 +4,18 @@
 - **Scope**: All demo entry points under `docs/` (index, builder, specialized examples).
 - **Todo**:
   - [x] Extract shared helpers in `src/integration/json-io.js` (bundled into `radar_visualization`) with `importConfig(fileInput, applyConfig)` and `exportConfig(button, currentConfigProvider)`.
-  - [ ] Embed toolbar controls (`Import JSON`, `Export JSON`) in every demo that call the helpers and re-render via `radar_visualization`.
+  - [x] Create reusable `src/ui/demo-toolbar.js` module with `initDemoToolbar()` helper to eliminate duplication.
+  - [x] Add toolbar CSS styles to `radar.css` for consistent UI across all demos.
+  - [x] Embed toolbar controls in `index.html` with full import/export functionality.
+  - [x] Embed toolbar controls in `demo-2x4.html` with full import/export functionality.
+  - [x] Embed toolbar controls in `demo-3x4.html` using new `initDemoToolbar()` helper.
+  - [ ] Embed toolbar controls in remaining demos: `demo-4x8.html`, `demo-5x4.html`, `demo-6x5.html`, `demo-7x4.html`, `demo-8x8.html`, `ai.html`.
   - [x] Add user-friendly error handling for malformed JSON and name downloads `<demoSlug>-<timestamp>.json`.
+  - [ ] **Optional:** Refactor `index.html` and `demo-2x4.html` to use `initDemoToolbar()` helper (currently use inline code).
 - **Validation**:
-  - [x] Vitest unit tests covering helper behavior with mocked `FileReader`.
+  - [x] Bun unit tests covering helper behavior with mocked `FileReader`.
   - [ ] Manual smoke verification that configs round-trip across all demos.
+- **Reference**: See `TOOLBAR_UPDATE_GUIDE.md` for detailed implementation pattern.
 
 ## 2. Local Storage Customization
 - **Scope**: Persist per-demo overrides so users can edit radars locally.

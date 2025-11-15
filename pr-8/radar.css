@@ -241,9 +241,62 @@ td {
   outline-offset: 1px;
 }
 
+/* JSON Toolbar styles */
+.demo-toolbar {
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.demo-toolbar__controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.demo-toolbar__button {
+  background: #1976d2;
+  border: none;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.2s ease;
+}
+
+.demo-toolbar__button:hover {
+  background: #1565c0;
+}
+
+.demo-toolbar__button:active {
+  background: #0d47a1;
+}
+
+.demo-toolbar__message {
+  font-size: 0.85rem;
+  color: #1976d2;
+  min-height: 1rem;
+  flex: 1;
+}
+
+.demo-toolbar__message[data-state="error"] {
+  color: #d32f2f;
+}
+
+.demo-toolbar__message[data-state="success"] {
+  color: #2e7d32;
+}
+
 /* Print styles */
 @media print {
-  .demo-links {
+  .demo-links,
+  .demo-toolbar {
     display: none;
   }
 

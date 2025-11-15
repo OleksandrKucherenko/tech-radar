@@ -77,13 +77,52 @@
       <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
     </nav>
 
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button type="button" class="demo-toolbar__button" id="jsonImportButton">Import JSON</button>
+        <button type="button" class="demo-toolbar__button" id="jsonExportButton">Export JSON</button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
+
     <svg id="radar"></svg>
 
     <script>
+      // Configuration state
+      let currentConfig = null;
+      const demoSlug = "tech-radar";
+
+      // Get JSON I/O helpers from radar_visualization
+      const jsonIOHelpers = radar_visualization && radar_visualization.jsonIO;
+      const { exportConfig, importConfig } = jsonIOHelpers || {};
+
+      // Toolbar message handling
+      const jsonToolbarMessageEl = document.getElementById("jsonToolbarMessage");
+      function showToolbarMessage(message, state = "info") {
+        if (jsonToolbarMessageEl) {
+          jsonToolbarMessageEl.textContent = message;
+          jsonToolbarMessageEl.dataset.state = state;
+          if (state !== "error") {
+            setTimeout(() => {
+              jsonToolbarMessageEl.textContent = "";
+              delete jsonToolbarMessageEl.dataset.state;
+            }, 3000);
+          }
+        }
+      }
+
+      // Render visualization with given config
+      function renderRadar(config) {
+        currentConfig = config;
+        radar_visualization(config);
+      }
+
+      // Load and render initial configuration
       fetch("./config.json")
         .then(response => response.json())
         .then(data => {
-          radar_visualization({
+          const config = {
             repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
             title: "Tech Radar",
             date: data.date,
@@ -100,13 +139,51 @@
               { name: "HOLD", color: "#e09b96" },
             ],
             entries: data.entries,
-          });
+          };
+          renderRadar(config);
+
+          // Initialize JSON import/export if available
+          if (exportConfig && importConfig) {
+            const importButton = document.getElementById("jsonImportButton");
+            const exportButton = document.getElementById("jsonExportButton");
+            const importInput = document.getElementById("jsonImportInput");
+
+            importButton.addEventListener("click", () => importInput.click());
+
+            importConfig(
+              importInput,
+              importedConfig => {
+                renderRadar(importedConfig);
+              },
+              {
+                demoSlug,
+                onSuccess: ({ fileName }) => {
+                  showToolbarMessage(`Imported ${fileName || "configuration"} successfully`, "success");
+                },
+                onError: message => {
+                  showToolbarMessage(message, "error");
+                },
+              }
+            );
+
+            exportConfig(exportButton, () => currentConfig, {
+              demoSlug,
+              onSuccess: ({ fileName }) => {
+                showToolbarMessage(`Exported ${fileName}`, "success");
+              },
+              onError: message => {
+                showToolbarMessage(message, "error");
+              },
+            });
+          } else {
+            showToolbarMessage("JSON helpers unavailable.", "error");
+          }
         })
         .catch(err => {
           console.log("Error loading config.json", err);
+          showToolbarMessage("Failed to load default configuration.", "error");
         });
     </script>
-
     <table>
       <tr>
         <td>
@@ -191,7 +268,7 @@
         font-size: 12px;
       "
     >
-      Build: <code>cdd5aa5</code>
+      Build: <code>ebf2f60</code>
     </footer>
   </body>
 </html>
