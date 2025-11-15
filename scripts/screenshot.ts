@@ -1,8 +1,9 @@
 // Screenshot generator using existing demo HTML pages
 // Usage: bun run screenshot.ts
+
+import { mkdirSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { chromium } from 'playwright';
-import { mkdirSync, readFileSync } from 'fs';
-import { resolve } from 'path';
 
 // Map demo HTML files to screenshot names
 const demoPages = [
@@ -12,7 +13,7 @@ const demoPages = [
   { htmlFile: 'demo-5x4.html', screenshotName: '5x4-quadrants-rings', width: 1920, height: 1080 },
   { htmlFile: 'demo-6x5.html', screenshotName: '6x5-quadrants-rings', width: 1920, height: 1080 },
   { htmlFile: 'demo-7x4.html', screenshotName: '7x4-quadrants-rings', width: 1920, height: 1080 },
-  { htmlFile: 'demo-8x8.html', screenshotName: '8x8-quadrants-rings', width: 1920, height: 1080 }
+  { htmlFile: 'demo-8x8.html', screenshotName: '8x8-quadrants-rings', width: 1920, height: 1080 },
 ];
 
 // JPEG quality setting (0-100, higher = better quality but larger file)
@@ -24,7 +25,7 @@ async function generateScreenshots() {
   // Create screenshots directory
   try {
     mkdirSync('./docs/screenshots', { recursive: true });
-  } catch (e) {
+  } catch (_e) {
     // Directory exists
   }
 
@@ -34,14 +35,14 @@ async function generateScreenshots() {
 
   const browser = await chromium.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
 
   for (const demo of demoPages) {
     console.log(`Generating: ${demo.screenshotName}...`);
 
     const page = await browser.newPage({
-      viewport: { width: demo.width, height: demo.height }
+      viewport: { width: demo.width, height: demo.height },
     });
 
     // Read the demo HTML file
@@ -49,16 +50,10 @@ async function generateScreenshots() {
     let htmlContent = readFileSync(htmlPath, 'utf-8');
 
     // Replace the radar.css link tag with inlined content
-    htmlContent = htmlContent.replace(
-      /<link rel="stylesheet" href="radar\.css">/,
-      `<style>${radarCssContent}</style>`
-    );
+    htmlContent = htmlContent.replace(/<link rel="stylesheet" href="radar\.css">/, `<style>${radarCssContent}</style>`);
 
     // Replace the radar.js script tag with inlined content
-    htmlContent = htmlContent.replace(
-      /<script src="radar\.js"><\/script>/,
-      `<script>${radarJsContent}</script>`
-    );
+    htmlContent = htmlContent.replace(/<script src="radar\.js"><\/script>/, `<script>${radarJsContent}</script>`);
 
     await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
 
@@ -73,7 +68,7 @@ async function generateScreenshots() {
       path: outputPath,
       type: 'jpeg',
       quality: JPEG_QUALITY,
-      fullPage: false
+      fullPage: false,
     });
 
     console.log(`  ✓ Saved: ${outputPath}`);

@@ -39,8 +39,10 @@ ignore:
   - "node_modules/**/*"
   - "*.test.js"
   - "*.test.ts"
-  - "build.ts"
-  - "screenshot.ts"
+  - "scripts/build.ts"
+  - "scripts/screenshot.ts"
+  - "docs/radar.js"              # Bundled build artifact
+  - "docs/release/**/*.js"       # Minified releases
 
 # Only track coverage for main source files
 flag_management:
@@ -50,7 +52,7 @@ flag_management:
 flags:
   unittests:
     paths:
-      - docs/radar.js
+      - src/**/*.js      # Track source files only
     carryforward: false
 
 # GitHub Checks integration

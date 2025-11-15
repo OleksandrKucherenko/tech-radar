@@ -36,6 +36,12 @@
     <!-- Repository & Links -->
     <link rel="canonical" href="https://oleksandrkucherenko.github.io/tech-radar/builder.html">
     <link rel="repository" href="https://github.com/OleksandrKucherenko/tech-radar">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Tech Radar">
+    <link rel="manifest" href="/site.webmanifest">
     <meta name="theme-color" content="#1976d2">
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -43,6 +49,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="radar.js"></script>
     <link rel="stylesheet" href="radar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         * {
             box-sizing: border-box;
@@ -72,6 +79,76 @@
         .header p {
             color: #666;
             font-size: 0.9rem;
+        }
+
+        .demo-toolbar {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .demo-toolbar__controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-toolbar__button {
+            background: #1976d2;
+            border: none;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        /* Icon button variant */
+        .demo-toolbar__button--icon {
+            padding: 0.625rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1rem;
+        }
+
+        .demo-toolbar__button--icon i {
+            pointer-events: none;
+        }
+
+        .demo-toolbar__button:hover {
+            background: #1565c0;
+        }
+
+        .demo-toolbar__button--icon:hover {
+            transform: translateY(-1px) scale(1.05);
+        }
+
+        .demo-toolbar__button--icon:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .demo-toolbar__message {
+            font-size: 0.85rem;
+            color: #1976d2;
+            min-height: 1rem;
+            flex: 1;
+        }
+
+        .demo-toolbar__message[data-state="error"] {
+            color: #d32f2f;
+        }
+
+        .demo-toolbar__message[data-state="success"] {
+            color: #2e7d32;
         }
 
         .container {
@@ -392,6 +469,18 @@
         <p>Create, customize, and share your technology radar. Configure quadrants, add entries, and generate embeddable
             code for Confluence or web pages.</p>
     </div>
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+        <div class="demo-toolbar__controls">
+            <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonImportButton" title="Import JSON Configuration" aria-label="Import JSON">
+                <i class="fas fa-file-import"></i>
+            </button>
+            <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonExportButton" title="Export JSON Configuration" aria-label="Export JSON">
+                <i class="fas fa-file-export"></i>
+            </button>
+            <input type="file" id="jsonImportInput" accept="application/json,.json" hidden>
+        </div>
+        <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
 
     <div class="container">
         <!-- Left Column: Configuration & Share/Export -->
@@ -448,14 +537,6 @@
 
                 <div class="btn-group" style="margin-top: 0.5rem;">
                     <button class="btn btn-secondary btn-full" id="exportPdfBtn">Download as PDF</button>
-                </div>
-
-                <div class="btn-group" style="margin-top: 0.5rem;">
-                    <button class="btn btn-secondary btn-full" id="exportJsonBtn">Export JSON Config</button>
-                </div>
-
-                <div class="btn-group" style="margin-top: 0.5rem;">
-                    <button class="btn btn-secondary btn-full" id="importJsonBtn">Import JSON Config</button>
                 </div>
 
                 <div id="embedCodeSection" style="display: none; margin-top: 1rem;">
@@ -550,6 +631,25 @@
     </div>
 
     <script>
+        // Get jsonIO helpers from radar_visualization
+        // Note: radar.js is loaded in <head>, so it should be available here
+        let exportConfig = null;
+        let importConfig = null;
+        
+        // Try to get jsonIO helpers
+        if (window.radar_visualization && window.radar_visualization.jsonIO) {
+            const jsonIOHelpers = window.radar_visualization.jsonIO;
+            exportConfig = jsonIOHelpers.exportConfig;
+            importConfig = jsonIOHelpers.importConfig;
+            console.log('✓ JSON import/export helpers loaded successfully');
+        } else {
+            console.error('✗ radar_visualization.jsonIO is unavailable. JSON import/export will be disabled.');
+            console.log('  window.radar_visualization:', typeof window.radar_visualization);
+            if (window.radar_visualization) {
+                console.log('  radar_visualization.jsonIO:', window.radar_visualization.jsonIO);
+            }
+        }
+        
         // State management
         const state = {
             ringCount: 4,
@@ -594,6 +694,10 @@
             }
         };
 
+        const demoSlug = 'builder';
+        let jsonToolbarMessageEl = null;
+        let toolbarMessageTimer = null;
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadFromLocalStorage();
@@ -601,7 +705,76 @@
             setupEventListeners();
             updateUI();
             renderRadar();
+            initializeJsonToolbar();
         });
+
+        function initializeJsonToolbar() {
+            const importButton = document.getElementById('jsonImportButton');
+            const exportButton = document.getElementById('jsonExportButton');
+            const importInput = document.getElementById('jsonImportInput');
+            jsonToolbarMessageEl = document.getElementById('jsonToolbarMessage');
+
+            if (!exportConfig || !importConfig) {
+                if (jsonToolbarMessageEl) {
+                    jsonToolbarMessageEl.textContent = 'JSON helpers unavailable.';
+                    jsonToolbarMessageEl.dataset.state = 'error';
+                }
+                return;
+            }
+
+            if (!importButton || !exportButton || !importInput) {
+                console.warn('JSON toolbar is missing required elements.');
+                return;
+            }
+
+            importButton.addEventListener('click', () => importInput.click());
+
+            importConfig(importInput, applyImportedConfig, {
+                demoSlug,
+                onSuccess: ({ fileName }) => {
+                    showToolbarMessage(`Imported ${fileName || 'configuration'} successfully`, 'success');
+                },
+                onError: (message) => {
+                    console.error(message);
+                    showToolbarMessage(message, 'error');
+                }
+            });
+
+            exportConfig(exportButton, () => buildVisualizationConfigFromState(), {
+                demoSlug,
+                onSuccess: ({ fileName }) => {
+                    showToolbarMessage(`Exported ${fileName}`, 'success');
+                },
+                onError: (message) => {
+                    console.error(message);
+                    showToolbarMessage(message, 'error');
+                }
+            });
+        }
+
+        function showToolbarMessage(message = '', state = '') {
+            if (!jsonToolbarMessageEl) {
+                return;
+            }
+
+            if (toolbarMessageTimer) {
+                clearTimeout(toolbarMessageTimer);
+            }
+
+            jsonToolbarMessageEl.textContent = message;
+            if (state) {
+                jsonToolbarMessageEl.dataset.state = state;
+            } else {
+                delete jsonToolbarMessageEl.dataset.state;
+            }
+
+            if (message) {
+                toolbarMessageTimer = window.setTimeout(() => {
+                    jsonToolbarMessageEl.textContent = '';
+                    delete jsonToolbarMessageEl.dataset.state;
+                }, 4000);
+            }
+        }
 
         function setupEventListeners() {
             // Ring selector
@@ -609,7 +782,7 @@
                 btn.addEventListener('click', () => {
                     document.querySelectorAll('.ring-option').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    state.ringCount = parseInt(btn.dataset.rings);
+                    state.ringCount = parseInt(btn.dataset.rings, 10);
                     state.ringNames = RING_CONFIGS[state.ringCount].names;
                     updateUI();
                     renderRadar();
@@ -619,7 +792,7 @@
 
             // Quadrant count
             document.getElementById('quadrantCount').addEventListener('change', (e) => {
-                const count = parseInt(e.target.value);
+                const count = parseInt(e.target.value, 10);
                 if (count >= 2 && count <= 8) {
                     state.quadrantCount = count;
                     // Adjust quadrant names array
@@ -688,11 +861,6 @@
             // Export PDF
             document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
 
-            // Export JSON
-            document.getElementById('exportJsonBtn').addEventListener('click', exportToJSON);
-
-            // Import JSON
-            document.getElementById('importJsonBtn').addEventListener('click', importFromJSON);
         }
 
         function updateUI() {
@@ -713,7 +881,7 @@
             // Add event listeners to quadrant name inputs
             document.querySelectorAll('.quadrant-name-input').forEach(input => {
                 input.addEventListener('input', (e) => {
-                    const index = parseInt(e.target.dataset.index);
+                    const index = parseInt(e.target.dataset.index, 10);
                     state.quadrantNames[index] = e.target.value;
                     updateQuadrantDropdown();
                     renderRadar();
@@ -738,7 +906,7 @@
                 select.appendChild(option);
             }
 
-            if (currentValue !== '' && parseInt(currentValue) < state.quadrantCount) {
+            if (currentValue !== '' && parseInt(currentValue, 10) < state.quadrantCount) {
                 select.value = currentValue;
             }
         }
@@ -755,7 +923,7 @@
                 select.appendChild(option);
             }
 
-            if (currentValue !== '' && parseInt(currentValue) < state.ringCount) {
+            if (currentValue !== '' && parseInt(currentValue, 10) < state.ringCount) {
                 select.value = currentValue;
             }
         }
@@ -791,9 +959,9 @@
 
         function addOrUpdateEntry() {
             const label = document.getElementById('entryLabel').value.trim();
-            const quadrant = parseInt(document.getElementById('entryQuadrant').value);
-            const ring = parseInt(document.getElementById('entryRing').value);
-            const moved = parseInt(document.getElementById('entryMoved').value);
+            const quadrant = parseInt(document.getElementById('entryQuadrant').value, 10);
+            const ring = parseInt(document.getElementById('entryRing').value, 10);
+            const moved = parseInt(document.getElementById('entryMoved').value, 10);
             const active = document.getElementById('entryActive').value === 'true';
             const link = document.getElementById('entryLink').value.trim();
 
@@ -833,7 +1001,7 @@
             saveToLocalStorage();
         }
 
-        function editEntry(index) {
+        function _editEntry(index) {
             const entry = state.entries[index];
             state.editingIndex = index;
 
@@ -863,7 +1031,7 @@
             document.getElementById('entryLink').value = '';
         }
 
-        function deleteEntry(index) {
+        function _deleteEntry(index) {
             if (confirm('Are you sure you want to delete this entry?')) {
                 state.entries.splice(index, 1);
                 updateEntriesList();
@@ -993,8 +1161,8 @@
                     btn.textContent = originalText;
                     btn.style.background = '';
                 }, 2000);
-            }).catch(err => {
-                alert('Failed to copy URL. Please copy manually: ' + url);
+            }).catch(_err => {
+                alert(`Failed to copy URL. Please copy manually: ${url}`);
             });
         }
 
@@ -1021,7 +1189,7 @@
                 return clean;
             });
 
-            const config = {
+            const _config = {
                 svg_id: 'radar',
                 width: 1000,
                 height: 800,
@@ -1036,13 +1204,13 @@
                 entries: cleanEntries
             };
 
-            const code = `<!DOCTYPE html>
+            const _code = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Technology Radar</title>
-    <script src="https://d3js.org/d3.v7.min.js"><\/script>
-    <script src="https://raw.githubusercontent.com/OleksandrKucherenko/tech-radar/main/docs/radar.js"><\/script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://raw.githubusercontent.com/OleksandrKucherenko/tech-radar/main/docs/radar.js"></script>
     <link rel="stylesheet" href="https://raw.githubusercontent.com/OleksandrKucherenko/tech-radar/main/docs/radar.css">
     <style>
         body { margin: 0; padding: 20px; font-family: Arial, Helvetica, sans-serif; }
@@ -1056,7 +1224,7 @@
 
     <script>
         radar_visualization(${JSON.stringify(config, null, 2)});
-    <\/script>
+    </script>
 </body>
 </html>`;
 
@@ -1103,9 +1271,9 @@
                 backgroundColor: '#ffffff',
                 scale: 2, // Higher quality
                 logging: false
-            }).then(function (canvas) {
+            }).then((canvas) => {
                 // Convert to PNG and download
-                canvas.toBlob(function (blob) {
+                canvas.toBlob((blob) => {
                     const link = document.createElement('a');
                     link.download = 'tech-radar.png';
                     link.href = URL.createObjectURL(blob);
@@ -1114,7 +1282,7 @@
                     btn.textContent = 'Download as PNG';
                     btn.disabled = false;
                 });
-            }).catch(function (error) {
+            }).catch((error) => {
                 console.error('Export error:', error);
                 alert('Failed to export PNG. Please try again.');
                 btn.textContent = 'Download as PNG';
@@ -1143,7 +1311,7 @@
                 backgroundColor: '#ffffff',
                 scale: 2, // Higher quality
                 logging: false
-            }).then(function (canvas) {
+            }).then((canvas) => {
                 // Convert to data URL
                 const imgData = canvas.toDataURL('image/png');
 
@@ -1164,7 +1332,7 @@
 
                 btn.textContent = 'Download as PDF';
                 btn.disabled = false;
-            }).catch(function (error) {
+            }).catch((error) => {
                 console.error('Export error:', error);
                 alert('Failed to export PDF. Please try again.');
                 btn.textContent = 'Download as PDF';
@@ -1172,8 +1340,7 @@
             });
         }
 
-        function exportToJSON() {
-            // Clean entries - only include data properties
+        function buildVisualizationConfigFromState() {
             const cleanEntries = state.entries.map(entry => {
                 const clean = {
                     label: entry.label,
@@ -1182,13 +1349,14 @@
                     moved: entry.moved,
                     active: entry.active
                 };
-                if (entry.link) clean.link = entry.link;
+                if (entry.link) {
+                    clean.link = entry.link;
+                }
                 return clean;
             });
 
-            // Export in radar_visualization API format
-            const config = {
-                title: "Technology Radar",
+            return {
+                title: 'Technology Radar',
                 quadrants: state.quadrantNames.map(name => ({ name })),
                 rings: state.ringNames.map((name, index) => ({
                     name,
@@ -1196,111 +1364,88 @@
                 })),
                 entries: cleanEntries
             };
-
-            const json = JSON.stringify(config, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-
-            const link = document.createElement('a');
-            link.download = 'tech-radar-config.json';
-            link.href = url;
-            link.click();
-
-            URL.revokeObjectURL(url);
-
-            const btn = document.getElementById('exportJsonBtn');
-            const originalText = btn.textContent;
-            btn.textContent = 'Downloaded!';
-            setTimeout(() => {
-                btn.textContent = originalText;
-            }, 2000);
         }
 
-        function importFromJSON() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'application/json,.json';
+        function normalizeImportedConfig(config) {
+            let ringCount;
+            let quadrantCount;
+            let quadrantNames;
+            let ringNames;
+            let entries;
 
-            input.onchange = function (e) {
-                const file = e.target.files[0];
-                if (!file) return;
+            if (config.quadrants && Array.isArray(config.quadrants)) {
+                quadrantCount = config.quadrants.length;
+                quadrantNames = config.quadrants.map(q => q.name);
 
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    try {
-                        const config = JSON.parse(event.target.result);
+                if (config.rings && Array.isArray(config.rings)) {
+                    ringCount = config.rings.length;
+                    ringNames = config.rings.map(r => r.name);
+                } else {
+                    throw new Error('Invalid configuration: missing rings array.');
+                }
 
-                        // Support both old and new format
-                        let ringCount, quadrantCount, quadrantNames, ringNames, entries;
+                entries = Array.isArray(config.entries) ? config.entries : [];
+            } else if (config.ringCount && config.quadrantCount && Array.isArray(config.quadrantNames)) {
+                ringCount = config.ringCount;
+                quadrantCount = config.quadrantCount;
+                quadrantNames = config.quadrantNames;
+                const fallbackConfig = RING_CONFIGS[ringCount];
+                ringNames = Array.isArray(config.ringNames)
+                    ? config.ringNames
+                    : (fallbackConfig ? fallbackConfig.names : []);
+                entries = Array.isArray(config.entries) ? config.entries : [];
+            } else {
+                throw new Error('Invalid configuration file format.');
+            }
 
-                        if (config.quadrants && Array.isArray(config.quadrants)) {
-                            // New format: { quadrants: [{name: "..."}], rings: [{name: "...", color: "..."}], entries: [] }
-                            quadrantCount = config.quadrants.length;
-                            quadrantNames = config.quadrants.map(q => q.name);
+            if (quadrantCount < 2 || quadrantCount > 8) {
+                throw new Error('Quadrant count must be between 2 and 8.');
+            }
 
-                            if (config.rings && Array.isArray(config.rings)) {
-                                ringCount = config.rings.length;
-                                ringNames = config.rings.map(r => r.name);
+            if (ringCount !== 4 && ringCount !== 7) {
+                throw new Error('Only 4 or 7 rings are supported.');
+            }
 
-                                // Validate ring count (4 or 7 supported)
-                                if (ringCount !== 4 && ringCount !== 7) {
-                                    throw new Error('Only 4 or 7 rings are supported');
-                                }
-                            } else {
-                                throw new Error('Invalid format: missing rings array');
-                            }
+            quadrantNames = quadrantNames.slice(0, quadrantCount);
+            while (quadrantNames.length < quadrantCount) {
+                quadrantNames.push(`Quadrant ${quadrantNames.length + 1}`);
+            }
 
-                            entries = config.entries || [];
-                        } else if (config.ringCount && config.quadrantCount && config.quadrantNames) {
-                            // Old format: { ringCount: 4, quadrantCount: 4, quadrantNames: [...], ringNames: [...], entries: [] }
-                            ringCount = config.ringCount;
-                            quadrantCount = config.quadrantCount;
-                            quadrantNames = config.quadrantNames;
-                            ringNames = config.ringNames || RING_CONFIGS[ringCount].names;
-                            entries = config.entries || [];
-                        } else {
-                            throw new Error('Invalid configuration file format');
-                        }
+            const defaultRings = RING_CONFIGS[ringCount] ? RING_CONFIGS[ringCount].names : [];
+            ringNames = ringNames.slice(0, ringCount);
+            while (ringNames.length < ringCount) {
+                ringNames.push(defaultRings[ringNames.length] || `Ring ${ringNames.length + 1}`);
+            }
 
-                        // Validate
-                        if (quadrantCount < 2 || quadrantCount > 8) {
-                            throw new Error('Quadrant count must be between 2 and 8');
-                        }
-
-                        // Load configuration
-                        state.ringCount = ringCount;
-                        state.quadrantCount = quadrantCount;
-                        state.quadrantNames = quadrantNames;
-                        state.ringNames = ringNames;
-                        state.entries = entries;
-                        state.editingIndex = -1;
-
-                        // Update UI
-                        document.getElementById('quadrantCount').value = state.quadrantCount;
-                        document.querySelectorAll('.ring-option').forEach(b => b.classList.remove('active'));
-                        const ringBtn = document.querySelector(`.ring-option[data-rings="${state.ringCount}"]`);
-                        if (ringBtn) {
-                            ringBtn.classList.add('active');
-                        }
-
-                        updateUI();
-                        renderRadar();
-                        saveToLocalStorage();
-
-                        alert('Configuration loaded successfully!');
-                    } catch (error) {
-                        alert('Failed to load configuration: ' + error.message);
-                    }
-                };
-
-                reader.onerror = function () {
-                    alert('Failed to read file.');
-                };
-
-                reader.readAsText(file);
+            return {
+                ringCount,
+                quadrantCount,
+                quadrantNames,
+                ringNames,
+                entries
             };
+        }
 
-            input.click();
+        function applyImportedConfig(config) {
+            const normalized = normalizeImportedConfig(config);
+
+            state.ringCount = normalized.ringCount;
+            state.quadrantCount = normalized.quadrantCount;
+            state.quadrantNames = [...normalized.quadrantNames];
+            state.ringNames = [...normalized.ringNames];
+            state.entries = normalized.entries.map(entry => ({ ...entry }));
+            state.editingIndex = -1;
+
+            document.getElementById('quadrantCount').value = state.quadrantCount;
+            document.querySelectorAll('.ring-option').forEach(b => b.classList.remove('active'));
+            const ringBtn = document.querySelector(`.ring-option[data-rings="${state.ringCount}"]`);
+            if (ringBtn) {
+                ringBtn.classList.add('active');
+            }
+
+            updateUI();
+            renderRadar();
+            saveToLocalStorage();
         }
 
         // Make functions globally available

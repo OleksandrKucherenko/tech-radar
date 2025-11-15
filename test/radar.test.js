@@ -23,7 +23,7 @@
  * 3. Run: bun run test:bun
  */
 
-import { test, expect } from 'bun:test';
+import { expect, test } from 'bun:test';
 
 test('provides guidance about using Vitest instead of Bun for testing', () => {
   // This test serves as a helpful reminder to use Vitest
@@ -50,7 +50,7 @@ test('explains why Vitest is recommended over Bun', () => {
     'Better test infrastructure and reporting',
     'Coverage reports (though limited due to eval() usage)',
     'Watch mode for improved development experience',
-    'Bun cannot track coverage for eval() loaded code'
+    'Bun cannot track coverage for eval() loaded code',
   ];
 
   reasons.forEach(reason => {

@@ -1,0 +1,2 @@
+# Run lint-staged (handles formatting, linting, tests, and auto-rebuild)
+bunx lint-staged

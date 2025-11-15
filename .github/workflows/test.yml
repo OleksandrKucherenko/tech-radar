@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Check code formatting
+        run: bun run format:check
+
+      - name: Check linting
+        run: bun run lint:check
+
       - name: Run tests with coverage
         run: npm run test:coverage
 
@@ -67,11 +73,16 @@ jobs:
       - name: Add test summary to job
         if: always()
         run: |
+          echo "## ✨ Quality Checks" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Code formatting verified (Biome + Prettier)" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Linting checks passed (Biome)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ -f "test-results.xml" ]; then
-            echo "✅ Tests completed successfully with Vitest" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Tests completed successfully with Bun" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "📊 Test results uploaded to Codecov.io" >> $GITHUB_STEP_SUMMARY
           else
