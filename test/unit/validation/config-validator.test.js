@@ -1,5 +1,5 @@
 // Test suite for configuration validation
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'bun:test';
 import { ConfigValidationError, validateConfig, validateConfigAll } from '../../../src/validation/config-validator.js';
 
 describe('ConfigValidationError', () => {

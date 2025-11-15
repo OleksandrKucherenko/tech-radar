@@ -1,5 +1,5 @@
 // Test suite for seeded random number generator
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'bun:test';
 import { SeededRandom } from '../../../src/math/random.js';
 
 describe('SeededRandom', () => {

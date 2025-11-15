@@ -1,5 +1,5 @@
 // Test suite for coordinate transformation utilities
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'bun:test';
 import { boundedBox, boundedInterval, boundedRing, cartesian, polar } from '../../../src/math/coordinates.js';
 
 describe('Coordinate Transformations', () => {

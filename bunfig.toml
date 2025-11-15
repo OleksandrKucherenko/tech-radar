@@ -3,14 +3,13 @@
 
 [test]
 # Test configuration
-# preload - optional array of scripts to run before tests
-# preload = ["./test-setup.js"]
+preload = ["./test/bun-test-setup.js"]
 
 # Coverage settings
-# Enable coverage by default
-coverage = true
+# Coverage is enabled via CLI with --coverage flag
 
-# Set coverage reporter (note: singular, not plural)
+# Set coverage reporters (text for console, lcov for Codecov)
+# Note: Additional reporters like "html" can be added via CLI if needed
 coverageReporter = ["text", "lcov"]
 
 # Set coverage output directory
@@ -19,7 +18,7 @@ coverageDir = "./coverage"
 # Coverage threshold (70%)
 coverageThreshold = 0.7
 
-# Coverage scope - focus on docs/radar.js
+# Coverage scope - focus on docs/radar.js and src/
 coverageSkipTestFiles = true
 
 # Specify test file patterns
@@ -27,8 +26,4 @@ coverageSkipTestFiles = true
 root = "."
 
 # Test reporters configuration
-# JUnit XML reporter can be enabled via command-line:
-#   bun test --reporter=junit --reporter-outfile=./test-results.xml
-# Or configured here:
-# [test.reporter]
-# junit = "./test-results.xml"
+# JUnit reporter is configured via CLI: --reporter=junit --reporter-outfile=./test-results.xml

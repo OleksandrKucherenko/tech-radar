@@ -2,7 +2,7 @@
 
 // Copyright (c) 2017-2024 Zalando SE
 
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'bun:test';
 import { generateRings } from '../../../src/geometry/ring-calculator.js';
 
 describe('Ring Calculator', () => {

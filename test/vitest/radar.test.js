@@ -1,12 +1,12 @@
 /**
- * Unit tests for radar.js using Vitest
+ * Unit tests for radar.js using Bun test runner
  * Tests critical functionality to ensure the radar visualization works correctly
  * and to prevent regressions.
  *
  * Tests follow GIVEN/WHEN/THEN pattern for clarity and maintainability.
  */
 
-import { beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test } from 'bun:test';
 import radar_visualization from '../../docs/radar.js';
 
 // Helper to create a minimal valid configuration

@@ -82,7 +82,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ -f "test-results.xml" ]; then
-            echo "✅ Tests completed successfully with Vitest" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Tests completed successfully with Bun" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "📊 Test results uploaded to Codecov.io" >> $GITHUB_STEP_SUMMARY
           else

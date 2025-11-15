@@ -2,7 +2,7 @@
 
 // Copyright (c) 2017-2024 Zalando SE
 
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'bun:test';
 import { generateQuadrants } from '../../../src/geometry/quadrant-calculator.js';
 import { generateRings } from '../../../src/geometry/ring-calculator.js';
 import { createSegment } from '../../../src/geometry/segment-calculator.js';

@@ -2,7 +2,7 @@
 
 // Copyright (c) 2017-2024 Zalando SE
 
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'bun:test';
 import {
   computeQuadrantBounds,
   generateQuadrantOrder,

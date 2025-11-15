@@ -5,6 +5,7 @@ import { applyConfigDefaults, calculateDimensions, configureOffsets } from './co
 import { computeQuadrantBounds, generateQuadrants } from './geometry/quadrant-calculator.js';
 import { generateRings } from './geometry/ring-calculator.js';
 import { createSegment } from './geometry/segment-calculator.js';
+import { createJsonIOHelpers } from './integration/json-io.js';
 import { boundedBox, boundedInterval, boundedRing } from './math/coordinates.js';
 import { SeededRandom } from './math/random.js';
 import { EntryProcessor } from './processing/entry-processor.js';
@@ -126,5 +127,8 @@ function radar_visualization(config) {
   }
 }
 
+const jsonIO = createJsonIOHelpers();
+radar_visualization.jsonIO = jsonIO;
+
 export default radar_visualization;
-export { radar_visualization };
+export { radar_visualization, jsonIO };

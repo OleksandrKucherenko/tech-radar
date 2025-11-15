@@ -39,8 +39,8 @@ ignore:
   - "node_modules/**/*"
   - "*.test.js"
   - "*.test.ts"
-  - "build.ts"
-  - "screenshot.ts"
+  - "scripts/build.ts"
+  - "scripts/screenshot.ts"
 
 # Only track coverage for main source files
 flag_management:

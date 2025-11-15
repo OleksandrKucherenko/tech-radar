@@ -77,7 +77,7 @@
   },
   "overrides": [
     {
-      "includes": ["**/src/**/*.js", "**/build.ts", "**/screenshot.ts"],
+      "includes": ["**/src/**/*.js", "**/scripts/build.ts", "**/scripts/screenshot.ts"],
       "linter": {
         "rules": {
           "style": {},
