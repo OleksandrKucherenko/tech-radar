@@ -121,12 +121,51 @@
       <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
     </nav>
 
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button type="button" class="demo-toolbar__button" id="jsonImportButton">Import JSON</button>
+        <button type="button" class="demo-toolbar__button" id="jsonExportButton">Export JSON</button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
+
     <div class="radar-container">
       <svg id="radar"></svg>
     </div>
 
     <script>
-      radar_visualization({
+      // Configuration state
+      let currentConfig = null;
+      const demoSlug = "demo-2x4";
+
+      // Get JSON I/O helpers
+      const jsonIOHelpers = radar_visualization && radar_visualization.jsonIO;
+      const { exportConfig, importConfig } = jsonIOHelpers || {};
+
+      // Toolbar message handling
+      const jsonToolbarMessageEl = document.getElementById("jsonToolbarMessage");
+      function showToolbarMessage(message, state = "info") {
+        if (jsonToolbarMessageEl) {
+          jsonToolbarMessageEl.textContent = message;
+          jsonToolbarMessageEl.dataset.state = state;
+          if (state !== "error") {
+            setTimeout(() => {
+              jsonToolbarMessageEl.textContent = "";
+              delete jsonToolbarMessageEl.dataset.state;
+            }, 3000);
+          }
+        }
+      }
+
+      // Render visualization
+      function renderRadar(config) {
+        currentConfig = config;
+        radar_visualization(config);
+      }
+
+      // Initial config
+      const initialConfig = {
         svg_id: "radar",
         title: "2 Quadrants × 4 Rings",
         quadrants: [{ name: "Frontend" }, { name: "Backend" }],
@@ -194,7 +233,46 @@
           { label: "CORBA", quadrant: 1, ring: 3, moved: 2, active: true },
           { label: "WCF", quadrant: 1, ring: 3, moved: 0, active: true },
         ],
-      });
+      };
+
+      renderRadar(initialConfig);
+
+      // Initialize JSON import/export
+      if (exportConfig && importConfig) {
+        const importButton = document.getElementById("jsonImportButton");
+        const exportButton = document.getElementById("jsonExportButton");
+        const importInput = document.getElementById("jsonImportInput");
+
+        importButton.addEventListener("click", () => importInput.click());
+
+        importConfig(
+          importInput,
+          importedConfig => {
+            renderRadar(importedConfig);
+          },
+          {
+            demoSlug,
+            onSuccess: ({ fileName }) => {
+              showToolbarMessage(`Imported ${fileName || "configuration"} successfully`, "success");
+            },
+            onError: message => {
+              showToolbarMessage(message, "error");
+            },
+          }
+        );
+
+        exportConfig(exportButton, () => currentConfig, {
+          demoSlug,
+          onSuccess: ({ fileName }) => {
+            showToolbarMessage(`Exported ${fileName}`, "success");
+          },
+          onError: message => {
+            showToolbarMessage(message, "error");
+          },
+        });
+      } else {
+        showToolbarMessage("JSON helpers unavailable.", "error");
+      }
     </script>
 
     <footer>Build: <code>{{BUILD_COMMIT_HASH}}</code></footer>
