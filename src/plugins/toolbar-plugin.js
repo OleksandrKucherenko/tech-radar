@@ -71,9 +71,10 @@ export const toolbarPlugin = definePlugin({
     let cleanupFunctions = [];
 
     /**
-     * Render the toolbar
+     * Render toolbar UI
      * @param {HTMLElement} container - Container element (optional)
      */
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Plugin initialization requires complex setup
     const render = (container = null) => {
       // Find or create container
       if (container) {

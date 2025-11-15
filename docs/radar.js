@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+9031936
+// Version: 0.0.1-dev+54945a7
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -555,6 +555,87 @@ function definePlugin({ name, init, defaults = {} }) {
     }
   };
 }
+
+// src/plugins/import-export-plugin.js
+var importExportPlugin = definePlugin({
+  name: "importExport",
+  defaults: {
+    enabled: true,
+    formats: ["json"],
+    fileNamePattern: "{slug}-{timestamp}",
+    pretty: true
+  },
+  init: (config, context) => {
+    const { formats: _formats, fileNamePattern, pretty } = config;
+    const { getCurrentConfig, onConfigChange: _onConfigChange, demoSlug } = context;
+    const jsonIO = createJsonIOHelpers();
+    const operations = {
+      imports: 0,
+      exports: 0,
+      lastImport: null,
+      lastExport: null
+    };
+    const generateFileName = (operation) => {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+      const slug = demoSlug || "radar-config";
+      return fileNamePattern.replace("{slug}", slug).replace("{timestamp}", timestamp).replace("{operation}", operation);
+    };
+    const exportJSON = async (options = {}) => {
+      const configToExport = options.config || getCurrentConfig?.();
+      if (!configToExport) {
+        throw new Error("No configuration to export");
+      }
+      const fileName = options.fileName || `${generateFileName("export")}.json`;
+      const jsonString = pretty ? JSON.stringify(configToExport, null, 2) : JSON.stringify(configToExport);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      operations.exports++;
+      operations.lastExport = {
+        timestamp: Date.now(),
+        fileName,
+        size: blob.size
+      };
+      return { fileName, blob };
+    };
+    const importJSON = async (source) => {
+      let data;
+      if (source instanceof File || source instanceof Blob) {
+        const text = await source.text();
+        data = JSON.parse(text);
+      } else if (typeof source === "string") {
+        data = JSON.parse(source);
+      } else {
+        throw new Error("Invalid import source");
+      }
+      operations.imports++;
+      operations.lastImport = {
+        timestamp: Date.now(),
+        fileName: source.name || "unknown"
+      };
+      return data;
+    };
+    const setupExport = (button, getConfig, options = {}) => {
+      return jsonIO.exportConfig(button, getConfig, {
+        ...options,
+        demoSlug: demoSlug || options.demoSlug
+      });
+    };
+    const setupImport = (input, onImport, options = {}) => {
+      return jsonIO.importConfig(input, onImport, {
+        ...options,
+        demoSlug: demoSlug || options.demoSlug
+      });
+    };
+    return {
+      jsonIO,
+      export: exportJSON,
+      import: importJSON,
+      setupExport,
+      setupImport,
+      getStats: () => ({ ...operations }),
+      cleanup: () => {}
+    };
+  }
+});
 // src/plugins/storage-plugin.js
 class LocalStorageAdapter {
   constructor(key, options = {}) {
@@ -742,86 +823,6 @@ var storagePlugin = definePlugin({
         }
       },
       _loadPromise: loadPromise
-    };
-  }
-});
-// src/plugins/import-export-plugin.js
-var importExportPlugin = definePlugin({
-  name: "importExport",
-  defaults: {
-    enabled: true,
-    formats: ["json"],
-    fileNamePattern: "{slug}-{timestamp}",
-    pretty: true
-  },
-  init: (config, context) => {
-    const { formats: _formats, fileNamePattern, pretty } = config;
-    const { getCurrentConfig, onConfigChange: _onConfigChange, demoSlug } = context;
-    const jsonIO = createJsonIOHelpers();
-    const operations = {
-      imports: 0,
-      exports: 0,
-      lastImport: null,
-      lastExport: null
-    };
-    const generateFileName = (operation) => {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
-      const slug = demoSlug || "radar-config";
-      return fileNamePattern.replace("{slug}", slug).replace("{timestamp}", timestamp).replace("{operation}", operation);
-    };
-    const exportJSON = async (options = {}) => {
-      const configToExport = options.config || getCurrentConfig?.();
-      if (!configToExport) {
-        throw new Error("No configuration to export");
-      }
-      const fileName = options.fileName || `${generateFileName("export")}.json`;
-      const jsonString = pretty ? JSON.stringify(configToExport, null, 2) : JSON.stringify(configToExport);
-      const blob = new Blob([jsonString], { type: "application/json" });
-      operations.exports++;
-      operations.lastExport = {
-        timestamp: Date.now(),
-        fileName,
-        size: blob.size
-      };
-      return { fileName, blob };
-    };
-    const importJSON = async (source) => {
-      let data;
-      if (source instanceof File || source instanceof Blob) {
-        const text = await source.text();
-        data = JSON.parse(text);
-      } else if (typeof source === "string") {
-        data = JSON.parse(source);
-      } else {
-        throw new Error("Invalid import source");
-      }
-      operations.imports++;
-      operations.lastImport = {
-        timestamp: Date.now(),
-        fileName: source.name || "unknown"
-      };
-      return data;
-    };
-    const setupExport = (button, getConfig, options = {}) => {
-      return jsonIO.exportConfig(button, getConfig, {
-        ...options,
-        demoSlug: demoSlug || options.demoSlug
-      });
-    };
-    const setupImport = (input, onImport, options = {}) => {
-      return jsonIO.importConfig(input, onImport, {
-        ...options,
-        demoSlug: demoSlug || options.demoSlug
-      });
-    };
-    return {
-      jsonIO,
-      export: exportJSON,
-      import: importJSON,
-      setupExport,
-      setupImport,
-      getStats: () => ({ ...operations }),
-      cleanup: () => {}
     };
   }
 });

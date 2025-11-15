@@ -38,14 +38,6 @@ td {
   position: relative;
 }
 
-.radar-layout .radar-legend-column {
-  flex: 1 0 20%;
-}
-
-.radar-layout .radar-svg-container {
-  flex: 1 1 60%;
-}
-
 .radar-svg-container {
   flex: 1 1 auto;
   display: flex;
@@ -61,6 +53,14 @@ td {
   justify-content: space-between;
   position: relative;
   height: 100%;
+}
+
+.radar-layout .radar-legend-column {
+  flex: 1 0 20%;
+}
+
+.radar-layout .radar-svg-container {
+  flex: 1 1 60%;
 }
 
 .left {

@@ -138,6 +138,7 @@ export class EntryProcessor {
    * @param {number} quadrant - Quadrant index
    * @param {number} ring - Ring index
    */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex geometry calculations required
   gridPosition(entries, quadrant, ring) {
     if (entries.length === 0) return;
 
@@ -275,6 +276,7 @@ export class EntryProcessor {
    *
    * @param {Array<Array<Array<Object>>>} segmented - 2D array of entries by quadrant/ring
    */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex collision detection algorithm
   calculateCollisionRadii(segmented) {
     for (let quadrant = 0; quadrant < this.numQuadrants; quadrant++) {
       for (let ring = 0; ring < this.numRings; ring++) {

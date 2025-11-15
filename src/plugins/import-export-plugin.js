@@ -4,8 +4,8 @@
  * Supports JSON format (extensible to CSV, YAML, etc.)
  */
 
-import { definePlugin } from './plugin-base.js';
 import { createJsonIOHelpers } from '../integration/json-io.js';
+import { definePlugin } from './plugin-base.js';
 
 /**
  * Import/Export Plugin Definition

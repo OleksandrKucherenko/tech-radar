@@ -154,11 +154,11 @@ radar_visualization.initDemoToolbar = initDemoToolbar;
 
 // Export plugin system
 export {
-  storagePlugin,
   importExportPlugin,
-  toolbarPlugin,
-  registerPlugin,
   initializePlugins,
+  registerPlugin,
+  storagePlugin,
+  toolbarPlugin,
 } from './plugins/index.js';
 
 export default radar_visualization;

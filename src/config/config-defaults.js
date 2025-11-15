@@ -22,6 +22,7 @@ import { computeLegendOffsets } from '../rendering/helpers.js';
  *
  * @param {Object} config - User-provided configuration object
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Legacy function with many config options
 export function applyConfigDefaults(config) {
   // SVG element configuration
   config.svg_id = config.svg || 'radar';

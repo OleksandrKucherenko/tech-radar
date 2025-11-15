@@ -920,6 +920,7 @@ describe('Grid Distribution and Spatial Positioning', () => {
 
 describe('Collision Detection and Overlap Prevention', () => {
   // Helper function to detect collisions mathematically
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Test helper requires thorough collision checking
   function _detectCollisions(entries, minDistance = 12) {
     const collisions = [];
 
