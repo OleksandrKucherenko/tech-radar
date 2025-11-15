@@ -1,247 +1,327 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Primary Meta Tags -->
+    <title>Tech Radar Demo - 5 Quadrants × 4 Rings</title>
+    <meta name="title" content="Tech Radar Demo - 5 Quadrants × 4 Rings" />
+    <meta
+      name="description"
+      content="Interactive Tech Radar demo with 5 quadrants and 4 rings configuration. Flexible quadrant layout for diverse technology categories."
+    />
+    <meta name="keywords" content="tech radar, technology radar, demo, 5 quadrants, 4 rings, visualization" />
 
-  <!-- Primary Meta Tags -->
-  <title>Tech Radar Demo - 5 Quadrants × 4 Rings</title>
-  <meta name="title" content="Tech Radar Demo - 5 Quadrants × 4 Rings">
-  <meta name="description"
-    content="Interactive Tech Radar demo with 5 quadrants and 4 rings configuration. Flexible quadrant layout for diverse technology categories.">
-  <meta name="keywords" content="tech radar, technology radar, demo, 5 quadrants, 4 rings, visualization">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://oleksandrkucherenko.github.io/tech-radar/demo-5x4.html" />
+    <meta property="og:title" content="Tech Radar Demo - 5 Quadrants × 4 Rings" />
+    <meta
+      property="og:description"
+      content="Interactive Tech Radar demo with 5 quadrants and 4 rings configuration. Flexible quadrant layout for diverse technology categories."
+    />
+    <meta
+      property="og:image"
+      content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/5x4-quadrants-rings.jpg"
+    />
+    <meta property="og:site_name" content="Tech Radar" />
 
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://oleksandrkucherenko.github.io/tech-radar/demo-5x4.html">
-  <meta property="og:title" content="Tech Radar Demo - 5 Quadrants × 4 Rings">
-  <meta property="og:description"
-    content="Interactive Tech Radar demo with 5 quadrants and 4 rings configuration. Flexible quadrant layout for diverse technology categories.">
-  <meta property="og:image"
-    content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/5x4-quadrants-rings.jpg">
-  <meta property="og:site_name" content="Tech Radar">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://oleksandrkucherenko.github.io/tech-radar/demo-5x4.html" />
+    <meta name="twitter:title" content="Tech Radar Demo - 5 Quadrants × 4 Rings" />
+    <meta
+      name="twitter:description"
+      content="Interactive Tech Radar demo with 5 quadrants and 4 rings configuration. Flexible quadrant layout for diverse technology categories."
+    />
+    <meta
+      name="twitter:image"
+      content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/5x4-quadrants-rings.jpg"
+    />
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://oleksandrkucherenko.github.io/tech-radar/demo-5x4.html">
-  <meta name="twitter:title" content="Tech Radar Demo - 5 Quadrants × 4 Rings">
-  <meta name="twitter:description"
-    content="Interactive Tech Radar demo with 5 quadrants and 4 rings configuration. Flexible quadrant layout for diverse technology categories.">
-  <meta name="twitter:image"
-    content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/5x4-quadrants-rings.jpg">
+    <!-- Repository & Links -->
+    <link rel="canonical" href="https://oleksandrkucherenko.github.io/tech-radar/demo-5x4.html" />
+    <link rel="repository" href="https://github.com/OleksandrKucherenko/tech-radar" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Tech Radar" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#1976d2" />
 
-  <!-- Repository & Links -->
-  <link rel="canonical" href="https://oleksandrkucherenko.github.io/tech-radar/demo-5x4.html">
-  <link rel="repository" href="https://github.com/OleksandrKucherenko/tech-radar">
-  <meta name="theme-color" content="#1976d2">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="radar.js"></script>
 
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="radar.js"></script>
-  <link rel="stylesheet" href="radar.css">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: white;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    <link rel="stylesheet" href="radar.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
 
-    nav.demo-links {
-      padding: 15px 20px;
-      background: #f8f8f8;
-      border-bottom: 1px solid #e0e0e0;
-      margin: 0;
-    }
+      nav.demo-links {
+        padding: 15px 20px;
+        background: #f8f8f8;
+        border-bottom: 1px solid #e0e0e0;
+        margin: 0;
+      }
 
-    .radar-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      max-width: 100%;
-      box-sizing: border-box;
-    }
+      .radar-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
 
-    #radar {
-      max-width: 100%;
-      height: auto;
-    }
+      #radar {
+        max-width: 100%;
+        height: auto;
+      }
 
-    footer {
-      text-align: center;
-      padding: 15px 20px;
-      margin: 0;
-      border-top: 1px solid #e0e0e0;
-      background: #f8f8f8;
-      color: #666;
-      font-size: 12px;
-    }
+      footer {
+        text-align: center;
+        padding: 15px 20px;
+        margin: 0;
+        border-top: 1px solid #e0e0e0;
+        background: #f8f8f8;
+        color: #666;
+        font-size: 12px;
+      }
 
-    footer code {
-      background: #e8e8e8;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-family: 'Courier New', monospace;
-    }
-  </style>
-</head>
+      footer code {
+        background: #e8e8e8;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "Courier New", monospace;
+      }
+    </style>
+  </head>
 
-<body>
+  <body>
+    <nav class="demo-links">
+      <strong>Demo pages:</strong>
+      <a href="./index.html">Default</a>
+      <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
+      <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
+      <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
+      <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
+      <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
+      <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
+      <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
+      <span class="separator">|</span>
+      <a href="./ai.html">🤖 AI Tech Radar</a>
+      <span class="separator">|</span>
+      <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
+    </nav>
 
-  <nav class="demo-links">
-    <strong>Demo pages:</strong>
-    <a href="./index.html">Default</a>
-    <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
-    <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
-    <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
-    <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
-    <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
-    <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
-    <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
-    <span class="separator">|</span>
-    <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
-  </nav>
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonImportButton"
+          title="Import JSON Configuration"
+          aria-label="Import JSON"
+        >
+          <i class="fas fa-file-import"></i>
+        </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonExportButton"
+          title="Export JSON Configuration"
+          aria-label="Export JSON"
+        >
+          <i class="fas fa-file-export"></i>
+        </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonResetButton"
+          title="Reset to Initial Configuration"
+          aria-label="Reset Configuration"
+        >
+          <i class="fas fa-undo"></i>
+        </button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
 
-  <div class="radar-container">
-    <svg id="radar"></svg>
-  </div>
+    <div class="radar-container">
+      <svg id="radar"></svg>
+    </div>
 
-  <script>
-    radar_visualization({
-      svg_id: "radar",
-      title: "5 Quadrants × 4 Rings",
-      quadrants: [
-        { name: "Languages" },
-        { name: "Frameworks" },
-        { name: "Tools" },
-        { name: "Platforms" },
-        { name: "Techniques" }
-      ],
-      rings: [
-        { name: "ADOPT", color: "#5ba300" },
-        { name: "TRIAL", color: "#009eb0" },
-        { name: "ASSESS", color: "#c7ba00" },
-        { name: "HOLD", color: "#e09b96" }
-      ],
-      entries: [
-        // Languages - ADOPT
-        { label: "TypeScript", quadrant: 0, ring: 0, moved: 0, active: true },
-        { label: "Python", quadrant: 0, ring: 0, moved: 1, active: true },
-        { label: "Go", quadrant: 0, ring: 0, moved: 2, active: true },
-        { label: "Rust", quadrant: 0, ring: 0, moved: 1, active: true },
-        { label: "JavaScript", quadrant: 0, ring: 0, moved: 0, active: true },
-        // Languages - TRIAL
-        { label: "Kotlin", quadrant: 0, ring: 1, moved: 2, active: true },
-        { label: "Swift", quadrant: 0, ring: 1, moved: 1, active: true },
-        { label: "Elixir", quadrant: 0, ring: 1, moved: 0, active: true },
-        { label: "Zig", quadrant: 0, ring: 1, moved: 2, active: true },
-        // Languages - ASSESS
-        { label: "Gleam", quadrant: 0, ring: 2, moved: 2, active: true },
-        { label: "OCaml", quadrant: 0, ring: 2, moved: 1, active: true },
-        { label: "Haskell", quadrant: 0, ring: 2, moved: 0, active: true },
-        { label: "Nim", quadrant: 0, ring: 2, moved: 1, active: true },
-        // Languages - HOLD
-        { label: "CoffeeScript", quadrant: 0, ring: 3, moved: -1, active: true },
-        { label: "Perl", quadrant: 0, ring: 3, moved: 0, active: true },
-        { label: "PHP 5", quadrant: 0, ring: 3, moved: -1, active: true },
+    <script>
+      let currentConfig = null;
+      function renderRadar(config) {
+        currentConfig = config;
+        radar_visualization.render(config);
+      }
 
-        // Frameworks - ADOPT
-        { label: "React", quadrant: 1, ring: 0, moved: 0, active: true },
-        { label: "Next.js", quadrant: 1, ring: 0, moved: 1, active: true },
-        { label: "FastAPI", quadrant: 1, ring: 0, moved: 2, active: true },
-        { label: "Express", quadrant: 1, ring: 0, moved: 0, active: true },
-        { label: "Spring Boot", quadrant: 1, ring: 0, moved: 1, active: true },
-        // Frameworks - TRIAL
-        { label: "Svelte", quadrant: 1, ring: 1, moved: 2, active: true },
-        { label: "SvelteKit", quadrant: 1, ring: 1, moved: 1, active: true },
-        { label: "Solid", quadrant: 1, ring: 1, moved: 2, active: true },
-        { label: "Astro", quadrant: 1, ring: 1, moved: 1, active: true },
-        { label: "Qwik", quadrant: 1, ring: 1, moved: 2, active: true },
-        // Frameworks - ASSESS
-        { label: "Remix", quadrant: 1, ring: 2, moved: 1, active: true },
-        { label: "Fresh", quadrant: 1, ring: 2, moved: 2, active: true },
-        { label: "Htmx", quadrant: 1, ring: 2, moved: 2, active: true },
-        { label: "Alpine.js", quadrant: 1, ring: 2, moved: 1, active: true },
-        // Frameworks - HOLD
-        { label: "Angular.js", quadrant: 1, ring: 3, moved: -1, active: true },
-        { label: "Backbone", quadrant: 1, ring: 3, moved: -1, active: true },
-        { label: "jQuery UI", quadrant: 1, ring: 3, moved: 0, active: true },
+      const initialConfig = {
+        repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
+        svg_id: "radar",
+        colors: {
+          background: "#fff",
+          grid: "#bbb",
+          inactive: "#ddd",
+        },
+        font_family: "Arial, Helvetica",
+        title: "5 Quadrants × 4 Rings",
+        quadrants: [
+          { name: "Languages" },
+          { name: "Frameworks" },
+          { name: "Tools" },
+          { name: "Platforms" },
+          { name: "Techniques" },
+        ],
+        rings: [
+          { name: "ADOPT", color: "#5ba300" },
+          { name: "TRIAL", color: "#009eb0" },
+          { name: "ASSESS", color: "#c7ba00" },
+          { name: "HOLD", color: "#e09b96" },
+        ],
+        print_layout: true,
+        links_in_new_tabs: true,
+        entries: [
+          // Languages - ADOPT
+          { label: "TypeScript", quadrant: 0, ring: 0, moved: 0, active: true },
+          { label: "Python", quadrant: 0, ring: 0, moved: 1, active: true },
+          { label: "Go", quadrant: 0, ring: 0, moved: 2, active: true },
+          { label: "Rust", quadrant: 0, ring: 0, moved: 1, active: true },
+          { label: "JavaScript", quadrant: 0, ring: 0, moved: 0, active: true },
+          // Languages - TRIAL
+          { label: "Kotlin", quadrant: 0, ring: 1, moved: 2, active: true },
+          { label: "Swift", quadrant: 0, ring: 1, moved: 1, active: true },
+          { label: "Elixir", quadrant: 0, ring: 1, moved: 0, active: true },
+          { label: "Zig", quadrant: 0, ring: 1, moved: 2, active: true },
+          // Languages - ASSESS
+          { label: "Gleam", quadrant: 0, ring: 2, moved: 2, active: true },
+          { label: "OCaml", quadrant: 0, ring: 2, moved: 1, active: true },
+          { label: "Haskell", quadrant: 0, ring: 2, moved: 0, active: true },
+          { label: "Nim", quadrant: 0, ring: 2, moved: 1, active: true },
+          // Languages - HOLD
+          { label: "CoffeeScript", quadrant: 0, ring: 3, moved: -1, active: true },
+          { label: "Perl", quadrant: 0, ring: 3, moved: 0, active: true },
+          { label: "PHP 5", quadrant: 0, ring: 3, moved: -1, active: true },
 
-        // Tools - ADOPT
-        { label: "Git", quadrant: 2, ring: 0, moved: 0, active: true },
-        { label: "VS Code", quadrant: 2, ring: 0, moved: 0, active: true },
-        { label: "Docker", quadrant: 2, ring: 0, moved: 1, active: true },
-        { label: "Kubernetes", quadrant: 2, ring: 0, moved: 2, active: true },
-        { label: "Terraform", quadrant: 2, ring: 0, moved: 0, active: true },
-        // Tools - TRIAL
-        { label: "Copilot", quadrant: 2, ring: 1, moved: 2, active: true },
-        { label: "Bun", quadrant: 2, ring: 1, moved: 1, active: true },
-        { label: "Deno", quadrant: 2, ring: 1, moved: 0, active: true },
-        { label: "Podman", quadrant: 2, ring: 1, moved: 1, active: true },
-        // Tools - ASSESS
-        { label: "Nix", quadrant: 2, ring: 2, moved: 2, active: true },
-        { label: "Cursor", quadrant: 2, ring: 2, moved: 2, active: true },
-        { label: "Zed", quadrant: 2, ring: 2, moved: 1, active: true },
-        { label: "Fleet", quadrant: 2, ring: 2, moved: 0, active: true },
-        // Tools - HOLD
-        { label: "Bower", quadrant: 2, ring: 3, moved: -1, active: true },
-        { label: "Grunt", quadrant: 2, ring: 3, moved: -1, active: true },
-        { label: "Gulp", quadrant: 2, ring: 3, moved: 0, active: true },
+          // Frameworks - ADOPT
+          { label: "React", quadrant: 1, ring: 0, moved: 0, active: true },
+          { label: "Next.js", quadrant: 1, ring: 0, moved: 1, active: true },
+          { label: "FastAPI", quadrant: 1, ring: 0, moved: 2, active: true },
+          { label: "Express", quadrant: 1, ring: 0, moved: 0, active: true },
+          { label: "Spring Boot", quadrant: 1, ring: 0, moved: 1, active: true },
+          // Frameworks - TRIAL
+          { label: "Svelte", quadrant: 1, ring: 1, moved: 2, active: true },
+          { label: "SvelteKit", quadrant: 1, ring: 1, moved: 1, active: true },
+          { label: "Solid", quadrant: 1, ring: 1, moved: 2, active: true },
+          { label: "Astro", quadrant: 1, ring: 1, moved: 1, active: true },
+          { label: "Qwik", quadrant: 1, ring: 1, moved: 2, active: true },
+          // Frameworks - ASSESS
+          { label: "Remix", quadrant: 1, ring: 2, moved: 1, active: true },
+          { label: "Fresh", quadrant: 1, ring: 2, moved: 2, active: true },
+          { label: "Htmx", quadrant: 1, ring: 2, moved: 2, active: true },
+          { label: "Alpine.js", quadrant: 1, ring: 2, moved: 1, active: true },
+          // Frameworks - HOLD
+          { label: "Angular.js", quadrant: 1, ring: 3, moved: -1, active: true },
+          { label: "Backbone", quadrant: 1, ring: 3, moved: -1, active: true },
+          { label: "jQuery UI", quadrant: 1, ring: 3, moved: 0, active: true },
 
-        // Platforms - ADOPT
-        { label: "AWS", quadrant: 3, ring: 0, moved: 0, active: true },
-        { label: "GitHub", quadrant: 3, ring: 0, moved: 0, active: true },
-        { label: "Datadog", quadrant: 3, ring: 0, moved: 1, active: true },
-        { label: "PostgreSQL", quadrant: 3, ring: 0, moved: 0, active: true },
-        { label: "Redis", quadrant: 3, ring: 0, moved: 1, active: true },
-        // Platforms - TRIAL
-        { label: "Azure", quadrant: 3, ring: 1, moved: 1, active: true },
-        { label: "GCP", quadrant: 3, ring: 1, moved: 0, active: true },
-        { label: "Vercel", quadrant: 3, ring: 1, moved: 2, active: true },
-        { label: "Cloudflare", quadrant: 3, ring: 1, moved: 1, active: true },
-        // Platforms - ASSESS
-        { label: "Supabase", quadrant: 3, ring: 2, moved: 2, active: true },
-        { label: "PlanetScale", quadrant: 3, ring: 2, moved: 1, active: true },
-        { label: "Neon", quadrant: 3, ring: 2, moved: 2, active: true },
-        { label: "Railway", quadrant: 3, ring: 2, moved: 1, active: true },
-        // Platforms - HOLD
-        { label: "Heroku", quadrant: 3, ring: 3, moved: -1, active: true },
-        { label: "Parse", quadrant: 3, ring: 3, moved: -1, active: true },
-        { label: "MongoDB Atlas", quadrant: 3, ring: 3, moved: 0, active: true },
+          // Tools - ADOPT
+          { label: "Git", quadrant: 2, ring: 0, moved: 0, active: true },
+          { label: "VS Code", quadrant: 2, ring: 0, moved: 0, active: true },
+          { label: "Docker", quadrant: 2, ring: 0, moved: 1, active: true },
+          { label: "Kubernetes", quadrant: 2, ring: 0, moved: 2, active: true },
+          { label: "Terraform", quadrant: 2, ring: 0, moved: 0, active: true },
+          // Tools - TRIAL
+          { label: "Copilot", quadrant: 2, ring: 1, moved: 2, active: true },
+          { label: "Bun", quadrant: 2, ring: 1, moved: 1, active: true },
+          { label: "Deno", quadrant: 2, ring: 1, moved: 0, active: true },
+          { label: "Podman", quadrant: 2, ring: 1, moved: 1, active: true },
+          // Tools - ASSESS
+          { label: "Nix", quadrant: 2, ring: 2, moved: 2, active: true },
+          { label: "Cursor", quadrant: 2, ring: 2, moved: 2, active: true },
+          { label: "Zed", quadrant: 2, ring: 2, moved: 1, active: true },
+          { label: "Fleet", quadrant: 2, ring: 2, moved: 0, active: true },
+          // Tools - HOLD
+          { label: "Bower", quadrant: 2, ring: 3, moved: -1, active: true },
+          { label: "Grunt", quadrant: 2, ring: 3, moved: -1, active: true },
+          { label: "Gulp", quadrant: 2, ring: 3, moved: 0, active: true },
 
-        // Techniques - ADOPT
-        { label: "CI/CD", quadrant: 4, ring: 0, moved: 0, active: true },
-        { label: "GitOps", quadrant: 4, ring: 0, moved: 1, active: true },
-        { label: "TDD", quadrant: 4, ring: 0, moved: 0, active: true },
-        { label: "Code Review", quadrant: 4, ring: 0, moved: 0, active: true },
-        { label: "IaC", quadrant: 4, ring: 0, moved: 1, active: true },
-        // Techniques - TRIAL
-        { label: "Trunk-Based Dev", quadrant: 4, ring: 1, moved: 1, active: true },
-        { label: "Feature Flags", quadrant: 4, ring: 1, moved: 2, active: true },
-        { label: "Chaos Engineering", quadrant: 4, ring: 1, moved: 1, active: true },
-        { label: "A/B Testing", quadrant: 4, ring: 1, moved: 0, active: true },
-        // Techniques - ASSESS
-        { label: "AI-Assisted Dev", quadrant: 4, ring: 2, moved: 2, active: true },
-        { label: "Prompt Engineering", quadrant: 4, ring: 2, moved: 2, active: true },
-        { label: "Shadow Deployments", quadrant: 4, ring: 2, moved: 1, active: true },
-        { label: "DORA Metrics", quadrant: 4, ring: 2, moved: 1, active: true },
-        // Techniques - HOLD
-        { label: "Waterfall", quadrant: 4, ring: 3, moved: -1, active: true },
-        { label: "Manual Testing Only", quadrant: 4, ring: 3, moved: 0, active: true },
-        { label: "Big Bang Releases", quadrant: 4, ring: 3, moved: -1, active: true }
-      ]
-    });
-  </script>
+          // Platforms - ADOPT
+          { label: "AWS", quadrant: 3, ring: 0, moved: 0, active: true },
+          { label: "GitHub", quadrant: 3, ring: 0, moved: 0, active: true },
+          { label: "Datadog", quadrant: 3, ring: 0, moved: 1, active: true },
+          { label: "PostgreSQL", quadrant: 3, ring: 0, moved: 0, active: true },
+          { label: "Redis", quadrant: 3, ring: 0, moved: 1, active: true },
+          // Platforms - TRIAL
+          { label: "Azure", quadrant: 3, ring: 1, moved: 1, active: true },
+          { label: "GCP", quadrant: 3, ring: 1, moved: 0, active: true },
+          { label: "Vercel", quadrant: 3, ring: 1, moved: 2, active: true },
+          { label: "Cloudflare", quadrant: 3, ring: 1, moved: 1, active: true },
+          // Platforms - ASSESS
+          { label: "Supabase", quadrant: 3, ring: 2, moved: 2, active: true },
+          { label: "PlanetScale", quadrant: 3, ring: 2, moved: 1, active: true },
+          { label: "Neon", quadrant: 3, ring: 2, moved: 2, active: true },
+          { label: "Railway", quadrant: 3, ring: 2, moved: 1, active: true },
+          // Platforms - HOLD
+          { label: "Heroku", quadrant: 3, ring: 3, moved: -1, active: true },
+          { label: "Parse", quadrant: 3, ring: 3, moved: -1, active: true },
+          { label: "MongoDB Atlas", quadrant: 3, ring: 3, moved: 0, active: true },
 
-  <footer>
-    Build: <code>8fb8c84</code>
-  </footer>
+          // Techniques - ADOPT
+          { label: "CI/CD", quadrant: 4, ring: 0, moved: 0, active: true },
+          { label: "GitOps", quadrant: 4, ring: 0, moved: 1, active: true },
+          { label: "TDD", quadrant: 4, ring: 0, moved: 0, active: true },
+          { label: "Code Review", quadrant: 4, ring: 0, moved: 0, active: true },
+          { label: "IaC", quadrant: 4, ring: 0, moved: 1, active: true },
+          // Techniques - TRIAL
+          { label: "Trunk-Based Dev", quadrant: 4, ring: 1, moved: 1, active: true },
+          { label: "Feature Flags", quadrant: 4, ring: 1, moved: 2, active: true },
+          { label: "Chaos Engineering", quadrant: 4, ring: 1, moved: 1, active: true },
+          { label: "A/B Testing", quadrant: 4, ring: 1, moved: 0, active: true },
+          // Techniques - ASSESS
+          { label: "AI-Assisted Dev", quadrant: 4, ring: 2, moved: 2, active: true },
+          { label: "Prompt Engineering", quadrant: 4, ring: 2, moved: 2, active: true },
+          { label: "Shadow Deployments", quadrant: 4, ring: 2, moved: 1, active: true },
+          { label: "DORA Metrics", quadrant: 4, ring: 2, moved: 1, active: true },
+          // Techniques - HOLD
+          { label: "Waterfall", quadrant: 4, ring: 3, moved: -1, active: true },
+          { label: "Manual Testing Only", quadrant: 4, ring: 3, moved: 0, active: true },
+          { label: "Big Bang Releases", quadrant: 4, ring: 3, moved: -1, active: true },
+        ],
+      };
 
-</body>
+      renderRadar(initialConfig);
 
+      radar_visualization.initDemoToolbar({
+        demoSlug: "demo-5x4",
+        getCurrentConfig: () => currentConfig,
+        onConfigImport: config => renderRadar(config),
+        onConfigReset: config => renderRadar(config),
+        initialConfig: initialConfig,
+        jsonIO: radar_visualization.jsonIO,
+      });
+    </script>
+
+    <footer>Build: <code>03a9647</code></footer>
+  </body>
 </html>

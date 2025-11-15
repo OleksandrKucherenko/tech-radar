@@ -1,5 +1,5 @@
 body {
-  font-family: 'Source Sans Pro', arial, helvetica, sans-serif;
+  font-family: "Source Sans Pro", arial, helvetica, sans-serif;
   padding-bottom: 50px;
 }
 
@@ -38,14 +38,6 @@ td {
   position: relative;
 }
 
-.radar-layout .radar-legend-column {
-  flex: 1 0 20%;
-}
-
-.radar-layout .radar-svg-container {
-  flex: 1 1 60%;
-}
-
 .radar-svg-container {
   flex: 1 1 auto;
   display: flex;
@@ -63,16 +55,24 @@ td {
   height: 100%;
 }
 
+.radar-layout .radar-legend-column {
+  flex: 1 0 20%;
+}
+
+.radar-layout .radar-svg-container {
+  flex: 1 1 60%;
+}
+
 .left {
   position: absolute;
   left: 0;
-  width: 25% !important;
+  width: 25%;
 }
 
 .right {
   position: absolute;
   right: 0;
-  width: 25% !important;
+  width: 25%;
 }
 
 .legend-section {
@@ -126,7 +126,7 @@ td {
 
 .legend-highlight {
   background: #333;
-  color: #fff !important;
+  color: #fff;
 }
 
 .demo-links {
@@ -147,7 +147,9 @@ td {
 /* Enhanced SVG element styling */
 .blip {
   cursor: pointer;
-  transition: opacity 0.15s ease, filter 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    filter 0.15s ease;
 }
 
 .blip:hover {
@@ -187,7 +189,10 @@ td {
 }
 
 #bubble text {
-  text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;
+  text-shadow:
+    0 0 3px white,
+    0 0 3px white,
+    0 0 3px white;
   font-weight: 500;
 }
 
@@ -236,9 +241,142 @@ td {
   outline-offset: 1px;
 }
 
+/* JSON Toolbar styles - Floating overlay */
+.demo-toolbar {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.demo-toolbar:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.demo-toolbar__controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+.demo-toolbar__button {
+  background: #1976d2;
+  border: none;
+  color: #fff;
+  padding: 0.5rem 0.875rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+/* Icon button variant */
+.demo-toolbar__button--icon {
+  padding: 0.625rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1rem;
+}
+
+.demo-toolbar__button--icon i {
+  pointer-events: none;
+}
+
+.demo-toolbar__button:hover {
+  background: #1565c0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+}
+
+.demo-toolbar__button--icon:hover {
+  transform: translateY(-1px) scale(1.05);
+}
+
+.demo-toolbar__button:active {
+  background: #0d47a1;
+  transform: translateY(0);
+}
+
+.demo-toolbar__button--icon:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.demo-toolbar__message {
+  position: absolute;
+  bottom: -36px;
+  right: 0;
+  left: 0;
+  font-size: 0.8125rem;
+  color: #1976d2;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(8px);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.demo-toolbar__message:empty {
+  display: none;
+}
+
+.demo-toolbar__message[data-state="error"] {
+  color: #d32f2f;
+  border-color: rgba(211, 47, 47, 0.2);
+}
+
+.demo-toolbar__message[data-state="success"] {
+  color: #2e7d32;
+  border-color: rgba(46, 125, 50, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .demo-toolbar {
+    top: 10px;
+    right: 10px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .demo-toolbar__button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
 /* Print styles */
 @media print {
-  .demo-links {
+  .demo-links,
+  .demo-toolbar {
     display: none;
   }
 
@@ -247,7 +385,8 @@ td {
     filter: none;
   }
 
-  nav, footer {
+  nav,
+  footer {
     page-break-inside: avoid;
   }
 }

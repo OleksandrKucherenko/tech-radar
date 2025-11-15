@@ -1,1345 +1,1772 @@
-// The MIT License (MIT)
+// Tech Radar Visualization - Bundled from ES6 modules
+// Version: 0.0.1-dev+893b19d
+// License: MIT
+// Source: https://github.com/OleksandrKucherenko/tech-radar
 
-// Copyright (c) 2017-2024 Zalando SE
+var radar_visualization = (function() {
+  'use strict';
 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+  // src/rendering/helpers.js
+function translate(x, y) {
+  return `translate(${x},${y})`;
+}
+function viewbox(quadrantIndex, quadrants, rings) {
+  const outer_radius = rings[rings.length - 1].radius;
+  const padding = 20;
+  return [
+    Math.max(0, quadrants[quadrantIndex].factor_x * outer_radius) - (outer_radius + padding),
+    Math.max(0, quadrants[quadrantIndex].factor_y * outer_radius) - (outer_radius + padding),
+    outer_radius + 2 * padding,
+    outer_radius + 2 * padding
+  ].join(" ");
+}
+function computeLegendOffsets(numQuadrants, outerRadius, config) {
+  if (config.legend_offset) {
+    return config.legend_offset;
+  }
+  const offsets = new Array(numQuadrants);
+  const legend_overlap = outerRadius * 0.08;
+  const left_x = -outerRadius - config.legend_column_width + legend_overlap;
+  const right_x = outerRadius - legend_overlap;
+  const left_column = [];
+  const right_column = [];
+  for (let i = 0;i < numQuadrants; i++) {
+    const targetColumn = i % 2 === 0 ? right_column : left_column;
+    targetColumn.push(i);
+  }
+  const baseY = -outerRadius + 80;
+  const verticalAvailable = 2 * outerRadius - 160;
+  function stepFor(count) {
+    if (count <= 1) {
+      return 0;
+    }
+    return Math.max(config.legend_vertical_spacing, verticalAvailable / (count - 1));
+  }
+  function assignOffsets(column, xPosition) {
+    const step = stepFor(column.length);
+    for (let idx = 0;idx < column.length; idx++) {
+      const qIndex = column[idx];
+      offsets[qIndex] = {
+        x: xPosition,
+        y: baseY + idx * step
+      };
+    }
+  }
+  assignOffsets(left_column, left_x);
+  assignOffsets(right_column, right_x);
+  return offsets;
+}
+function ensureLayoutStructure(svgSelection) {
+  const existing = svgSelection.node().closest(".radar-layout");
+  if (existing) {
+    return svgSelection.select(() => existing);
+  }
+  const svgNode = svgSelection.node();
+  const parent = svgNode.parentNode;
+  const wrapper = document.createElement("div");
+  wrapper.className = "radar-layout";
+  const leftColumn = document.createElement("div");
+  leftColumn.className = "radar-legend-column left";
+  const svgContainer = document.createElement("div");
+  svgContainer.className = "radar-svg-container";
+  const rightColumn = document.createElement("div");
+  rightColumn.className = "radar-legend-column right";
+  parent.insertBefore(wrapper, svgNode);
+  svgContainer.appendChild(svgNode);
+  wrapper.appendChild(leftColumn);
+  wrapper.appendChild(svgContainer);
+  wrapper.appendChild(rightColumn);
+  return svgSelection.select(() => wrapper);
+}
 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-
-
-function radar_visualization(config) {
-
+// src/config/config-defaults.js
+function applyConfigDefaults(config) {
   config.svg_id = config.svg || "radar";
   config.width = config.width || 1450;
   config.height = config.height || 1000;
-  config.colors = ("colors" in config) ? config.colors : {
+  config.colors = "colors" in config ? config.colors : {
     background: "#fff",
-    grid: '#dddde0',
+    grid: "#dddde0",
     inactive: "#ddd"
   };
-  config.print_layout = ("print_layout" in config) ? config.print_layout : true;
-  config.links_in_new_tabs = ("links_in_new_tabs" in config) ? config.links_in_new_tabs : true;
-  config.repo_url = config.repo_url || '#';
-  config.print_ring_descriptions_table = ("print_ring_descriptions_table" in config) ? config.print_ring_descriptions_table : false;
-
-  config.legend_column_width = config.legend_column_width || 140
-  config.legend_line_height = config.legend_line_height || 10
-  config.segment_radial_padding = ("segment_radial_padding" in config) ? config.segment_radial_padding : 16;
-  config.segment_angular_padding = ("segment_angular_padding" in config) ? config.segment_angular_padding : 12;
-  config.chart_padding = ("chart_padding" in config) ? config.chart_padding : 60;
-  config.blip_collision_radius = ("blip_collision_radius" in config) ? config.blip_collision_radius : 14;
+  config.print_layout = "print_layout" in config ? config.print_layout : true;
+  config.links_in_new_tabs = "links_in_new_tabs" in config ? config.links_in_new_tabs : true;
+  config.repo_url = config.repo_url || "#";
+  config.print_ring_descriptions_table = "print_ring_descriptions_table" in config ? config.print_ring_descriptions_table : false;
+  config.legend_column_width = config.legend_column_width || 140;
+  config.legend_line_height = config.legend_line_height || 10;
+  config.segment_radial_padding = "segment_radial_padding" in config ? config.segment_radial_padding : 16;
+  config.segment_angular_padding = "segment_angular_padding" in config ? config.segment_angular_padding : 12;
+  config.chart_padding = "chart_padding" in config ? config.chart_padding : 60;
+  config.blip_collision_radius = "blip_collision_radius" in config ? config.blip_collision_radius : 14;
   config.legend_vertical_spacing = config.legend_vertical_spacing || 20;
-  config.radar_horizontal_offset = ("radar_horizontal_offset" in config)
-    ? config.radar_horizontal_offset
-    : Math.round(config.legend_column_width * 0.25);
-
-  // DEBUG MODE: Enable geometric visualizations
-  config.debug_geometry = ("debug_geometry" in config) ? config.debug_geometry : false;
-
-  // Responsive sizing based on viewport and grid complexity
-  var viewport_width = window.innerWidth || document.documentElement.clientWidth;
-  var viewport_height = window.innerHeight || document.documentElement.clientHeight;
-
-  // Apply responsive scaling for smaller viewports
+  config.radar_horizontal_offset = "radar_horizontal_offset" in config ? config.radar_horizontal_offset : Math.round(config.legend_column_width * 0.25);
+  config.debug_geometry = "debug_geometry" in config ? config.debug_geometry : false;
+  const viewport_width = window.innerWidth || document.documentElement.clientWidth;
+  const viewport_height = window.innerHeight || document.documentElement.clientHeight;
   if (viewport_width < 1024 && !config.scale) {
-    // Mobile/tablet scaling
-    var scale_factor = Math.min(viewport_width / 1450, viewport_height / 1000);
+    const scale_factor = Math.min(viewport_width / 1450, viewport_height / 1000);
     config.scale = Math.max(0.5, Math.min(1, scale_factor));
   }
-
-  // Adjust sizing based on grid complexity (for 5+ quadrants)
-  var grid_quadrants = config.quadrants.length;
-  var grid_rings = config.rings.length;
+  const grid_quadrants = config.quadrants.length;
+  const grid_rings = config.rings.length;
   if (grid_quadrants >= 5 || grid_rings >= 6) {
-    // Increase base size for complex grids to prevent overcrowding
-    var complexity_multiplier = 1 + ((grid_quadrants - 4) * 0.05) + ((grid_rings - 4) * 0.03);
+    const complexity_multiplier = 1 + (grid_quadrants - 4) * 0.05 + (grid_rings - 4) * 0.03;
     if (!config.width_override) {
       config.width = Math.round(config.width * Math.min(complexity_multiplier, 1.3));
     }
     if (!config.height_override) {
       config.height = Math.round(config.height * Math.min(complexity_multiplier, 1.3));
     }
-
-    // Slightly reduce collision radius for high-complexity grids
     if (grid_quadrants >= 7 || grid_rings >= 7) {
       config.blip_collision_radius = Math.max(10, config.blip_collision_radius * 0.9);
     }
   }
-
-  // Calculate space for title and footer
-  var title_height = config.print_layout && config.title ? 60 : 0;  // Title + date + padding
-  var footer_height = config.print_layout ? 40 : 0;  // Footer + padding
-  var minimum_chart_height = (2 * config.chart_padding) + 40;
-  var available_height = Math.max(minimum_chart_height, config.height - title_height - footer_height);
-  var available_width = Math.max((2 * config.chart_padding) + 40, config.width);
-
-  var raw_outer_radius = Math.min(available_width, available_height) / 2 - config.chart_padding;
-  var target_outer_radius = Math.max(10, raw_outer_radius);
-
-  // Validate configuration
-  if (!config.quadrants || config.quadrants.length < 2 || config.quadrants.length > 8) {
-    throw new Error("Number of quadrants must be between 2 and 8 (found: " + (config.quadrants ? config.quadrants.length : 0) + ")");
-  }
-  if (!config.rings || config.rings.length < 4 || config.rings.length > 8) {
-    throw new Error("Number of rings must be between 4 and 8 (found: " + (config.rings ? config.rings.length : 0) + ")");
-  }
-
-  // Validate entries
-  for (var i = 0; i < config.entries.length; i++) {
-    var entry = config.entries[i];
-    if (entry.quadrant < 0 || entry.quadrant >= config.quadrants.length) {
-      throw new Error("Entry '" + entry.label + "' has invalid quadrant: " + entry.quadrant + " (must be 0-" + (config.quadrants.length - 1) + ")");
-    }
-    if (entry.ring < 0 || entry.ring >= config.rings.length) {
-      throw new Error("Entry '" + entry.label + "' has invalid ring: " + entry.ring + " (must be 0-" + (config.rings.length - 1) + ")");
-    }
-  }
-
-  // custom random number generator, to make random sequence reproducible
-  // source: https://stackoverflow.com/questions/521295
-  var seed = 42;
-  function random() {
-    var x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
-  }
-
-  function random_between(min, max) {
-    return min + random() * (max - min);
-  }
-
-  function normal_between(min, max) {
-    return min + (random() + random()) * 0.5 * (max - min);
-  }
-
-  // Generate quadrants dynamically based on config.quadrants.length
-  // radial_min / radial_max are multiples of PI
-  const quadrants = [];
-  const num_quadrants = config.quadrants.length;
-  const angle_per_quadrant = 2 / num_quadrants; // in PI multiples
-  const rotation_offset = (num_quadrants === 2) ? -0.5 : 0; // rotate to vertical split for 2 quadrants
-
-  for (let i = 0; i < num_quadrants; i++) {
-    const start_angle = -1 + (i * angle_per_quadrant) + rotation_offset;
-    const end_angle = -1 + ((i + 1) * angle_per_quadrant) + rotation_offset;
-    const mid_angle = (-Math.PI + (i + 0.5) * angle_per_quadrant * Math.PI) + (rotation_offset * Math.PI);
-
-    quadrants.push({
-      radial_min: start_angle,
-      radial_max: end_angle,
-      factor_x: Math.cos(mid_angle),
-      factor_y: Math.sin(mid_angle)
-    });
-  }
-
-  // Generate rings dynamically based on config.rings.length
-  // Scale the current pattern [130, 220, 310, 400] proportionally
-  const num_rings = config.rings.length;
-  const base_pattern = [130, 220, 310, 400];
-  const max_base_radius = base_pattern[base_pattern.length - 1];
-  const ring_template = [];
-
-  if (num_rings === 4) {
-    for (let i = 0; i < 4; i++) {
-      ring_template.push(base_pattern[i]);
-    }
-  } else {
-    for (let i = 0; i < num_rings; i++) {
-      const pattern_position = (i / (num_rings - 1)) * 3;
-      const pattern_index = Math.floor(pattern_position);
-      const fraction = pattern_position - pattern_index;
-
-      let radius;
-      if (pattern_index >= 3) {
-        radius = max_base_radius;
-      } else {
-        radius = base_pattern[pattern_index] +
-          (base_pattern[pattern_index + 1] - base_pattern[pattern_index]) * fraction;
-      }
-
-      ring_template.push(radius);
-    }
-  }
-
-  const radius_scale = target_outer_radius / max_base_radius;
-  const rings = ring_template.map(function (r) {
-    return { radius: Math.max(10, Math.round(r * radius_scale)) };
-  });
-  const outer_radius = rings[rings.length - 1].radius;
-  const quadrant_bounds = quadrants.map(function (q) {
-    return computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius);
-  });
-
+}
+function calculateDimensions(config) {
+  const title_height = config.print_layout && config.title ? 60 : 0;
+  const footer_height = config.print_layout ? 40 : 0;
+  const minimum_chart_height = 2 * config.chart_padding + 40;
+  const available_height = Math.max(minimum_chart_height, config.height - title_height - footer_height);
+  const available_width = Math.max(2 * config.chart_padding + 40, config.width);
+  const raw_outer_radius = Math.min(available_width, available_height) / 2 - config.chart_padding;
+  const target_outer_radius = Math.max(10, raw_outer_radius);
+  return {
+    title_height,
+    footer_height,
+    available_height,
+    available_width,
+    target_outer_radius
+  };
+}
+function configureOffsets(config, outerRadius, numQuadrants) {
   if (!config.title_offset) {
     config.title_offset = {
-      x: -outer_radius,
-      y: -outer_radius - 40
+      x: -outerRadius,
+      y: -outerRadius - 40
     };
   }
   if (!config.footer_offset) {
     config.footer_offset = {
-      x: -outer_radius,
-      y: outer_radius + 60
+      x: -outerRadius,
+      y: outerRadius + 60
     };
   }
+  config.legend_offset = computeLegendOffsets(numQuadrants, outerRadius, config);
+}
 
-  function computeLegendOffsets() {
-    if (config.legend_offset) {
-      return config.legend_offset;
-    }
-
-    var num_quads = config.quadrants.length;
-    var offsets = new Array(num_quads);
-    var legend_overlap = outer_radius * 0.08;
-    var left_x = -outer_radius - config.legend_column_width + legend_overlap;
-    var right_x = outer_radius - legend_overlap;
-
-    var left_column = [];
-    var right_column = [];
-    for (var i = 0; i < num_quads; i++) {
-      var targetColumn = (i % 2 === 0) ? right_column : left_column;
-      targetColumn.push(i);
-    }
-
-    var baseY = -outer_radius + 80;
-    var verticalAvailable = (2 * outer_radius) - 160;
-
-    function stepFor(count) {
-      if (count <= 1) {
-        return 0;
-      }
-      return Math.max(config.legend_vertical_spacing, verticalAvailable / (count - 1));
-    }
-
-    function assignOffsets(column, xPosition) {
-      var step = stepFor(column.length);
-      for (var idx = 0; idx < column.length; idx++) {
-        var qIndex = column[idx];
-        offsets[qIndex] = {
-          x: xPosition,
-          y: baseY + idx * step
-        };
-      }
-    }
-
-    assignOffsets(left_column, left_x);
-    assignOffsets(right_column, right_x);
-
-    return offsets;
-  }
-
-  config.legend_offset = computeLegendOffsets();
-
-  function polar(cartesian) {
-    var x = cartesian.x;
-    var y = cartesian.y;
-    return {
-      t: Math.atan2(y, x),
-      r: Math.sqrt(x * x + y * y)
-    }
-  }
-
-  function cartesian(polar) {
-    return {
-      x: polar.r * Math.cos(polar.t),
-      y: polar.r * Math.sin(polar.t)
-    }
-  }
-
-  function bounded_interval(value, min, max) {
-    var low = Math.min(min, max);
-    var high = Math.max(min, max);
-    return Math.min(Math.max(value, low), high);
-  }
-
-  function bounded_ring(polar, r_min, r_max) {
-    return {
-      t: polar.t,
-      r: bounded_interval(polar.r, r_min, r_max)
-    }
-  }
-
-  function bounded_box(point, min, max) {
-    return {
-      x: bounded_interval(point.x, min.x, max.x),
-      y: bounded_interval(point.y, min.y, max.y)
-    }
-  }
-
-  function computeQuadrantBounds(startAngle, endAngle, radius) {
-    var twoPi = 2 * Math.PI;
-    var normalizedStart = startAngle;
-    var normalizedEnd = endAngle;
-
-    while (normalizedEnd <= normalizedStart) {
-      normalizedEnd += twoPi;
-    }
-
-    var axisAngles = [
-      -Math.PI,
-      -Math.PI / 2,
-      0,
-      Math.PI / 2,
-      Math.PI,
-      (3 * Math.PI) / 2,
-      2 * Math.PI
-    ];
-
-    var candidates = [normalizedStart, normalizedEnd];
-
-    axisAngles.forEach(function (axisAngle) {
-      var candidate = axisAngle;
-      while (candidate < normalizedStart) {
-        candidate += twoPi;
-      }
-      if (candidate <= normalizedEnd) {
-        candidates.push(candidate);
-      }
+// src/geometry/quadrant-calculator.js
+function generateQuadrants(numQuadrants) {
+  const quadrants = [];
+  const anglePerQuadrant = 2 / numQuadrants;
+  const rotationOffset = numQuadrants === 2 ? -0.5 : 0;
+  for (let i = 0;i < numQuadrants; i++) {
+    const startAngle = -1 + i * anglePerQuadrant + rotationOffset;
+    const endAngle = -1 + (i + 1) * anglePerQuadrant + rotationOffset;
+    const midAngle = -Math.PI + (i + 0.5) * anglePerQuadrant * Math.PI + rotationOffset * Math.PI;
+    quadrants.push({
+      radial_min: startAngle,
+      radial_max: endAngle,
+      factor_x: Math.cos(midAngle),
+      factor_y: Math.sin(midAngle)
     });
-
-    var min_x = Infinity;
-    var max_x = -Infinity;
-    var min_y = Infinity;
-    var max_y = -Infinity;
-
-    candidates.forEach(function (angle) {
-      var cosA = Math.cos(angle);
-      var sinA = Math.sin(angle);
-      min_x = Math.min(min_x, cosA);
-      max_x = Math.max(max_x, cosA);
-      min_y = Math.min(min_y, sinA);
-      max_y = Math.max(max_y, sinA);
-    });
-
-    var padding = 20;
-    return {
-      min: {
-        x: (min_x * radius) - padding,
-        y: (min_y * radius) - padding
-      },
-      max: {
-        x: (max_x * radius) + padding,
-        y: (max_y * radius) + padding
-      }
-    };
   }
-
-  function segment(quadrant, ring) {
-    var min_angle = quadrants[quadrant].radial_min * Math.PI;
-    var max_angle = quadrants[quadrant].radial_max * Math.PI;
-    var base_inner_radius = ring === 0 ? 30 : rings[ring - 1].radius;
-    var base_outer_radius = rings[ring].radius;
-
-    var inner_radius = base_inner_radius + config.segment_radial_padding;
-    var outer_radius = base_outer_radius - config.segment_radial_padding;
-    if (outer_radius <= inner_radius) {
-      var midpoint = (base_inner_radius + base_outer_radius) / 2;
-      inner_radius = Math.max(0, midpoint - 1);
-      outer_radius = midpoint + 1;
+  return quadrants;
+}
+function computeQuadrantBounds(startAngle, endAngle, radius) {
+  const twoPi = 2 * Math.PI;
+  const normalizedStart = startAngle;
+  let normalizedEnd = endAngle;
+  while (normalizedEnd <= normalizedStart) {
+    normalizedEnd += twoPi;
+  }
+  const axisAngles = [
+    -Math.PI,
+    -Math.PI / 2,
+    0,
+    Math.PI / 2,
+    Math.PI,
+    3 * Math.PI / 2,
+    2 * Math.PI
+  ];
+  const candidates = [normalizedStart, normalizedEnd];
+  axisAngles.forEach((axisAngle) => {
+    let candidate = axisAngle;
+    while (candidate < normalizedStart) {
+      candidate += twoPi;
     }
-
-    var ring_center = (inner_radius + outer_radius) / 2;
-    var angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
-    var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
-    angular_padding = Math.min(angular_padding, angular_limit);
-
-    var angle_min = min_angle + angular_padding;
-    var angle_max = max_angle - angular_padding;
-    if (angle_max <= angle_min) {
-      angle_min = min_angle;
-      angle_max = max_angle;
+    if (candidate <= normalizedEnd) {
+      candidates.push(candidate);
     }
-
-    // FIX #7: Calculate bounding box PER SEGMENT, not per quadrant
-    // Use segment's actual angles and outer_radius, not the full quadrant
-    var segment_bounds = computeQuadrantBounds(angle_min, angle_max, outer_radius);
-    var cartesian_min = segment_bounds.min;
-    var cartesian_max = segment_bounds.max;
-
-    function clampPoint(point) {
-      var c = bounded_box(point, cartesian_min, cartesian_max);
-      var p = polar(c);
-      p.r = bounded_interval(p.r, inner_radius, outer_radius);
-      p.t = bounded_interval(p.t, angle_min, angle_max);
-      return cartesian(p);
+  });
+  let min_x = Infinity;
+  let max_x = -Infinity;
+  let min_y = Infinity;
+  let max_y = -Infinity;
+  candidates.forEach((angle) => {
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+    min_x = Math.min(min_x, cosA);
+    max_x = Math.max(max_x, cosA);
+    min_y = Math.min(min_y, sinA);
+    max_y = Math.max(max_y, sinA);
+  });
+  const padding = 20;
+  return {
+    min: {
+      x: min_x * radius - padding,
+      y: min_y * radius - padding
+    },
+    max: {
+      x: max_x * radius + padding,
+      y: max_y * radius + padding
     }
+  };
+}
+function generateQuadrantOrder(numQuadrants) {
+  if (numQuadrants === 4) {
+    return [2, 3, 1, 0];
+  }
+  const quadrantOrder = [];
+  const startIndex = Math.floor(numQuadrants / 2);
+  for (let i = 0;i < numQuadrants; i++) {
+    quadrantOrder.push((startIndex + i) % numQuadrants);
+  }
+  return quadrantOrder;
+}
 
-    function clampAndAssign(d) {
-      var clipped = clampPoint({ x: d.x, y: d.y });
+// src/geometry/ring-calculator.js
+var BASE_PATTERN = [130, 220, 310, 400];
+var MAX_BASE_RADIUS = 400;
+function generateRings(numRings, targetOuterRadius) {
+  const ringTemplate = [];
+  if (numRings === 4) {
+    for (let i = 0;i < 4; i++) {
+      ringTemplate.push(BASE_PATTERN[i]);
+    }
+  } else {
+    for (let i = 0;i < numRings; i++) {
+      const patternPosition = i / (numRings - 1) * 3;
+      const patternIndex = Math.floor(patternPosition);
+      const fraction = patternPosition - patternIndex;
+      let radius;
+      if (patternIndex >= 3) {
+        radius = MAX_BASE_RADIUS;
+      } else {
+        radius = BASE_PATTERN[patternIndex] + (BASE_PATTERN[patternIndex + 1] - BASE_PATTERN[patternIndex]) * fraction;
+      }
+      ringTemplate.push(radius);
+    }
+  }
+  const radiusScale = targetOuterRadius / MAX_BASE_RADIUS;
+  return ringTemplate.map((r) => ({ radius: Math.max(10, Math.round(r * radiusScale)) }));
+}
+
+// src/math/coordinates.js
+function polar(cartesian) {
+  const { x, y } = cartesian;
+  return {
+    t: Math.atan2(y, x),
+    r: Math.sqrt(x * x + y * y)
+  };
+}
+function cartesian(polar2) {
+  const { r, t } = polar2;
+  return {
+    x: r * Math.cos(t),
+    y: r * Math.sin(t)
+  };
+}
+function boundedInterval(value, min, max) {
+  const low = Math.min(min, max);
+  const high = Math.max(min, max);
+  return Math.min(Math.max(value, low), high);
+}
+function boundedRing(polar2, r_min, r_max) {
+  return {
+    t: polar2.t,
+    r: boundedInterval(polar2.r, r_min, r_max)
+  };
+}
+function boundedBox(point, min, max) {
+  return {
+    x: boundedInterval(point.x, min.x, max.x),
+    y: boundedInterval(point.y, min.y, max.y)
+  };
+}
+
+// src/geometry/segment-calculator.js
+function createSegment(quadrantIndex, ringIndex, quadrants, rings, config, randomBetween) {
+  const min_angle = quadrants[quadrantIndex].radial_min * Math.PI;
+  const max_angle = quadrants[quadrantIndex].radial_max * Math.PI;
+  const base_inner_radius = ringIndex === 0 ? 30 : rings[ringIndex - 1].radius;
+  const base_outer_radius = rings[ringIndex].radius;
+  let inner_radius = base_inner_radius + config.segment_radial_padding;
+  let outer_radius = base_outer_radius - config.segment_radial_padding;
+  if (outer_radius <= inner_radius) {
+    const midpoint = (base_inner_radius + base_outer_radius) / 2;
+    inner_radius = Math.max(0, midpoint - 1);
+    outer_radius = midpoint + 1;
+  }
+  const ring_center = (inner_radius + outer_radius) / 2;
+  let angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
+  const angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
+  angular_padding = Math.min(angular_padding, angular_limit);
+  let angle_min = min_angle + angular_padding;
+  let angle_max = max_angle - angular_padding;
+  if (angle_max <= angle_min) {
+    angle_min = min_angle;
+    angle_max = max_angle;
+  }
+  const segment_bounds = computeQuadrantBounds(angle_min, angle_max, outer_radius);
+  const cartesian_min = segment_bounds.min;
+  const cartesian_max = segment_bounds.max;
+  function clampPoint(point) {
+    const c = boundedBox(point, cartesian_min, cartesian_max);
+    const p = polar(c);
+    p.r = boundedInterval(p.r, inner_radius, outer_radius);
+    p.t = boundedInterval(p.t, angle_min, angle_max);
+    return cartesian(p);
+  }
+  function clampAndAssign(d) {
+    const clipped = clampPoint({ x: d.x, y: d.y });
+    d.x = clipped.x;
+    d.y = clipped.y;
+    return clipped;
+  }
+  return {
+    clipx: (d) => {
+      const clipped = clampAndAssign(d);
+      return clipped.x;
+    },
+    clipy: (d) => {
+      const clipped = clampAndAssign(d);
+      return clipped.y;
+    },
+    clip: (d) => {
+      const clipped = clampPoint({ x: d.x, y: d.y });
       d.x = clipped.x;
       d.y = clipped.y;
       return clipped;
-    }
+    },
+    random: () => cartesian({
+      t: randomBetween(angle_min, angle_max),
+      r: randomBetween(inner_radius, outer_radius)
+    })
+  };
+}
 
+// src/integration/json-io.js
+var defaultOptions = {
+  demoSlug: "tech-radar",
+  onError: (message) => {
+    if (typeof window !== "undefined" && typeof window.alert === "function") {
+      window.alert(message);
+    } else {
+      console.error(message);
+    }
+  },
+  onSuccess: () => {},
+  sanitizeData: true,
+  mergeOnImport: true
+};
+var readerErrorMessages = {
+  read: "Failed to read the selected file. Please try again.",
+  parse: "The selected file is not valid JSON. Please choose a valid radar configuration."
+};
+function mergeOptions(custom = {}) {
+  const merged = {
+    ...defaultOptions,
+    ...custom
+  };
+  merged.onError = typeof custom.onError === "function" ? custom.onError : defaultOptions.onError;
+  merged.onSuccess = typeof custom.onSuccess === "function" ? custom.onSuccess : defaultOptions.onSuccess;
+  return merged;
+}
+function formatTimestamp(date = new Date) {
+  const pad = (value) => value.toString().padStart(2, "0");
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const seconds = date.getSeconds();
+  return `${year}${pad(month)}${pad(day)}-${pad(hours)}${pad(minutes)}${pad(seconds)}`;
+}
+function buildDownloadLink(json, fileName) {
+  const blob = new Blob([json], { type: "application/json" });
+  const linkCreator = typeof window !== "undefined" && window.URL ? window.URL : URL;
+  const url = linkCreator.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.download = fileName;
+  link.href = url;
+  return { link, url };
+}
+function handleError(message, options) {
+  options.onError(message);
+}
+function sanitizeConfigForExport(config) {
+  if (!config)
+    return config;
+  const sanitized = { ...config };
+  if (Array.isArray(config.entries)) {
+    sanitized.entries = config.entries.map((entry) => {
+      const clean = {
+        label: entry.label,
+        quadrant: entry.quadrant,
+        ring: entry.ring,
+        moved: entry.moved,
+        active: entry.active
+      };
+      if (entry.link) {
+        clean.link = entry.link;
+      }
+      return clean;
+    });
+  }
+  const { _pluginInstances, _internalState, ...cleanConfig } = sanitized;
+  return cleanConfig;
+}
+function mergeConfigs(baseConfig, importedConfig) {
+  if (!baseConfig)
+    return importedConfig;
+  if (!importedConfig)
+    return baseConfig;
+  const merged = { ...baseConfig };
+  if (importedConfig.entries) {
+    merged.entries = importedConfig.entries;
+  }
+  const mergeableProps = ["title", "date", "quadrants", "rings", "print_layout", "links_in_new_tabs"];
+  mergeableProps.forEach((prop) => {
+    if (importedConfig[prop] !== undefined) {
+      merged[prop] = importedConfig[prop];
+    }
+  });
+  return merged;
+}
+function exportConfig(button, currentConfigProvider, options = {}) {
+  if (!button) {
+    throw new Error("exportConfig requires a button element");
+  }
+  if (typeof currentConfigProvider !== "function") {
+    throw new Error("exportConfig requires a config provider function");
+  }
+  const merged = mergeOptions(options);
+  const demoSlug = merged.demoSlug || defaultOptions.demoSlug;
+  const handleClick = async () => {
+    try {
+      const config = await currentConfigProvider();
+      if (!config) {
+        throw new Error("No radar configuration is available to export.");
+      }
+      const configToExport = merged.sanitizeData ? sanitizeConfigForExport(config) : config;
+      const json = JSON.stringify(configToExport, null, 2);
+      const timestamp = formatTimestamp();
+      const fileName = `${demoSlug}-${timestamp}.json`;
+      const { link, url } = buildDownloadLink(json, fileName);
+      link.click();
+      const revoker = typeof window !== "undefined" && window.URL ? window.URL : URL;
+      revoker.revokeObjectURL(url);
+      merged.onSuccess({ fileName });
+    } catch (error) {
+      handleError(error.message || "Unable to export JSON.", merged);
+    }
+  };
+  button.addEventListener("click", handleClick);
+  return () => button.removeEventListener("click", handleClick);
+}
+function importConfig(fileInput, applyConfig, options = {}) {
+  if (!fileInput) {
+    throw new Error("importConfig requires a file input element");
+  }
+  if (typeof applyConfig !== "function") {
+    throw new Error("importConfig requires an applyConfig callback");
+  }
+  const merged = mergeOptions(options);
+  const handleChange = (event) => {
+    const [file] = event.target.files || [];
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader;
+    reader.onload = async (loadEvent) => {
+      let parsed;
+      try {
+        parsed = JSON.parse(loadEvent.target.result);
+      } catch (_parseError) {
+        handleError(readerErrorMessages.parse, merged);
+        fileInput.value = "";
+        return;
+      }
+      try {
+        await applyConfig(parsed);
+        merged.onSuccess({ fileName: file.name });
+      } catch (error) {
+        handleError(error.message || "Unable to import configuration.", merged);
+      } finally {
+        fileInput.value = "";
+      }
+    };
+    reader.onerror = () => {
+      handleError(readerErrorMessages.read, merged);
+      fileInput.value = "";
+    };
+    reader.readAsText(file);
+  };
+  fileInput.addEventListener("change", handleChange);
+  return () => fileInput.removeEventListener("change", handleChange);
+}
+function createJsonIOHelpers() {
+  return {
+    exportConfig,
+    importConfig,
+    sanitizeConfigForExport,
+    mergeConfigs
+  };
+}
+
+// src/math/random.js
+class SeededRandom {
+  constructor(seed = 42) {
+    this.seed = seed;
+    this.initialSeed = seed;
+  }
+  next() {
+    const x = Math.sin(this.seed++) * 1e4;
+    return x - Math.floor(x);
+  }
+  between(min, max) {
+    return min + this.next() * (max - min);
+  }
+  normalBetween(min, max) {
+    return min + (this.next() + this.next()) * 0.5 * (max - min);
+  }
+  reset(seed) {
+    this.seed = seed !== undefined ? seed : this.initialSeed;
+  }
+}
+
+// src/plugins/plugin-base.js
+var pluginRegistry = new Map;
+function registerPlugin(name, plugin) {
+  pluginRegistry.set(name, plugin);
+}
+function getPlugin(name) {
+  return pluginRegistry.get(name) || null;
+}
+function initializePlugins(pluginConfig = {}, context = {}) {
+  const initialized = {};
+  const cleanupFunctions = [];
+  for (const [pluginName, config] of Object.entries(pluginConfig)) {
+    if (!config || config.enabled === false) {
+      continue;
+    }
+    const plugin = getPlugin(pluginName);
+    if (!plugin) {
+      console.warn(`Plugin "${pluginName}" not registered, skipping...`);
+      continue;
+    }
+    try {
+      const instance = plugin.init(config, context);
+      initialized[pluginName] = instance;
+      if (instance && typeof instance.cleanup === "function") {
+        cleanupFunctions.push(instance.cleanup);
+      }
+    } catch (error) {
+      console.error(`Failed to initialize plugin "${pluginName}":`, error);
+    }
+  }
+  return {
+    plugins: initialized,
+    cleanup: () => {
+      cleanupFunctions.forEach((fn) => {
+        try {
+          fn();
+        } catch (error) {
+          console.error("Plugin cleanup error:", error);
+        }
+      });
+    }
+  };
+}
+function definePlugin({ name, init, defaults = {} }) {
+  return {
+    name,
+    defaults,
+    init: (config, context) => {
+      const mergedConfig = { ...defaults, ...config };
+      return init(mergedConfig, context);
+    }
+  };
+}
+
+// src/plugins/import-export-plugin.js
+var importExportPlugin = definePlugin({
+  name: "importExport",
+  defaults: {
+    enabled: true,
+    formats: ["json"],
+    fileNamePattern: "{slug}-{timestamp}",
+    pretty: true
+  },
+  init: (config, context) => {
+    const { formats: _formats, fileNamePattern, pretty } = config;
+    const { getCurrentConfig, onConfigChange: _onConfigChange, demoSlug } = context;
+    const jsonIO = createJsonIOHelpers();
+    const operations = {
+      imports: 0,
+      exports: 0,
+      lastImport: null,
+      lastExport: null
+    };
+    const generateFileName = (operation) => {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+      const slug = demoSlug || "radar-config";
+      return fileNamePattern.replace("{slug}", slug).replace("{timestamp}", timestamp).replace("{operation}", operation);
+    };
+    const exportJSON = async (options = {}) => {
+      const configToExport = options.config || getCurrentConfig?.();
+      if (!configToExport) {
+        throw new Error("No configuration to export");
+      }
+      const fileName = options.fileName || `${generateFileName("export")}.json`;
+      const jsonString = pretty ? JSON.stringify(configToExport, null, 2) : JSON.stringify(configToExport);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      operations.exports++;
+      operations.lastExport = {
+        timestamp: Date.now(),
+        fileName,
+        size: blob.size
+      };
+      return { fileName, blob };
+    };
+    const importJSON = async (source) => {
+      let data;
+      if (source instanceof File || source instanceof Blob) {
+        const text = await source.text();
+        data = JSON.parse(text);
+      } else if (typeof source === "string") {
+        data = JSON.parse(source);
+      } else {
+        throw new Error("Invalid import source");
+      }
+      operations.imports++;
+      operations.lastImport = {
+        timestamp: Date.now(),
+        fileName: source.name || "unknown"
+      };
+      return data;
+    };
+    const setupExport = (button, getConfig, options = {}) => {
+      return jsonIO.exportConfig(button, getConfig, {
+        ...options,
+        demoSlug: demoSlug || options.demoSlug
+      });
+    };
+    const setupImport = (input, onImport, options = {}) => {
+      return jsonIO.importConfig(input, onImport, {
+        ...options,
+        demoSlug: demoSlug || options.demoSlug
+      });
+    };
     return {
-      clipx: function (d) {
-        var clipped = clampAndAssign(d);
-        return clipped.x;
-      },
-      clipy: function (d) {
-        var clipped = clampAndAssign(d);
-        return clipped.y;
-      },
-      // FIX #5: Single clip operation that doesn't double-clip
-      clip: function (d) {
-        var clipped = clampPoint({ x: d.x, y: d.y });
-        d.x = clipped.x;
-        d.y = clipped.y;
-        return clipped;
-      },
-      random: function () {
-        return cartesian({
-          t: random_between(angle_min, angle_max),
-          r: random_between(inner_radius, outer_radius)
+      jsonIO,
+      export: exportJSON,
+      import: importJSON,
+      setupExport,
+      setupImport,
+      getStats: () => ({ ...operations }),
+      cleanup: () => {}
+    };
+  }
+});
+// src/plugins/storage-plugin.js
+class LocalStorageAdapter {
+  constructor(key, options = {}) {
+    this.key = key;
+    this.version = options.version || 1;
+    this.namespace = options.namespace || "tech-radar";
+    this.fullKey = `${this.namespace}:${this.key}`;
+  }
+  async save(config) {
+    try {
+      const data = {
+        version: this.version,
+        timestamp: Date.now(),
+        config
+      };
+      localStorage.setItem(this.fullKey, JSON.stringify(data));
+    } catch (error) {
+      console.error("localStorage save error:", error);
+      throw new Error("Failed to save to localStorage");
+    }
+  }
+  async load() {
+    try {
+      const item = localStorage.getItem(this.fullKey);
+      if (!item)
+        return null;
+      const data = JSON.parse(item);
+      if (data.version !== this.version) {
+        console.warn(`Storage version mismatch: expected ${this.version}, got ${data.version}`);
+      }
+      return data.config;
+    } catch (error) {
+      console.error("localStorage load error:", error);
+      return null;
+    }
+  }
+  async clear() {
+    try {
+      localStorage.removeItem(this.fullKey);
+    } catch (error) {
+      console.error("localStorage clear error:", error);
+    }
+  }
+  async exists() {
+    return localStorage.getItem(this.fullKey) !== null;
+  }
+}
+
+class SessionStorageAdapter {
+  constructor(key, options = {}) {
+    this.key = key;
+    this.namespace = options.namespace || "tech-radar";
+    this.fullKey = `${this.namespace}:${this.key}`;
+  }
+  async save(config) {
+    try {
+      const data = {
+        timestamp: Date.now(),
+        config
+      };
+      sessionStorage.setItem(this.fullKey, JSON.stringify(data));
+    } catch (error) {
+      console.error("sessionStorage save error:", error);
+      throw new Error("Failed to save to sessionStorage");
+    }
+  }
+  async load() {
+    try {
+      const item = sessionStorage.getItem(this.fullKey);
+      if (!item)
+        return null;
+      const data = JSON.parse(item);
+      return data.config;
+    } catch (error) {
+      console.error("sessionStorage load error:", error);
+      return null;
+    }
+  }
+  async clear() {
+    try {
+      sessionStorage.removeItem(this.fullKey);
+    } catch (error) {
+      console.error("sessionStorage clear error:", error);
+    }
+  }
+  async exists() {
+    return sessionStorage.getItem(this.fullKey) !== null;
+  }
+}
+
+class IndexedDBAdapter {
+  constructor(key, options = {}) {
+    this.key = key;
+    this.dbName = options.dbName || "tech-radar-db";
+    this.storeName = options.storeName || "configurations";
+    this.version = options.version || 1;
+  }
+  async save(_config) {
+    throw new Error("IndexedDB adapter not yet implemented");
+  }
+  async load() {
+    throw new Error("IndexedDB adapter not yet implemented");
+  }
+  async clear() {
+    throw new Error("IndexedDB adapter not yet implemented");
+  }
+  async exists() {
+    return false;
+  }
+}
+function createStorageAdapter(type, key, options = {}) {
+  switch (type) {
+    case "localStorage":
+      return new LocalStorageAdapter(key, options);
+    case "sessionStorage":
+      return new SessionStorageAdapter(key, options);
+    case "indexedDB":
+      return new IndexedDBAdapter(key, options);
+    case "custom":
+      if (!options.save || !options.load || !options.clear) {
+        throw new Error("Custom storage requires save, load, and clear functions");
+      }
+      return {
+        save: options.save,
+        load: options.load,
+        clear: options.clear,
+        exists: options.exists || (() => Promise.resolve(false))
+      };
+    default:
+      throw new Error(`Unknown storage type: ${type}`);
+  }
+}
+var storagePlugin = definePlugin({
+  name: "storage",
+  defaults: {
+    type: "localStorage",
+    key: "default",
+    autoLoad: false,
+    autoSave: false,
+    namespace: "tech-radar",
+    version: 1
+  },
+  init: (config, context) => {
+    const { type, key, autoLoad, autoSave, ...options } = config;
+    const { getCurrentConfig, onConfigChange } = context;
+    const storage = createStorageAdapter(type, key, options);
+    let loadPromise = null;
+    if (autoLoad) {
+      loadPromise = storage.load().then((loadedConfig) => {
+        if (loadedConfig && context.applyConfig) {
+          context.applyConfig(loadedConfig);
+        }
+        return loadedConfig;
+      });
+    }
+    let unsubscribe = null;
+    if (autoSave && onConfigChange) {
+      unsubscribe = onConfigChange((config2) => {
+        storage.save(config2).catch((error) => {
+          console.error("Auto-save failed:", error);
         });
+      });
+    }
+    return {
+      storage,
+      save: async () => {
+        const config2 = getCurrentConfig ? getCurrentConfig() : null;
+        if (!config2) {
+          throw new Error("No configuration to save");
+        }
+        return storage.save(config2);
+      },
+      load: async () => {
+        return storage.load();
+      },
+      clear: async () => {
+        return storage.clear();
+      },
+      exists: async () => {
+        return storage.exists();
+      },
+      cleanup: () => {
+        if (unsubscribe) {
+          unsubscribe();
+        }
+      },
+      _loadPromise: loadPromise
+    };
+  }
+});
+// src/plugins/toolbar-plugin.js
+function showToolbarMessage(messageEl, message, state = "info") {
+  if (!messageEl)
+    return;
+  messageEl.textContent = message;
+  messageEl.dataset.state = state;
+  if (state !== "error") {
+    setTimeout(() => {
+      messageEl.textContent = "";
+      delete messageEl.dataset.state;
+    }, 3000);
+  }
+}
+function getDefaultToolbarHTML() {
+  return `
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonImportButton" title="Import JSON Configuration" aria-label="Import JSON">
+          <i class="fas fa-file-import"></i>
+        </button>
+        <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonExportButton" title="Export JSON Configuration" aria-label="Export JSON">
+          <i class="fas fa-file-export"></i>
+        </button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
+  `.trim();
+}
+var toolbarPlugin = definePlugin({
+  name: "toolbar",
+  defaults: {
+    enabled: true,
+    position: "top-right",
+    buttons: ["import", "export"],
+    containerId: null,
+    autoRender: true
+  },
+  init: (config, context) => {
+    const { enabled, containerId, autoRender, buttons } = config;
+    const { importExportPlugin: importExportPlugin2, getCurrentConfig, onConfigImport, demoSlug } = context;
+    if (!enabled) {
+      return { cleanup: () => {} };
+    }
+    let toolbarContainer = null;
+    let cleanupFunctions = [];
+    const render = (container = null) => {
+      if (container) {
+        toolbarContainer = container;
+      } else if (containerId) {
+        toolbarContainer = document.getElementById(containerId);
+      } else {
+        toolbarContainer = document.querySelector(".demo-toolbar");
+        if (!toolbarContainer) {
+          const nav = document.querySelector("nav.demo-links");
+          if (nav) {
+            toolbarContainer = document.createElement("div");
+            nav.insertAdjacentElement("afterend", toolbarContainer);
+          }
+        }
+      }
+      if (!toolbarContainer) {
+        console.warn("Toolbar container not found");
+        return;
+      }
+      if (!toolbarContainer.querySelector(".demo-toolbar__controls")) {
+        toolbarContainer.innerHTML = getDefaultToolbarHTML();
+      }
+      const importButton = document.getElementById("jsonImportButton");
+      const exportButton = document.getElementById("jsonExportButton");
+      const importInput = document.getElementById("jsonImportInput");
+      const messageEl = document.getElementById("jsonToolbarMessage");
+      if (!importButton || !exportButton || !importInput) {
+        console.warn("Toolbar elements not found");
+        return;
+      }
+      if (!buttons.includes("import")) {
+        importButton.style.display = "none";
+      }
+      if (!buttons.includes("export")) {
+        exportButton.style.display = "none";
+      }
+      if (importExportPlugin2) {
+        const { setupImport, setupExport } = importExportPlugin2;
+        const handleImportClick = () => importInput.click();
+        importButton.addEventListener("click", handleImportClick);
+        const disposeImport = setupImport(importInput, (importedConfig) => {
+          if (onConfigImport) {
+            onConfigImport(importedConfig);
+          }
+        }, {
+          demoSlug,
+          onSuccess: ({ fileName }) => {
+            showToolbarMessage(messageEl, `Imported ${fileName || "configuration"} successfully`, "success");
+          },
+          onError: (message) => {
+            showToolbarMessage(messageEl, message, "error");
+          }
+        });
+        const disposeExport = setupExport(exportButton, getCurrentConfig, {
+          demoSlug,
+          onSuccess: ({ fileName }) => {
+            showToolbarMessage(messageEl, `Exported ${fileName}`, "success");
+          },
+          onError: (message) => {
+            showToolbarMessage(messageEl, message, "error");
+          }
+        });
+        cleanupFunctions.push(() => importButton.removeEventListener("click", handleImportClick), disposeImport, disposeExport);
+      } else {
+        console.warn("Import/Export plugin not available for toolbar");
+      }
+    };
+    if (autoRender) {
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", () => render());
+      } else {
+        render();
+      }
+    }
+    return {
+      render,
+      showMessage: (message, state = "info") => {
+        const messageEl = document.getElementById("jsonToolbarMessage");
+        showToolbarMessage(messageEl, message, state);
+      },
+      getContainer: () => toolbarContainer,
+      cleanup: () => {
+        cleanupFunctions.forEach((fn) => {
+          if (typeof fn === "function") {
+            try {
+              fn();
+            } catch (error) {
+              console.error("Toolbar cleanup error:", error);
+            }
+          }
+        });
+        cleanupFunctions = [];
+      }
+    };
+  }
+});
+// src/plugins/index.js
+registerPlugin("storage", storagePlugin);
+registerPlugin("importExport", importExportPlugin);
+registerPlugin("toolbar", toolbarPlugin);
+
+// src/processing/entry-processor.js
+class EntryProcessor {
+  constructor(config, quadrants, rings, randomNext, randomBetween) {
+    this.config = config;
+    this.quadrants = quadrants;
+    this.rings = rings;
+    this.randomNext = randomNext;
+    this.randomBetween = randomBetween;
+    this.numQuadrants = quadrants.length;
+    this.numRings = rings.length;
+  }
+  processEntries(entries) {
+    const segmented = this.segmentEntries(entries);
+    this.assignSegmentsAndColors(entries);
+    this.positionEntries(segmented);
+    this.assignIds(segmented);
+    this.calculateCollisionRadii(segmented);
+    return entries;
+  }
+  segmentEntries(entries) {
+    const segmented = new Array(this.numQuadrants);
+    for (let quadrant = 0;quadrant < this.numQuadrants; quadrant++) {
+      segmented[quadrant] = new Array(this.numRings);
+      for (let ring = 0;ring < this.numRings; ring++) {
+        segmented[quadrant][ring] = [];
+      }
+    }
+    for (let i = 0;i < entries.length; i++) {
+      const entry = entries[i];
+      segmented[entry.quadrant][entry.ring].push(entry);
+    }
+    return segmented;
+  }
+  assignSegmentsAndColors(entries) {
+    for (let i = 0;i < entries.length; i++) {
+      const entry = entries[i];
+      entry.segment = createSegment(entry.quadrant, entry.ring, this.quadrants, this.rings, this.config, this.randomBetween);
+      entry.color = entry.active || this.config.print_layout ? this.config.rings[entry.ring].color : this.config.colors.inactive;
+    }
+  }
+  positionEntries(segmented) {
+    for (let quadrant = 0;quadrant < this.numQuadrants; quadrant++) {
+      for (let ring = 0;ring < this.numRings; ring++) {
+        this.gridPosition(segmented[quadrant][ring], quadrant, ring);
       }
     }
   }
-
-  // Helper function to distribute entries in a grid pattern within their segment
-  function gridPosition(entries, segmentInfo) {
-    if (entries.length === 0) return;
-
-    var min_angle = quadrants[segmentInfo.quadrant].radial_min * Math.PI;
-    var max_angle = quadrants[segmentInfo.quadrant].radial_max * Math.PI;
-    var base_inner_radius = segmentInfo.ring === 0 ? 30 : rings[segmentInfo.ring - 1].radius;
-    var base_outer_radius = rings[segmentInfo.ring].radius;
-
-    var inner_radius = base_inner_radius + config.segment_radial_padding;
-    var outer_radius = base_outer_radius - config.segment_radial_padding;
+  gridPosition(entries, quadrant, ring) {
+    if (entries.length === 0)
+      return;
+    const min_angle = this.quadrants[quadrant].radial_min * Math.PI;
+    const max_angle = this.quadrants[quadrant].radial_max * Math.PI;
+    const base_inner_radius = ring === 0 ? 30 : this.rings[ring - 1].radius;
+    const base_outer_radius = this.rings[ring].radius;
+    let inner_radius = base_inner_radius + this.config.segment_radial_padding;
+    let outer_radius = base_outer_radius - this.config.segment_radial_padding;
     if (outer_radius <= inner_radius) {
-      var midpoint = (base_inner_radius + base_outer_radius) / 2;
+      const midpoint = (base_inner_radius + base_outer_radius) / 2;
       inner_radius = Math.max(0, midpoint - 1);
       outer_radius = midpoint + 1;
     }
-
-    var ring_center = (inner_radius + outer_radius) / 2;
-    var angular_padding = config.segment_angular_padding / Math.max(ring_center, 1);
-    var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
+    const ring_center = (inner_radius + outer_radius) / 2;
+    let angular_padding = this.config.segment_angular_padding / Math.max(ring_center, 1);
+    const angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
     angular_padding = Math.min(angular_padding, angular_limit);
-
-    var angle_min = min_angle + angular_padding;
-    var angle_max = max_angle - angular_padding;
-
-    // Calculate optimal grid dimensions to maximize spatial distribution
-    var angle_range = angle_max - angle_min;
-    var radius_range = outer_radius - inner_radius;
-    var count = entries.length;
-
-    // Calculate segment dimensions in pixels (approximate)
-    // FIX #1: Use inner_radius for ring 0 to avoid overestimating angular capacity
-    // Ring 0 has smallest inner arc, using center radius overestimates by ~74%
-    var effective_radius = (segmentInfo.ring === 0) ? inner_radius : ring_center;
-    var segment_arc_length = angle_range * effective_radius;
-    var segment_radial_depth = radius_range;
-
-    // Estimate item size (based on collision radius)
-    var item_size = config.blip_collision_radius || 14;
-
-    // Calculate maximum items that could fit in each dimension
-    // Use a more generous calculation since force simulation will adjust spacing
-    // Divide by 70% of item size to allow for better initial distribution
-    var max_angular_items = Math.max(3, Math.floor(segment_arc_length / (item_size * 0.7)));
-    var max_radial_items = Math.max(3, Math.floor(segment_radial_depth / (item_size * 0.7)));
-
-    // Calculate balanced grid that uses both dimensions effectively
-    var angular_divisions, radial_divisions;
-
-    // Start with square root distribution
-    var base = Math.ceil(Math.sqrt(count));
-
-    // Calculate aspect ratio
-    var aspect_ratio = segment_arc_length / Math.max(segment_radial_depth, 1);
-
+    const angle_min = min_angle + angular_padding;
+    const angle_max = max_angle - angular_padding;
+    const angle_range = angle_max - angle_min;
+    const radius_range = outer_radius - inner_radius;
+    const count = entries.length;
+    const effective_radius = ring === 0 ? inner_radius : ring_center;
+    const segment_arc_length = angle_range * effective_radius;
+    const segment_radial_depth = radius_range;
+    const item_size = this.config.blip_collision_radius || 14;
+    const max_angular_items = Math.max(3, Math.floor(segment_arc_length / (item_size * 0.7)));
+    const max_radial_items = Math.max(3, Math.floor(segment_radial_depth / (item_size * 0.7)));
+    let angular_divisions, radial_divisions;
+    const base = Math.ceil(Math.sqrt(count));
+    const aspect_ratio = segment_arc_length / Math.max(segment_radial_depth, 1);
     if (count === 1) {
       angular_divisions = 1;
       radial_divisions = 1;
     } else if (count <= 4) {
-      // For small counts, spread evenly
       angular_divisions = Math.min(count, max_angular_items);
       radial_divisions = Math.ceil(count / angular_divisions);
     } else {
-      // For larger counts, balance based on aspect ratio but enforce minimums
       if (aspect_ratio > 2) {
-        // Much wider than tall - strongly prefer angular spread
         angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.5));
         radial_divisions = Math.ceil(count / angular_divisions);
       } else if (aspect_ratio > 1) {
-        // Moderately wider - prefer angular spread
         angular_divisions = Math.min(max_angular_items, Math.ceil(base * 1.2));
         radial_divisions = Math.ceil(count / angular_divisions);
       } else if (aspect_ratio < 0.5) {
-        // FIX #2: Much taller than wide - but don't over-favor radial in narrow segments
-        // For ring 0 with many quadrants, radial depth is limited, so balance better
-        var radial_bias = (segmentInfo.ring === 0) ? 0.85 : 0.7;
+        const radial_bias = ring === 0 ? 0.85 : 0.7;
         angular_divisions = Math.min(max_angular_items, Math.max(3, Math.floor(base * radial_bias)));
         radial_divisions = Math.ceil(count / angular_divisions);
       } else {
-        // Moderately tall or square - balanced approach
         angular_divisions = Math.min(max_angular_items, Math.max(3, base));
         radial_divisions = Math.ceil(count / angular_divisions);
       }
-
-      // Ensure we don't exceed capacity in either dimension
       angular_divisions = Math.max(2, Math.min(angular_divisions, max_angular_items));
       radial_divisions = Math.max(2, Math.min(radial_divisions, max_radial_items));
     }
-
-    // Distribute entries in grid with better spacing
-    for (var i = 0; i < entries.length; i++) {
-      var entry = entries[i];
-
-      // Grid cell indices
-      var angular_index = i % angular_divisions;
-      var radial_index = Math.floor(i / angular_divisions);
-
-      // FIX #3: Better handling when entries exceed grid capacity
-      // Instead of simple wrapping, detect overcrowding for collision radius adjustment
-      var is_overcrowded = radial_index >= radial_divisions;
+    for (let i = 0;i < entries.length; i++) {
+      const entry = entries[i];
+      let angular_index = i % angular_divisions;
+      let radial_index = Math.floor(i / angular_divisions);
+      const is_overcrowded = radial_index >= radial_divisions;
       if (is_overcrowded) {
-        // Wrap excess entries back into the grid using modulo
-        var total_cells = angular_divisions * radial_divisions;
-        var cell_index = i % total_cells;
+        const total_cells = angular_divisions * radial_divisions;
+        const cell_index = i % total_cells;
         angular_index = cell_index % angular_divisions;
         radial_index = Math.floor(cell_index / angular_divisions);
       }
-
-      // Position within grid cell with increased jitter for better spread
-      // Use 0.15-0.85 range instead of 0.3-0.7 to fill more of each cell
-      var angular_fraction = (angular_index + 0.15 + random() * 0.7) / angular_divisions;
-      var radial_fraction = (radial_index + 0.15 + random() * 0.7) / radial_divisions;
-
-      var angle = angle_min + angular_fraction * angle_range;
-      var radius = inner_radius + radial_fraction * radius_range;
-
-      var point = cartesian({ t: angle, r: radius });
+      const angular_fraction = (angular_index + 0.15 + this.randomNext() * 0.7) / angular_divisions;
+      const radial_fraction = (radial_index + 0.15 + this.randomNext() * 0.7) / radial_divisions;
+      const angle = angle_min + angular_fraction * angle_range;
+      const radius = inner_radius + radial_fraction * radius_range;
+      const point = cartesian({ t: angle, r: radius });
       entry.x = point.x;
       entry.y = point.y;
     }
   }
-
-  // partition entries according to segments first
-  var segmented = new Array(num_quadrants);
-  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
-    segmented[quadrant] = new Array(num_rings);
-    for (var ring = 0; ring < num_rings; ring++) {
-      segmented[quadrant][ring] = [];
-    }
-  }
-  for (var i = 0; i < config.entries.length; i++) {
-    var entry = config.entries[i];
-    segmented[entry.quadrant][entry.ring].push(entry);
-  }
-
-  // position each entry using grid-based distribution
-  for (var i = 0; i < config.entries.length; i++) {
-    var entry = config.entries[i];
-    entry.segment = segment(entry.quadrant, entry.ring);
-    entry.color = entry.active || config.print_layout ?
-      config.rings[entry.ring].color : config.colors.inactive;
-  }
-
-  // Apply grid positioning to each segment
-  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
-    for (let ring = 0; ring < num_rings; ring++) {
-      gridPosition(segmented[quadrant][ring], { quadrant: quadrant, ring: ring });
-    }
-  }
-
-  // assign unique sequential id to each entry
-  var id = 1;
-  // Generate quadrant ordering (for 4 quadrants: [2,3,1,0], otherwise sequential with wrap)
-  var quadrant_order = [];
-  if (num_quadrants === 4) {
-    quadrant_order = [2, 3, 1, 0]; // Original ordering for 4 quadrants
-  } else {
-    // For other counts, start from bottom-left and go counter-clockwise
-    var start_index = Math.floor(num_quadrants / 2);
-    for (var i = 0; i < num_quadrants; i++) {
-      quadrant_order.push((start_index + i) % num_quadrants);
-    }
-  }
-
-  for (var quadrant of quadrant_order) {
-    for (var ring = 0; ring < num_rings; ring++) {
-      var entries = segmented[quadrant][ring];
-      entries.sort(function (a, b) { return a.label.localeCompare(b.label); })
-      for (var i = 0; i < entries.length; i++) {
-        entries[i].id = "" + id++;
-      }
-    }
-  }
-
-  // Calculate adaptive collision radius based on segment density
-  for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
-    for (let ring = 0; ring < num_rings; ring++) {
-      var entries = segmented[quadrant][ring];
-      if (entries.length === 0) continue;
-
-      // Calculate segment area
-      var seg_base_inner_radius = ring === 0 ? 30 : rings[ring - 1].radius;
-      var seg_base_outer_radius = rings[ring].radius;
-      var seg_inner_radius = seg_base_inner_radius + config.segment_radial_padding;
-      var seg_outer_radius = seg_base_outer_radius - config.segment_radial_padding;
-
-      // Guard against zero-width or negative-width segments
-      if (seg_outer_radius <= seg_inner_radius) {
-        var midpoint = (seg_base_inner_radius + seg_base_outer_radius) / 2;
-        seg_inner_radius = Math.max(0, midpoint - 1);
-        seg_outer_radius = midpoint + 1;
-      }
-
-      var seg_angle_range = (quadrants[quadrant].radial_max - quadrants[quadrant].radial_min) * Math.PI;
-      var seg_ring_center = (seg_inner_radius + seg_outer_radius) / 2;
-      var seg_radial_thickness = seg_outer_radius - seg_inner_radius;
-
-      // Approximate segment area (sector area)
-      var segment_area = seg_angle_range * seg_ring_center * seg_radial_thickness;
-
-      // Calculate area per entry
-      var area_per_entry = segment_area / entries.length;
-
-      // Collision radius based on available area (with safety factor)
-      // Increased safety factor from 0.45 to 0.55 for better spacing
-      var ideal_radius = Math.sqrt(area_per_entry / Math.PI) * 0.55;
-
-      // Allow adaptive radius to exceed default when there's room
-      // Use minimum of 12px to ensure reasonable spacing
-      var adaptive_radius = Math.max(12, ideal_radius);
-
-      // For very dense segments, ensure minimum spacing
-      if (entries.length > 10) {
-        adaptive_radius = Math.max(adaptive_radius, 13);
-      }
-      if (entries.length > 15) {
-        adaptive_radius = Math.max(adaptive_radius, 14);
-      }
-
-      // FIX #4: Reduce collision radius for narrow segments (many quadrants in ring 0)
-      // Narrow segments with small inner arc need tighter packing
-      if (ring === 0 && num_quadrants >= 6) {
-        adaptive_radius = Math.max(10, adaptive_radius * 0.9);
-      }
-
-      // Assign collision radius to each entry
-      for (var i = 0; i < entries.length; i++) {
-        entries[i].collision_radius = adaptive_radius;
-      }
-    }
-  }
-
-  function translate(x, y) {
-    return "translate(" + x + "," + y + ")";
-  }
-
-  function viewbox(quadrant) {
-    var outer_radius = rings[rings.length - 1].radius;
-    var padding = 20;
-    return [
-      Math.max(0, quadrants[quadrant].factor_x * outer_radius) - (outer_radius + padding),
-      Math.max(0, quadrants[quadrant].factor_y * outer_radius) - (outer_radius + padding),
-      outer_radius + 2 * padding,
-      outer_radius + 2 * padding
-    ].join(" ");
-  }
-
-  // adjust with config.scale.
-  config.scale = config.scale || 1;
-  var scaled_width = config.width * config.scale;
-  var scaled_height = config.height * config.scale;
-
-  var svg = d3.select("svg#" + config.svg_id)
-    .style("background-color", config.colors.background)
-    .attr("width", scaled_width)
-    .attr("height", scaled_height);
-
-  function ensureLayoutStructure(svgSelection) {
-    var existing = svgSelection.node().closest('.radar-layout');
-    if (existing) {
-      return d3.select(existing);
-    }
-
-    var svgNode = svgSelection.node();
-    var parent = svgNode.parentNode;
-    var wrapper = document.createElement('div');
-    wrapper.className = 'radar-layout';
-    var leftColumn = document.createElement('div');
-    leftColumn.className = 'radar-legend-column left';
-    var svgContainer = document.createElement('div');
-    svgContainer.className = 'radar-svg-container';
-    var rightColumn = document.createElement('div');
-    rightColumn.className = 'radar-legend-column right';
-
-    parent.insertBefore(wrapper, svgNode);
-    svgContainer.appendChild(svgNode);
-    wrapper.appendChild(leftColumn);
-    wrapper.appendChild(svgContainer);
-    wrapper.appendChild(rightColumn);
-
-    return d3.select(wrapper);
-  }
-
-  var layoutWrapper = ensureLayoutStructure(svg);
-  var legendLeftColumn = layoutWrapper.select('.radar-legend-column.left');
-  var legendRightColumn = layoutWrapper.select('.radar-legend-column.right');
-  var layoutWidth = layoutWrapper.node().getBoundingClientRect().width || config.width;
-  var minLegendColumnWidth = (config.legend_column_width * 2) + 60;
-  var maxLegendColumnWidth = (config.legend_column_width * 4) + 80;
-  var targetLegendColumnWidth = Math.min(
-    maxLegendColumnWidth,
-    Math.max(minLegendColumnWidth, layoutWidth * 0.3)
-  );
-  var legendSectionColumns = Math.min(4, Math.max(2, Math.floor(targetLegendColumnWidth / (config.legend_column_width + 20))));
-
-  legendLeftColumn
-    .style('gap', config.legend_vertical_spacing + 'px')
-    .style('width', targetLegendColumnWidth + 'px');
-  legendRightColumn
-    .style('gap', config.legend_vertical_spacing + 'px')
-    .style('width', targetLegendColumnWidth + 'px');
-
-  var radar = svg.append("g");
-  if ("zoomed_quadrant" in config) {
-    svg.attr("viewBox", viewbox(config.zoomed_quadrant));
-  } else {
-    // Center radar in available space (accounting for title and footer)
-    var radar_center_y = (scaled_height / 2) + ((title_height - footer_height) / 2);
-    var radar_center_x = (scaled_width / 2) + config.radar_horizontal_offset;
-    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
-  }
-
-  var grid = radar.append("g");
-
-  // define default font-family
-  config.font_family = config.font_family || "Arial, Helvetica";
-
-  // draw grid lines - N radial lines for N quadrants
-  for (var i = 0; i < num_quadrants; i++) {
-    var angle = -Math.PI + (i * 2 * Math.PI / num_quadrants);
-    grid.append("line")
-      .attr("x1", 0)
-      .attr("y1", 0)
-      .attr("x2", outer_radius * Math.cos(angle))
-      .attr("y2", outer_radius * Math.sin(angle))
-      .attr("class", "quadrant-line quadrant-line-" + i)
-      .style("stroke", config.colors.grid)
-      .style("stroke-width", 1.5)
-      .style("stroke-opacity", 0.3);
-  }
-
-  // background color. Usage `.attr("filter", "url(#solid)")`
-  // SOURCE: https://stackoverflow.com/a/31013492/2609980
-  var defs = grid.append("defs");
-  var filter = defs.append("filter")
-    .attr("x", 0)
-    .attr("y", 0)
-    .attr("width", 1)
-    .attr("height", 1)
-    .attr("id", "solid");
-  filter.append("feFlood")
-    .attr("flood-color", "rgb(0, 0, 0, 0.8)");
-  filter.append("feComposite")
-    .attr("in", "SourceGraphic");
-
-  // draw rings
-  for (var i = 0; i < rings.length; i++) {
-    var outer = rings[i].radius;
-    var inner = i === 0 ? 0 : rings[i - 1].radius;
-    var thickness = Math.max(outer - inner, 1);
-    var labelRadius = outer - (thickness / 2);
-    var labelFontSize = Math.max(12, Math.min(32, thickness * 0.45));
-
-    // Add subtle alternating background fills for better visual separation
-    if (i > 0) {
-      grid.append("circle")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .attr("r", outer)
-        .attr("class", "ring ring-" + i)
-        .style("fill", i % 2 === 0 ? "rgba(0, 0, 0, 0.01)" : "rgba(0, 0, 0, 0.015)")
-        .style("stroke", "none")
-        .style("pointer-events", "none");
-    }
-
-    // Draw ring boundary with enhanced styling
-    grid.append("circle")
-      .attr("cx", 0)
-      .attr("cy", 0)
-      .attr("r", outer)
-      .attr("class", "ring-border ring-border-" + i)
-      .style("fill", "none")
-      .style("stroke", config.colors.grid)
-      .style("stroke-width", i === 0 ? 2 : 1)
-      .style("stroke-opacity", i === 0 ? 0.4 : 0.25);
-    if (config.print_layout) {
-      grid.append("text")
-        .text(config.rings[i].name)
-        .attr("y", -labelRadius)
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .style("fill", config.rings[i].color)
-        .style("opacity", 0.35)
-        .style("font-family", config.font_family)
-        .style("font-size", labelFontSize + "px")
-        .style("font-weight", "bold")
-        .style("pointer-events", "none")
-        .style("user-select", "none");
-    }
-  }
-
-  function legend_transform(quadrant, ring, legendColumnWidth, index = null, currentHeight = 0) {
-    // Determine number of columns based on ring count
-    // 4-6 rings: 2 columns, 7-8 rings: 3 columns
-    var num_columns = num_rings >= 7 ? 3 : 2;
-    var rings_per_column = Math.ceil(num_rings / num_columns);
-
-    var column = Math.floor(ring / rings_per_column);
-
-    const dx = column * legendColumnWidth;
-    // For ring header (index==null), just use currentHeight
-    // For entries, add line height * index to currentHeight
-    let dy;
-    if (index == null) {
-      // Ring header - use currentHeight directly with small adjustment
-      dy = currentHeight;
-    } else {
-      // Entry - add line spacing
-      dy = currentHeight + (index * config.legend_line_height);
-    }
-
-    return translate(
-      config.legend_offset[quadrant].x + dx,
-      config.legend_offset[quadrant].y + dy
-    );
-  }
-
-  // draw title and legend (only in print layout)
-  if (config.print_layout) {
-    // title
-    radar.append("a")
-      .attr("href", config.repo_url)
-      .attr("transform", translate(config.title_offset.x, config.title_offset.y))
-      .append("text")
-      .attr("class", "hover-underline")  // add class for hover effect
-      .text(config.title)
-      .style("font-family", config.font_family)
-      .style("font-size", "30")
-      .style("font-weight", "bold")
-
-    // date
-    radar
-      .append("text")
-      .attr("transform", translate(config.title_offset.x, config.title_offset.y + 20))
-      .text(config.date || "")
-      .style("font-family", config.font_family)
-      .style("font-size", "14")
-      .style("fill", "#999")
-
-    // footer
-    radar.append("text")
-      .attr("transform", translate(config.footer_offset.x, config.footer_offset.y))
-      .text("▲ moved up     ▼ moved down     ★ new     ⬤ no change")
-      .attr("xml:space", "preserve")
-      .style("font-family", config.font_family)
-      .style("font-size", "12px");
-
-    if (config.print_layout) {
-      legendLeftColumn.style('display', 'flex');
-      legendRightColumn.style('display', 'flex');
-      renderLegendColumns();
-    } else {
-      legendLeftColumn.style('display', 'none').html('');
-      legendRightColumn.style('display', 'none').html('');
-    }
-  }
-
-  function renderLegendColumns() {
-    legendLeftColumn.html('');
-    legendRightColumn.html('');
-
-    // Calculate which quadrants go in which column for clockwise ordering
-    // Right column: clockwise from position (num_quadrants - 2)
-    // Left column: remaining quadrants in reverse order (counter-clockwise visually)
-    // This ensures legends are visually close to their radar sectors
-    var right_count = Math.ceil(num_quadrants / 2);
-    var left_count = Math.floor(num_quadrants / 2);
-    var right_start = num_quadrants - 2;
-
-    var leftQuadrants = [];
-    var rightQuadrants = [];
-
-    // Fill right column quadrants (clockwise from right_start)
-    for (var i = 0; i < right_count; i++) {
-      rightQuadrants.push((right_start + i) % num_quadrants);
-    }
-
-    // Fill left column quadrants (backward from right_start - 1)
-    for (var i = 0; i < left_count; i++) {
-      leftQuadrants.push((right_start - 1 - i + num_quadrants) % num_quadrants);
-    }
-
-    function targetColumn(quadrant) {
-      return leftQuadrants.includes(quadrant) ? legendLeftColumn : legendRightColumn;
-    }
-
-    for (let quadrant = 0; quadrant < num_quadrants; quadrant++) {
-      var column = targetColumn(quadrant);
-      var section = column.append('div')
-        .attr('class', 'legend-section')
-        .style('--legend-columns', legendSectionColumns);
-      section.append('div')
-        .attr('class', 'legend-quadrant-name')
-        .text(config.quadrants[quadrant].name);
-
-      var ringsContainer = section.append('div').attr('class', 'legend-rings');
-
-      for (let ring = 0; ring < num_rings; ring++) {
-        var entriesInRing = segmented[quadrant][ring];
-        if (!entriesInRing.length) {
-          continue;
+  assignIds(segmented) {
+    let id = 1;
+    const quadrant_order = generateQuadrantOrder(this.numQuadrants);
+    for (const quadrant of quadrant_order) {
+      for (let ring = 0;ring < this.numRings; ring++) {
+        const entries = segmented[quadrant][ring];
+        entries.sort((a, b) => a.label.localeCompare(b.label));
+        for (let i = 0;i < entries.length; i++) {
+          entries[i].id = `${id++}`;
         }
-
-        var ringBlock = ringsContainer.append('div').attr('class', 'legend-ring');
-        ringBlock.append('div')
-          .attr('class', 'legend-ring-name')
-          .style('color', config.rings[ring].color)
-          .text(config.rings[ring].name);
-
-        var entriesList = ringBlock.append('div').attr('class', 'legend-ring-entries');
-        entriesList.selectAll('a')
-          .data(entriesInRing)
-          .enter()
-          .append('a')
-          .attr('href', function (d) { return d.link ? d.link : '#'; })
-          .attr('target', function (d) { return (d.link && config.links_in_new_tabs) ? '_blank' : null; })
-          .attr('id', function (d) { return 'legendItem' + d.id; })
-          .attr('class', 'legend-entry')
-          .text(function (d) { return d.id + '. ' + d.label; })
-          .on('mouseover', function (event, d) { showBubble(d); highlightLegendItem(d); })
-          .on('mouseout', function (event, d) { hideBubble(d); unhighlightLegendItem(d); });
       }
     }
   }
-
-  // layer for entries
-  var rink = radar.append("g")
-    .attr("id", "rink");
-
-  // rollover bubble (on top of everything else)
-  var bubble = radar.append("g")
-    .attr("id", "bubble")
-    .attr("x", 0)
-    .attr("y", 0)
-    .style("opacity", 0)
-    .style("pointer-events", "none")
-    .style("user-select", "none");
-  bubble.append("rect")
-    .attr("rx", 4)
-    .attr("ry", 4)
-    .style("fill", "#333");
-  bubble.append("text")
-    .style("font-family", config.font_family)
-    .style("font-size", "10px")
-    .style("fill", "#fff");
-  bubble.append("path")
-    .attr("d", "M 0,0 10,0 5,8 z")
-    .style("fill", "#333");
-
-  function showBubble(d) {
-    if (d.active || config.print_layout) {
-      var tooltip = d3.select("#bubble text")
-        .text(d.label);
-      var bbox = tooltip.node().getBBox();
-      // Use rendered (clamped) position for stable tooltip positioning
-      var x = d.rendered_x !== undefined ? d.rendered_x : d.x;
-      var y = d.rendered_y !== undefined ? d.rendered_y : d.y;
-      d3.select("#bubble")
-        .attr("transform", translate(x - bbox.width / 2, y - 16))
-        .style("opacity", 0.8);
-      d3.select("#bubble rect")
-        .attr("x", -5)
-        .attr("y", -bbox.height)
-        .attr("width", bbox.width + 10)
-        .attr("height", bbox.height + 4);
-      d3.select("#bubble path")
-        .attr("transform", translate(bbox.width / 2 - 5, 3));
-    }
-  }
-
-  function hideBubble(d) {
-    var bubble = d3.select("#bubble")
-      .attr("transform", translate(0, 0))
-      .style("opacity", 0);
-  }
-
-  function highlightLegendItem(d) {
-    var legendItem = document.getElementById("legendItem" + d.id);
-    if (legendItem) {
-      legendItem.classList.add('legend-highlight');
-    }
-  }
-
-  function unhighlightLegendItem(d) {
-    var legendItem = document.getElementById("legendItem" + d.id);
-    if (legendItem) {
-      legendItem.classList.remove('legend-highlight');
-    }
-  }
-
-  // draw blips on radar
-  var blips = rink.selectAll(".blip")
-    .data(config.entries)
-    .enter()
-    .append("g")
-    .attr("class", "blip")
-    .attr("transform", function (d, i) { return legend_transform(d.quadrant, d.ring, config.legend_column_width, i); })
-    .on("mouseover", function (event, d) { showBubble(d); highlightLegendItem(d); })
-    .on("mouseout", function (event, d) { hideBubble(d); unhighlightLegendItem(d); });
-
-  // configure each blip
-  blips.each(function (d) {
-    var blip = d3.select(this);
-
-    // blip link
-    if (d.active && Object.prototype.hasOwnProperty.call(d, "link") && d.link) {
-      blip = blip.append("a")
-        .attr("xlink:href", d.link);
-
-      if (config.links_in_new_tabs) {
-        blip.attr("target", "_blank");
+  calculateCollisionRadii(segmented) {
+    for (let quadrant = 0;quadrant < this.numQuadrants; quadrant++) {
+      for (let ring = 0;ring < this.numRings; ring++) {
+        const entries = segmented[quadrant][ring];
+        if (entries.length === 0)
+          continue;
+        const seg_base_inner_radius = ring === 0 ? 30 : this.rings[ring - 1].radius;
+        const seg_base_outer_radius = this.rings[ring].radius;
+        let seg_inner_radius = seg_base_inner_radius + this.config.segment_radial_padding;
+        let seg_outer_radius = seg_base_outer_radius - this.config.segment_radial_padding;
+        if (seg_outer_radius <= seg_inner_radius) {
+          const midpoint = (seg_base_inner_radius + seg_base_outer_radius) / 2;
+          seg_inner_radius = Math.max(0, midpoint - 1);
+          seg_outer_radius = midpoint + 1;
+        }
+        const seg_angle_range = (this.quadrants[quadrant].radial_max - this.quadrants[quadrant].radial_min) * Math.PI;
+        const seg_ring_center = (seg_inner_radius + seg_outer_radius) / 2;
+        const seg_radial_thickness = seg_outer_radius - seg_inner_radius;
+        const segment_area = seg_angle_range * seg_ring_center * seg_radial_thickness;
+        const area_per_entry = segment_area / entries.length;
+        const ideal_radius = Math.sqrt(area_per_entry / Math.PI) * 0.55;
+        let adaptive_radius = Math.max(12, ideal_radius);
+        if (entries.length > 10) {
+          adaptive_radius = Math.max(adaptive_radius, 13);
+        }
+        if (entries.length > 15) {
+          adaptive_radius = Math.max(adaptive_radius, 14);
+        }
+        if (ring === 0 && this.numQuadrants >= 6) {
+          adaptive_radius = Math.max(10, adaptive_radius * 0.9);
+        }
+        for (let i = 0;i < entries.length; i++) {
+          entries[i].collision_radius = adaptive_radius;
+        }
       }
     }
+  }
+}
 
-    // blip shape
-    if (d.moved == 1) {
-      blip.append("path")
-        .attr("d", "M -11,5 11,5 0,-13 z") // triangle pointing up
-        .style("fill", d.color);
-    } else if (d.moved == -1) {
-      blip.append("path")
-        .attr("d", "M -11,-5 11,-5 0,13 z") // triangle pointing down
-        .style("fill", d.color);
-    } else if (d.moved == 2) {
-      blip.append("path")
-        .attr("d", d3.symbol().type(d3.symbolStar).size(200))
-        .style("fill", d.color);
-    } else {
-      blip.append("circle")
-        .attr("r", 9)
-        .attr("fill", d.color);
-    }
-
-    // blip text
-    if (d.active || config.print_layout) {
-      var blip_text = config.print_layout ? d.id : d.label.match(/[a-z]/i);
-      blip.append("text")
-        .text(blip_text)
-        .attr("y", 3)
-        .attr("text-anchor", "middle")
-        .style("fill", "#fff")
-        .style("font-family", config.font_family)
-        .style("font-size", function (d) { return blip_text.length > 2 ? "8px" : "9px"; })
-        .style("pointer-events", "none")
-        .style("user-select", "none");
-    }
+// src/rendering/blip-renderer.js
+function renderBlips(rinkSelection, entries, config, showBubble, hideBubble, highlightLegendItem, unhighlightLegendItem) {
+  const d3 = window.d3;
+  const blips = rinkSelection.selectAll(".blip").data(entries).enter().append("g").attr("class", "blip").attr("transform", (d) => translate(d.x, d.y)).on("mouseover", (_event, d) => {
+    showBubble(d, config);
+    highlightLegendItem(d);
+  }).on("mouseout", (_event, d) => {
+    hideBubble();
+    unhighlightLegendItem(d);
   });
+  blips.each(function(d) {
+    const blip = d3.select(this);
+    let blipContainer = blip;
+    if (d.active && Object.hasOwn(d, "link") && d.link) {
+      blipContainer = blip.append("a").attr("xlink:href", d.link);
+      if (config.links_in_new_tabs) {
+        blipContainer.attr("target", "_blank");
+      }
+    }
+    renderBlipShape(blipContainer, d);
+    renderBlipText(blipContainer, d, config);
+  });
+  return blips;
+}
+function renderBlipShape(container, entry) {
+  const d3 = window.d3;
+  if (entry.moved === 1) {
+    container.append("path").attr("d", "M -11,5 11,5 0,-13 z").style("fill", entry.color);
+  } else if (entry.moved === -1) {
+    container.append("path").attr("d", "M -11,-5 11,-5 0,13 z").style("fill", entry.color);
+  } else if (entry.moved === 2) {
+    container.append("path").attr("d", d3.symbol().type(d3.symbolStar).size(200)).style("fill", entry.color);
+  } else {
+    container.append("circle").attr("r", 9).attr("fill", entry.color);
+  }
+}
+function renderBlipText(container, entry, config) {
+  if (entry.active || config.print_layout) {
+    const blipText = config.print_layout ? entry.id : entry.label.match(/[a-z]/i);
+    container.append("text").text(blipText).attr("y", 3).attr("text-anchor", "middle").style("fill", "#fff").style("font-family", config.font_family).style("font-size", (_d) => blipText.length > 2 ? "8px" : "9px").style("pointer-events", "none").style("user-select", "none");
+  }
+}
 
-  // make sure that blips stay inside their segment
-  // FIX #5: Use single clip() instead of clipx/clipy to avoid double-clipping
-  function ticked() {
-    blips.attr("transform", function (d) {
-      var clipped = d.segment.clip(d);
-      // Store rendered position for stable tooltip positioning and to prevent jumping on hover
+// src/rendering/debug-renderer.js
+function renderDebugVisualization(radarSelection, config, quadrants, rings, numQuadrants, numRings, segmented) {
+  const _d3 = window.d3;
+  const debugLayer = radarSelection.append("g").attr("id", "debug-layer");
+  const outerRadius = rings[rings.length - 1].radius;
+  renderSegmentBoundaries(debugLayer, config, quadrants, rings, numQuadrants, numRings, segmented);
+  renderCollisionRadii(debugLayer, config.entries, config.blip_collision_radius);
+  renderCoordinateAxes(debugLayer, outerRadius);
+  renderQuadrantBoundaries(debugLayer, numQuadrants, outerRadius);
+  renderDebugLegend(debugLayer, outerRadius);
+}
+function renderSegmentBoundaries(debugLayer, config, quadrants, rings, numQuadrants, numRings, segmented) {
+  const _d3 = window.d3;
+  for (let q = 0;q < numQuadrants; q++) {
+    for (let r = 0;r < numRings; r++) {
+      const segBaseInner = r === 0 ? 30 : rings[r - 1].radius;
+      const segBaseOuter = rings[r].radius;
+      const segInner = segBaseInner + config.segment_radial_padding;
+      const segOuter = segBaseOuter - config.segment_radial_padding;
+      const segRingCenter = (segInner + segOuter) / 2;
+      let segAngularPadding = config.segment_angular_padding / Math.max(segRingCenter, 1);
+      const minAngle = quadrants[q].radial_min * Math.PI;
+      const maxAngle = quadrants[q].radial_max * Math.PI;
+      const angularLimit = Math.max(0, (maxAngle - minAngle) / 2 - 0.01);
+      segAngularPadding = Math.min(segAngularPadding, angularLimit);
+      let angleMin = minAngle + segAngularPadding;
+      let angleMax = maxAngle - segAngularPadding;
+      if (angleMax <= angleMin) {
+        angleMin = minAngle;
+        angleMax = maxAngle;
+      }
+      renderPolarSector(debugLayer, segInner, segOuter, angleMin, angleMax, numQuadrants, r);
+      renderBoundingBox(debugLayer, quadrants[q].radial_min * Math.PI, quadrants[q].radial_max * Math.PI, segOuter);
+      if (r === 0) {
+        renderSegmentLabel(debugLayer, q, r, angleMin, angleMax, segInner, segOuter, segmented[q][r].length);
+      }
+    }
+  }
+}
+function renderPolarSector(debugLayer, innerRadius, outerRadius, angleMin, angleMax, numQuadrants, ringIndex) {
+  const d3 = window.d3;
+  const offsetMagnitude = Math.PI / (2 * numQuadrants);
+  const arcOffset = numQuadrants % 4 === 1 ? offsetMagnitude : -offsetMagnitude;
+  const arcPath = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius).startAngle(-angleMax + arcOffset).endAngle(-angleMin + arcOffset);
+  debugLayer.append("path").attr("d", arcPath).attr("fill", "none").attr("stroke", ringIndex === 0 ? "#ff0000" : "#00ffff").attr("stroke-width", ringIndex === 0 ? 2 : 1).attr("stroke-dasharray", "5,5").attr("opacity", 0.5);
+}
+function renderBoundingBox(debugLayer, minAngle, maxAngle, outerRadius) {
+  const bounds = computeQuadrantBounds(minAngle, maxAngle, outerRadius);
+  debugLayer.append("rect").attr("x", bounds.min.x).attr("y", bounds.min.y).attr("width", bounds.max.x - bounds.min.x).attr("height", bounds.max.y - bounds.min.y).attr("fill", "none").attr("stroke", "#ffff00").attr("stroke-width", 1).attr("stroke-dasharray", "3,3").attr("opacity", 0.3);
+}
+function renderSegmentLabel(debugLayer, quadrant, ring, angleMin, angleMax, segInner, segOuter, entryCount) {
+  const midAngle = (angleMin + angleMax) / 2;
+  const labelRadius = (segInner + segOuter) / 2;
+  const labelX = Math.cos(midAngle) * labelRadius;
+  const labelY = Math.sin(midAngle) * labelRadius;
+  const arcLength = (angleMax - angleMin) * segInner;
+  debugLayer.append("text").attr("x", labelX).attr("y", labelY).attr("text-anchor", "middle").attr("font-size", "10px").attr("fill", "#ff0000").attr("font-weight", "bold").text(`Q${quadrant}R${ring}: ${entryCount} items, arc=${arcLength.toFixed(0)}px`);
+}
+function renderCollisionRadii(debugLayer, entries, defaultCollisionRadius) {
+  const _d3 = window.d3;
+  debugLayer.append("g").attr("id", "debug-collision-radii").selectAll("circle").data(entries).enter().append("circle").attr("cx", (d) => d.x).attr("cy", (d) => d.y).attr("r", (d) => d.collision_radius || defaultCollisionRadius).attr("fill", "none").attr("stroke", (d) => d.ring === 0 ? "#00ff00" : "#0000ff").attr("stroke-width", 1).attr("stroke-dasharray", "2,2").attr("opacity", 0.4);
+}
+function renderCoordinateAxes(debugLayer, outerRadius) {
+  debugLayer.append("line").attr("x1", -outerRadius).attr("y1", 0).attr("x2", outerRadius).attr("y2", 0).attr("stroke", "#666").attr("stroke-width", 0.5).attr("opacity", 0.3);
+  debugLayer.append("line").attr("x1", 0).attr("y1", -outerRadius).attr("x2", 0).attr("y2", outerRadius).attr("stroke", "#666").attr("stroke-width", 0.5).attr("opacity", 0.3);
+}
+function renderQuadrantBoundaries(debugLayer, numQuadrants, outerRadius) {
+  for (let i = 0;i < numQuadrants; i++) {
+    const gridAngle = -Math.PI + i * 2 * Math.PI / numQuadrants;
+    debugLayer.append("line").attr("x1", 0).attr("y1", 0).attr("x2", outerRadius * Math.cos(gridAngle)).attr("y2", outerRadius * Math.sin(gridAngle)).attr("stroke", "#ff00ff").attr("stroke-width", 2).attr("opacity", 0.6).attr("stroke-dasharray", "10,5");
+  }
+}
+function renderDebugLegend(debugLayer, outerRadius) {
+  const debugLegend = debugLayer.append("g").attr("transform", translate(-outerRadius + 10, -outerRadius + 10));
+  const legendItems = [
+    { y: 0, text: "DEBUG MODE", color: "#000", bold: true, fontSize: "11px" },
+    { y: 15, text: "━━ Ring 0 polar sector", color: "#ff0000", bold: false, fontSize: "9px" },
+    { y: 28, text: "━━ Other rings polar sector", color: "#00ffff", bold: false, fontSize: "9px" },
+    { y: 41, text: "━━ Cartesian bounding box", color: "#ffff00", bold: false, fontSize: "9px" },
+    { y: 54, text: "○ Collision radius (Ring 0)", color: "#00ff00", bold: false, fontSize: "9px" }
+  ];
+  legendItems.forEach((item) => {
+    debugLegend.append("text").attr("x", 0).attr("y", item.y).attr("font-size", item.fontSize).attr("font-weight", item.bold ? "bold" : "normal").attr("fill", item.color).text(item.text);
+  });
+}
+
+// src/rendering/force-simulation.js
+function createTickCallback(blipsSelection, config) {
+  const d3 = window.d3;
+  return function ticked() {
+    blipsSelection.attr("transform", (d) => {
+      const clipped = d.segment.clip(d);
       d.rendered_x = clipped.x;
       d.rendered_y = clipped.y;
       return translate(clipped.x, clipped.y);
     });
-
-    // Update debug collision circles if debug mode is enabled
     if (config.debug_geometry) {
-      d3.select("#debug-collision-radii").selectAll("circle")
-        .attr("cx", function (d) { return d.x; })
-        .attr("cy", function (d) { return d.y; });
+      d3.select("#debug-collision-radii").selectAll("circle").attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+    }
+  };
+}
+function runForceSimulation(entries, blipsSelection, config) {
+  const d3 = window.d3;
+  const tickCallback = createTickCallback(blipsSelection, config);
+  d3.forceSimulation().nodes(entries).velocityDecay(0.15).alphaDecay(0.008).alphaMin(0.00005).force("collision", d3.forceCollide().radius((d) => d.collision_radius || config.blip_collision_radius).strength(1).iterations(6)).on("tick", tickCallback).tick(400);
+}
+
+// src/rendering/grid-renderer.js
+function renderGrid(gridSelection, config, quadrants, rings, outerRadius) {
+  const numQuadrants = quadrants.length;
+  for (let i = 0;i < numQuadrants; i++) {
+    const angle = -Math.PI + i * 2 * Math.PI / numQuadrants;
+    gridSelection.append("line").attr("x1", 0).attr("y1", 0).attr("x2", outerRadius * Math.cos(angle)).attr("y2", outerRadius * Math.sin(angle)).attr("class", `quadrant-line quadrant-line-${i}`).style("stroke", config.colors.grid).style("stroke-width", 1.5).style("stroke-opacity", 0.3);
+  }
+  const defs = gridSelection.append("defs");
+  const filter = defs.append("filter").attr("x", 0).attr("y", 0).attr("width", 1).attr("height", 1).attr("id", "solid");
+  filter.append("feFlood").attr("flood-color", "rgb(0, 0, 0, 0.8)");
+  filter.append("feComposite").attr("in", "SourceGraphic");
+  for (let i = 0;i < rings.length; i++) {
+    const outer = rings[i].radius;
+    const inner = i === 0 ? 0 : rings[i - 1].radius;
+    const thickness = Math.max(outer - inner, 1);
+    const labelRadius = outer - thickness / 2;
+    const labelFontSize = Math.max(12, Math.min(32, thickness * 0.45));
+    if (i > 0) {
+      gridSelection.append("circle").attr("cx", 0).attr("cy", 0).attr("r", outer).attr("class", `ring ring-${i}`).style("fill", i % 2 === 0 ? "rgba(0, 0, 0, 0.01)" : "rgba(0, 0, 0, 0.015)").style("stroke", "none").style("pointer-events", "none");
+    }
+    gridSelection.append("circle").attr("cx", 0).attr("cy", 0).attr("r", outer).attr("class", `ring-border ring-border-${i}`).style("fill", "none").style("stroke", config.colors.grid).style("stroke-width", i === 0 ? 2 : 1).style("stroke-opacity", i === 0 ? 0.4 : 0.25);
+    if (config.print_layout) {
+      gridSelection.append("text").text(config.rings[i].name).attr("y", -labelRadius).attr("text-anchor", "middle").attr("dominant-baseline", "middle").style("fill", config.rings[i].color).style("opacity", 0.35).style("font-family", config.font_family).style("font-size", `${labelFontSize}px`).style("font-weight", "bold").style("pointer-events", "none").style("user-select", "none");
     }
   }
+}
+function renderTitleAndFooter(radarSelection, config) {
+  if (config.title && config.print_layout) {
+    const titleGroup = radarSelection.append("a").attr("href", config.repo_url).attr("target", config.links_in_new_tabs ? "_blank" : null);
+    titleGroup.append("text").attr("transform", `translate(${config.title_offset.x}, ${config.title_offset.y})`).text(config.title).style("font-family", config.font_family).style("font-size", "34px").style("font-weight", "bold");
+    titleGroup.append("text").attr("transform", `translate(${config.title_offset.x}, ${config.title_offset.y + 30})`).text(config.date ? config.date : "").style("font-family", config.font_family).style("font-size", "14px").style("fill", "#999");
+  }
+  if (config.footer && config.print_layout) {
+    radarSelection.append("text").attr("transform", `translate(${config.footer_offset.x}, ${config.footer_offset.y})`).text(config.footer).attr("xml:space", "preserve").style("font-family", config.font_family).style("font-size", "10px").style("fill", "#999");
+  }
+}
 
-  // distribute blips, while avoiding collisions
-  // FIX #6: Enhanced force simulation with better convergence
-  d3.forceSimulation()
-    .nodes(config.entries)
-    .velocityDecay(0.15) // More movement freedom for better spreading
-    .alphaDecay(0.008) // Slower cooling for longer convergence time
-    .alphaMin(0.00005) // Lower minimum for thorough settlement
-    .force("collision", d3.forceCollide()
-      .radius(function (d) {
-        return d.collision_radius || config.blip_collision_radius;
-      })
-      .strength(1.0) // Maximum collision strength for strict enforcement
-      .iterations(6)) // More iterations per tick for better collision resolution
-    .on("tick", ticked)
-    .tick(400); // Increased pre-run iterations for better stabilization
+// src/rendering/interactions.js
+function createBubble(radarSelection, fontFamily) {
+  const bubble = radarSelection.append("g").attr("id", "bubble").attr("x", 0).attr("y", 0).style("opacity", 0).style("pointer-events", "none").style("user-select", "none");
+  bubble.append("rect").attr("rx", 4).attr("ry", 4).style("fill", "#333");
+  bubble.append("text").style("font-family", fontFamily).style("font-size", "10px").style("fill", "#fff");
+  bubble.append("path").attr("d", "M 0,0 10,0 5,8 z").style("fill", "#333");
+  return bubble;
+}
+function showBubble(d, config) {
+  if (d.active || config.print_layout) {
+    const d3 = window.d3;
+    const tooltip = d3.select("#bubble text").text(d.label);
+    const bbox = tooltip.node().getBBox();
+    const x = d.rendered_x !== undefined ? d.rendered_x : d.x;
+    const y = d.rendered_y !== undefined ? d.rendered_y : d.y;
+    d3.select("#bubble").attr("transform", translate(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
+    d3.select("#bubble rect").attr("x", -5).attr("y", -bbox.height).attr("width", bbox.width + 10).attr("height", bbox.height + 4);
+    d3.select("#bubble path").attr("transform", translate(bbox.width / 2 - 5, 3));
+  }
+}
+function hideBubble() {
+  const d3 = window.d3;
+  d3.select("#bubble").attr("transform", translate(0, 0)).style("opacity", 0);
+}
+function highlightLegendItem(d) {
+  const legendItem = document.getElementById(`legendItem${d.id}`);
+  if (legendItem) {
+    legendItem.classList.add("legend-highlight");
+  }
+}
+function unhighlightLegendItem(d) {
+  const legendItem = document.getElementById(`legendItem${d.id}`);
+  if (legendItem) {
+    legendItem.classList.remove("legend-highlight");
+  }
+}
 
-  // DEBUG VISUALIZATIONS: Show segment boundaries, grids, and collision radii
-  if (config.debug_geometry) {
-    var debugLayer = radar.append("g")
-      .attr("id", "debug-layer");
+// src/rendering/legend-renderer.js
+function renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, config, numQuadrants, numRings, showBubble2, hideBubble2, highlightLegendItem2, unhighlightLegendItem2) {
+  legendLeftColumn.html("");
+  legendRightColumn.html("");
+  const legendSectionColumns = numRings >= 7 ? 3 : 2;
+  const right_count = Math.ceil(numQuadrants / 2);
+  const left_count = Math.floor(numQuadrants / 2);
+  const right_start = numQuadrants - 2;
+  const leftQuadrants = [];
+  const rightQuadrants = [];
+  for (let i = 0;i < right_count; i++) {
+    rightQuadrants.push((right_start + i) % numQuadrants);
+  }
+  for (let i = 0;i < left_count; i++) {
+    leftQuadrants.push((right_start - 1 - i + numQuadrants) % numQuadrants);
+  }
+  function targetColumn(quadrant) {
+    return leftQuadrants.includes(quadrant) ? legendLeftColumn : legendRightColumn;
+  }
+  for (let quadrant = 0;quadrant < numQuadrants; quadrant++) {
+    const column = targetColumn(quadrant);
+    const section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns);
+    section.append("div").attr("class", "legend-quadrant-name").text(config.quadrants[quadrant].name);
+    const ringsContainer = section.append("div").attr("class", "legend-rings");
+    for (let ring = 0;ring < numRings; ring++) {
+      const entriesInRing = segmented[quadrant][ring];
+      if (!entriesInRing.length) {
+        continue;
+      }
+      const ringBlock = ringsContainer.append("div").attr("class", "legend-ring");
+      ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).text(config.rings[ring].name);
+      const entriesList = ringBlock.append("div").attr("class", "legend-ring-entries");
+      entriesList.selectAll("a").data(entriesInRing).enter().append("a").attr("href", (d) => d.link ? d.link : "#").attr("target", (d) => d.link && config.links_in_new_tabs ? "_blank" : null).attr("id", (d) => `legendItem${d.id}`).attr("class", "legend-entry").text((d) => `${d.id}. ${d.label}`).on("mouseover", (_event, d) => {
+        showBubble2(d, config);
+        highlightLegendItem2(d);
+      }).on("mouseout", (_event, d) => {
+        hideBubble2();
+        unhighlightLegendItem2(d);
+      });
+    }
+  }
+}
 
-    // Get outer radius for coordinate system
-    var debug_outer_radius = rings[rings.length - 1].radius;
+// src/rendering/svg-setup.js
+function setupSvg(config, quadrants, rings, dimensions) {
+  const d3 = window.d3;
+  config.scale = config.scale || 1;
+  const scaled_width = config.width * config.scale;
+  const scaled_height = config.height * config.scale;
+  const svg = d3.select(`svg#${config.svg_id}`).style("background-color", config.colors.background).attr("width", scaled_width).attr("height", scaled_height);
+  const layoutWrapper = ensureLayoutStructure(svg);
+  const legendLeftColumn = layoutWrapper.select(".radar-legend-column.left");
+  const legendRightColumn = layoutWrapper.select(".radar-legend-column.right");
+  const layoutWidth = layoutWrapper.node().getBoundingClientRect().width || config.width;
+  const minLegendColumnWidth = config.legend_column_width * 2 + 60;
+  const maxLegendColumnWidth = config.legend_column_width * 4 + 80;
+  const targetLegendColumnWidth = Math.min(maxLegendColumnWidth, Math.max(minLegendColumnWidth, layoutWidth * 0.3));
+  const legendSectionColumns = Math.min(4, Math.max(2, Math.floor(targetLegendColumnWidth / (config.legend_column_width + 20))));
+  legendLeftColumn.style("gap", `${config.legend_vertical_spacing}px`).style("width", `${targetLegendColumnWidth}px`);
+  legendRightColumn.style("gap", `${config.legend_vertical_spacing}px`).style("width", `${targetLegendColumnWidth}px`);
+  const radar = svg.append("g");
+  if ("zoomed_quadrant" in config) {
+    svg.attr("viewBox", viewbox(config.zoomed_quadrant, quadrants, rings));
+  } else {
+    const radar_center_y = scaled_height / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
+    const radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
+    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
+  }
+  config.font_family = config.font_family || "Arial, Helvetica";
+  const grid = radar.append("g");
+  return {
+    svg,
+    radar,
+    legendLeftColumn,
+    legendRightColumn,
+    grid,
+    legendSectionColumns
+  };
+}
 
-    // Draw segment boundaries for each quadrant/ring combination
-    for (let q = 0; q < num_quadrants; q++) {
-      for (let r = 0; r < num_rings; r++) {
-        var seg_base_inner = r === 0 ? 30 : rings[r - 1].radius;
-        var seg_base_outer = rings[r].radius;
-        var seg_inner = seg_base_inner + config.segment_radial_padding;
-        var seg_outer = seg_base_outer - config.segment_radial_padding;
+// src/rendering/table-renderer.js
+function renderRingDescriptionsTable(config) {
+  const d3 = window.d3;
+  const table = d3.select("body").append("table").attr("class", "radar-table").style("border-collapse", "collapse").style("position", "relative").style("top", "-70px").style("margin-left", "50px").style("margin-right", "50px").style("font-family", config.font_family).style("font-size", "13px").style("text-align", "left");
+  const thead = table.append("thead");
+  const tbody = table.append("tbody");
+  const columnWidth = `${100 / config.rings.length}%`;
+  const headerRow = thead.append("tr").style("border", "1px solid #ddd");
+  headerRow.selectAll("th").data(config.rings).enter().append("th").style("padding", "8px").style("border", "1px solid #ddd").style("background-color", (d) => d.color).style("color", "#fff").style("width", columnWidth).text((d) => d.name);
+  const descriptionRow = tbody.append("tr").style("border", "1px solid #ddd");
+  descriptionRow.selectAll("td").data(config.rings).enter().append("td").style("padding", "8px").style("border", "1px solid #ddd").style("width", columnWidth).text((d) => d.description);
+}
 
-        // FIX: Use same angular padding calculation as segment() function
-        // segment_angular_padding is in PIXELS, convert to radians based on ring_center
-        var seg_ring_center = (seg_inner + seg_outer) / 2;
-        var seg_angular_padding = config.segment_angular_padding / Math.max(seg_ring_center, 1);
-
-        var min_angle = quadrants[q].radial_min * Math.PI;
-        var max_angle = quadrants[q].radial_max * Math.PI;
-        var angular_limit = Math.max(0, (max_angle - min_angle) / 2 - 0.01);
-        seg_angular_padding = Math.min(seg_angular_padding, angular_limit);
-
-        var angle_min = min_angle + seg_angular_padding;
-        var angle_max = max_angle - seg_angular_padding;
-        if (angle_max <= angle_min) {
-          angle_min = min_angle;
-          angle_max = max_angle;
-        }
-
-        // Draw polar sector boundary (actual segment shape)
-        // NOTE: d3.arc() uses clockwise angle convention, but our angles are counter-clockwise
-        // So we negate the angles to flip direction, plus apply offset to align with coordinate system
-        // Pattern: offset sign alternates based on num_quadrants mod 4
-        // - num_quadrants ≡ 1 (mod 4): positive offset (e.g., 5, 9, 13...)
-        // - num_quadrants ≡ 3 (mod 4): negative offset (e.g., 3, 7, 11...)
-        var offset_magnitude = Math.PI / (2 * num_quadrants);
-        var arc_offset = (num_quadrants % 4 === 1) ? offset_magnitude : -offset_magnitude;
-        
-        var arcPath = d3.arc()
-          .innerRadius(seg_inner)
-          .outerRadius(seg_outer)
-          .startAngle(-angle_max + arc_offset)
-          .endAngle(-angle_min + arc_offset);
-
-        debugLayer.append("path")
-          .attr("d", arcPath)
-          .attr("fill", "none")
-          .attr("stroke", r === 0 ? "#ff0000" : "#00ffff")
-          .attr("stroke-width", r === 0 ? 2 : 1)
-          .attr("stroke-dasharray", "5,5")
-          .attr("opacity", 0.5);
-
-        // Draw Cartesian bounding box (rectangular approximation)
-        var bounds = computeQuadrantBounds(
-          quadrants[q].radial_min * Math.PI,
-          quadrants[q].radial_max * Math.PI,
-          seg_outer
-        );
-
-        debugLayer.append("rect")
-          .attr("x", bounds.min.x)
-          .attr("y", bounds.min.y)
-          .attr("width", bounds.max.x - bounds.min.x)
-          .attr("height", bounds.max.y - bounds.min.y)
-          .attr("fill", "none")
-          .attr("stroke", "#ffff00")
-          .attr("stroke-width", 1)
-          .attr("stroke-dasharray", "3,3")
-          .attr("opacity", 0.3);
-
-        // Add text labels for segment info (Ring 0 only for clarity)
-        if (r === 0) {
-          var mid_angle = (angle_min + angle_max) / 2;
-          var label_radius = (seg_inner + seg_outer) / 2;
-          var label_x = Math.cos(mid_angle) * label_radius;
-          var label_y = Math.sin(mid_angle) * label_radius;
-
-          var entries_count = segmented[q][r].length;
-          var arc_length = (angle_max - angle_min) * seg_inner;
-
-          debugLayer.append("text")
-            .attr("x", label_x)
-            .attr("y", label_y)
-            .attr("text-anchor", "middle")
-            .attr("font-size", "10px")
-            .attr("fill", "#ff0000")
-            .attr("font-weight", "bold")
-            .text(`Q${q}R${r}: ${entries_count} items, arc=${arc_length.toFixed(0)}px`);
+// src/ui/demo-toolbar.js
+function initDemoToolbar(radarInstance = null, options = {}) {
+  const { demoSlug = "tech-radar" } = options;
+  const jsonIO = typeof radar_visualization !== "undefined" && radar_visualization.jsonIO || radarInstance?.importExport;
+  if (!jsonIO || !jsonIO.importConfig || !jsonIO.exportConfig) {
+    console.warn("JSON I/O helpers not available. Toolbar will not be initialized.");
+    showToolbarMessage2("JSON helpers unavailable.", "error");
+    return {
+      onConfigImport: null,
+      onConfigReset: null,
+      getCurrentConfig: null,
+      cleanup: () => {},
+      showMessage: () => {}
+    };
+  }
+  const { importConfig: importConfig2, exportConfig: exportConfig2, mergeConfigs: mergeConfigs2 } = jsonIO;
+  const importButton = document.getElementById("jsonImportButton");
+  const exportButton = document.getElementById("jsonExportButton");
+  const resetButton = document.getElementById("jsonResetButton");
+  const importInput = document.getElementById("jsonImportInput");
+  if (!importButton || !exportButton || !importInput) {
+    console.warn("Toolbar elements not found in DOM");
+    return {
+      onConfigImport: null,
+      onConfigReset: null,
+      getCurrentConfig: null,
+      cleanup: () => {},
+      showMessage: () => {}
+    };
+  }
+  const toolbarInstance = {
+    onConfigImport: radarInstance ? (config) => radarInstance.render(config) : null,
+    onConfigReset: radarInstance ? () => radarInstance.reset() : null,
+    getCurrentConfig: radarInstance ? () => radarInstance.getConfig() : null,
+    showMessage(message, state = "info") {
+      showToolbarMessage2(message, state);
+    },
+    cleanup: null
+  };
+  const handleImportClick = () => importInput.click();
+  importButton.addEventListener("click", handleImportClick);
+  const disposeImport = importConfig2(importInput, (importedConfig) => {
+    if (toolbarInstance.onConfigImport) {
+      const currentConfig = toolbarInstance.getCurrentConfig ? toolbarInstance.getCurrentConfig() : null;
+      const configToApply = mergeConfigs2 && currentConfig ? mergeConfigs2(currentConfig, importedConfig) : importedConfig;
+      toolbarInstance.onConfigImport(configToApply);
+    }
+  }, {
+    demoSlug,
+    onSuccess: ({ fileName }) => {
+      showToolbarMessage2(`Imported ${fileName || "configuration"} successfully`, "success");
+    },
+    onError: (message) => {
+      showToolbarMessage2(message, "error");
+    }
+  });
+  const disposeExport = exportConfig2(exportButton, () => toolbarInstance.getCurrentConfig ? toolbarInstance.getCurrentConfig() : {}, {
+    demoSlug,
+    onSuccess: ({ fileName }) => {
+      showToolbarMessage2(`Exported ${fileName}`, "success");
+    },
+    onError: (message) => {
+      showToolbarMessage2(message, "error");
+    }
+  });
+  let handleResetClick = null;
+  if (resetButton) {
+    handleResetClick = () => {
+      if (toolbarInstance.onConfigReset) {
+        if (confirm("Reset to initial configuration? This will discard all changes.")) {
+          toolbarInstance.onConfigReset();
+          showToolbarMessage2("Configuration reset to initial state", "success");
         }
       }
-    }
-
-    // Draw collision radius circles for each blip
-    debugLayer.append("g")
-      .attr("id", "debug-collision-radii")
-      .selectAll("circle")
-      .data(config.entries)
-      .enter()
-      .append("circle")
-      .attr("cx", function (d) { return d.x; })
-      .attr("cy", function (d) { return d.y; })
-      .attr("r", function (d) { return d.collision_radius || config.blip_collision_radius; })
-      .attr("fill", "none")
-      .attr("stroke", function (d) { return d.ring === 0 ? "#00ff00" : "#0000ff"; })
-      .attr("stroke-width", 1)
-      .attr("stroke-dasharray", "2,2")
-      .attr("opacity", 0.4);
-
-    // Draw coordinate system axes
-    debugLayer.append("line")
-      .attr("x1", -debug_outer_radius)
-      .attr("y1", 0)
-      .attr("x2", debug_outer_radius)
-      .attr("y2", 0)
-      .attr("stroke", "#666")
-      .attr("stroke-width", 0.5)
-      .attr("opacity", 0.3);
-
-    debugLayer.append("line")
-      .attr("x1", 0)
-      .attr("y1", -debug_outer_radius)
-      .attr("x2", 0)
-      .attr("y2", debug_outer_radius)
-      .attr("stroke", "#666")
-      .attr("stroke-width", 0.5)
-      .attr("opacity", 0.3);
-
-    // Draw quadrant boundary lines (should match grid lines)
-    for (var i = 0; i < num_quadrants; i++) {
-      var grid_angle = -Math.PI + (i * 2 * Math.PI / num_quadrants);
-      debugLayer.append("line")
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", debug_outer_radius * Math.cos(grid_angle))
-        .attr("y2", debug_outer_radius * Math.sin(grid_angle))
-        .attr("stroke", "#ff00ff") // Magenta to distinguish from other lines
-        .attr("stroke-width", 2)
-        .attr("opacity", 0.6)
-        .attr("stroke-dasharray", "10,5");
-    }
-
-    // Add legend for debug colors
-    var debugLegend = debugLayer.append("g")
-      .attr("transform", translate(-debug_outer_radius + 10, -debug_outer_radius + 10));
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("font-size", "11px")
-      .attr("font-weight", "bold")
-      .attr("fill", "#000")
-      .text("DEBUG MODE");
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 15)
-      .attr("font-size", "9px")
-      .attr("fill", "#ff0000")
-      .text("━━ Ring 0 polar sector");
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 28)
-      .attr("font-size", "9px")
-      .attr("fill", "#00ffff")
-      .text("━━ Other rings polar sector");
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 41)
-      .attr("font-size", "9px")
-      .attr("fill", "#ffff00")
-      .text("━━ Cartesian bounding box");
-
-    debugLegend.append("text")
-      .attr("x", 0)
-      .attr("y", 54)
-      .attr("font-size", "9px")
-      .attr("fill", "#00ff00")
-      .text("○ Collision radius (Ring 0)");
+    };
+    resetButton.addEventListener("click", handleResetClick);
   }
-
-  function ringDescriptionsTable() {
-    var table = d3.select("body").append("table")
-      .attr("class", "radar-table")
-      .style("border-collapse", "collapse")
-      .style("position", "relative")
-      .style("top", "-70px")  // Adjust this value to move the table closer vertically
-      .style("margin-left", "50px")
-      .style("margin-right", "50px")
-      .style("font-family", config.font_family)
-      .style("font-size", "13px")
-      .style("text-align", "left");
-
-    var thead = table.append("thead");
-    var tbody = table.append("tbody");
-
-    // define fixed width for each column
-    var columnWidth = `${100 / config.rings.length}%`;
-
-    // create table header row with ring names
-    var headerRow = thead.append("tr")
-      .style("border", "1px solid #ddd");
-
-    headerRow.selectAll("th")
-      .data(config.rings)
-      .enter()
-      .append("th")
-      .style("padding", "8px")
-      .style("border", "1px solid #ddd")
-      .style("background-color", d => d.color)
-      .style("color", "#fff")
-      .style("width", columnWidth)
-      .text(d => d.name);
-
-    // create table body row with descriptions
-    var descriptionRow = tbody.append("tr")
-      .style("border", "1px solid #ddd");
-
-    descriptionRow.selectAll("td")
-      .data(config.rings)
-      .enter()
-      .append("td")
-      .style("padding", "8px")
-      .style("border", "1px solid #ddd")
-      .style("width", columnWidth)
-      .text(d => d.description);
+  toolbarInstance.cleanup = () => {
+    importButton.removeEventListener("click", handleImportClick);
+    if (handleResetClick && resetButton) {
+      resetButton.removeEventListener("click", handleResetClick);
+    }
+    if (disposeImport)
+      disposeImport();
+    if (disposeExport)
+      disposeExport();
+  };
+  return toolbarInstance;
+}
+function showToolbarMessage2(message, state = "info") {
+  const messageEl = document.getElementById("jsonToolbarMessage");
+  if (messageEl) {
+    messageEl.textContent = message;
+    messageEl.dataset.state = state;
+    if (state !== "error") {
+      setTimeout(() => {
+        messageEl.textContent = "";
+        delete messageEl.dataset.state;
+      }, 3000);
+    }
   }
+}
 
+// src/validation/config-validator.js
+class ConfigValidationError extends Error {
+  constructor(message, field, value) {
+    super(message);
+    this.name = "ConfigValidationError";
+    this.field = field;
+    this.value = value;
+  }
+}
+function validateConfig(config) {
+  const errors = [];
+  if (!config.quadrants || config.quadrants.length < 2 || config.quadrants.length > 8) {
+    errors.push(new ConfigValidationError(`Number of quadrants must be between 2 and 8 (found: ${config.quadrants?.length || 0})`, "quadrants", config.quadrants?.length));
+  }
+  if (!config.rings || config.rings.length < 4 || config.rings.length > 8) {
+    errors.push(new ConfigValidationError(`Number of rings must be between 4 and 8 (found: ${config.rings?.length || 0})`, "rings", config.rings?.length));
+  }
+  if (config.entries && config.quadrants && config.rings) {
+    config.entries.forEach((entry, index) => {
+      if (entry.quadrant < 0 || entry.quadrant >= config.quadrants.length) {
+        errors.push(new ConfigValidationError(`Entry '${entry.label}' has invalid quadrant: ${entry.quadrant} (must be 0-${config.quadrants.length - 1})`, `entries[${index}].quadrant`, entry.quadrant));
+      }
+      if (entry.ring < 0 || entry.ring >= config.rings.length) {
+        errors.push(new ConfigValidationError(`Entry '${entry.label}' has invalid ring: ${entry.ring} (must be 0-${config.rings.length - 1})`, `entries[${index}].ring`, entry.ring));
+      }
+    });
+  }
+  if (errors.length > 0) {
+    throw errors[0];
+  }
+  return true;
+}
+
+// src/index.js
+function _renderRadar(config) {
+  const svg = document.getElementById(config.svg_id || "radar");
+  if (svg) {
+    svg.innerHTML = "";
+  }
+  applyConfigDefaults(config);
+  const dimensions = calculateDimensions(config);
+  const target_outer_radius = dimensions.target_outer_radius;
+  validateConfig(config);
+  let _pluginCleanup = null;
+  if (config.plugins) {
+    const pluginContext = {
+      getCurrentConfig: () => config,
+      applyConfig: (newConfig) => {
+        _renderRadar(newConfig);
+      },
+      demoSlug: config.demoSlug || config.svg_id || "radar"
+    };
+    const result = initializePlugins(config.plugins, pluginContext);
+    _pluginCleanup = result.cleanup;
+    config._pluginInstances = result.plugins;
+  }
+  const rng = new SeededRandom(42);
+  const random = () => rng.next();
+  const random_between = (min, max) => rng.between(min, max);
+  const _normal_between = (min, max) => rng.normalBetween(min, max);
+  const num_quadrants = config.quadrants.length;
+  const quadrants = generateQuadrants(num_quadrants);
+  const num_rings = config.rings.length;
+  const rings = generateRings(num_rings, target_outer_radius);
+  const outer_radius = rings[rings.length - 1].radius;
+  const _quadrant_bounds = quadrants.map((q) => computeQuadrantBounds(q.radial_min * Math.PI, q.radial_max * Math.PI, outer_radius));
+  configureOffsets(config, outer_radius, num_quadrants);
+  const _bounded_interval = boundedInterval;
+  const _bounded_ring = boundedRing;
+  const _bounded_box = boundedBox;
+  function _segment(quadrant, ring) {
+    return createSegment(quadrant, ring, quadrants, rings, config, random_between);
+  }
+  const entryProcessor = new EntryProcessor(config, quadrants, rings, random, random_between);
+  entryProcessor.processEntries(config.entries);
+  const segmented = new Array(num_quadrants);
+  for (let quadrant = 0;quadrant < num_quadrants; quadrant++) {
+    segmented[quadrant] = new Array(num_rings);
+    for (let ring = 0;ring < num_rings; ring++) {
+      segmented[quadrant][ring] = [];
+    }
+  }
+  for (let i = 0;i < config.entries.length; i++) {
+    const entry = config.entries[i];
+    segmented[entry.quadrant][entry.ring].push(entry);
+  }
+  const svgElements = setupSvg(config, quadrants, rings, dimensions);
+  const { radar, legendLeftColumn, legendRightColumn, grid } = svgElements;
+  renderGrid(grid, config, quadrants, rings, outer_radius);
+  if (!config.footer) {
+    config.footer = "▲ moved up     ▼ moved down     ★ new     ⬤ no change";
+  }
+  renderTitleAndFooter(radar, config);
+  if (config.print_layout) {
+    legendLeftColumn.style("display", "flex");
+    legendRightColumn.style("display", "flex");
+    renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, config, num_quadrants, num_rings, showBubble, hideBubble, highlightLegendItem, unhighlightLegendItem);
+  } else {
+    legendLeftColumn.style("display", "none").html("");
+    legendRightColumn.style("display", "none").html("");
+  }
+  const rink = radar.append("g").attr("id", "rink");
+  const _bubble = createBubble(radar, config.font_family);
+  const blips = renderBlips(rink, config.entries, config, showBubble, hideBubble, highlightLegendItem, unhighlightLegendItem);
+  runForceSimulation(config.entries, blips, config);
+  if (config.debug_geometry) {
+    renderDebugVisualization(radar, config, quadrants, rings, num_quadrants, num_rings, segmented);
+  }
   if (config.print_ring_descriptions_table) {
-    ringDescriptionsTable();
+    renderRingDescriptionsTable(config);
   }
 }
+function radar_visualization2(initialConfig) {
+  let currentConfig = { ...initialConfig };
+  _renderRadar(currentConfig);
+  const instance = {
+    getConfig() {
+      return { ...currentConfig };
+    },
+    render(newConfig) {
+      currentConfig = { ...currentConfig, ...newConfig };
+      _renderRadar(currentConfig);
+      return this;
+    },
+    reset() {
+      currentConfig = { ...initialConfig };
+      _renderRadar(currentConfig);
+      return this;
+    },
+    importExport: null,
+    persistentStorage: null
+  };
+  return instance;
+}
+var jsonIO = createJsonIOHelpers();
+radar_visualization2.jsonIO = jsonIO;
+radar_visualization2.initDemoToolbar = initDemoToolbar;
+radar_visualization2.render = (config) => {
+  _renderRadar(config);
+  return config;
+};
+var src_default = radar_visualization2;
 
-// Export for module systems (ES6, CommonJS) while keeping browser compatibility
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
-  module.exports = radar_visualization;
-}
-if (typeof exports !== 'undefined') {
-  exports.radar_visualization = radar_visualization;
-}
-// Make available globally for browser use
+
+
+  // Return the main function (bundler may rename it, so use src_default)
+  return typeof src_default !== 'undefined' ? src_default : radar_visualization;
+})();
+
+// Export for all environments
 if (typeof window !== 'undefined') {
   window.radar_visualization = radar_visualization;
+}
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = radar_visualization;
 }
 if (typeof global !== 'undefined') {
   global.radar_visualization = radar_visualization;

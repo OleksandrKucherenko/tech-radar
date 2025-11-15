@@ -1,168 +1,334 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Primary Meta Tags -->
+    <title>Tech Radar - Visualize Technology Choices</title>
+    <meta name="title" content="Tech Radar - Visualize Technology Choices" />
+    <meta
+      name="description"
+      content="An interactive visualization tool to help engineering teams align on technology choices. Categorize technologies into quadrants and rings to guide adoption decisions."
+    />
+    <meta
+      name="keywords"
+      content="tech radar, technology radar, engineering, technology choices, d3.js, visualization, open source"
+    />
+    <meta name="author" content="Tech Radar Contributors" />
 
-  <!-- Primary Meta Tags -->
-  <title>Tech Radar - Visualize Technology Choices</title>
-  <meta name="title" content="Tech Radar - Visualize Technology Choices">
-  <meta name="description"
-    content="An interactive visualization tool to help engineering teams align on technology choices. Categorize technologies into quadrants and rings to guide adoption decisions.">
-  <meta name="keywords"
-    content="tech radar, technology radar, engineering, technology choices, d3.js, visualization, open source">
-  <meta name="author" content="Tech Radar Contributors">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://oleksandrkucherenko.github.io/tech-radar/" />
+    <meta property="og:title" content="Tech Radar - Visualize Technology Choices" />
+    <meta
+      property="og:description"
+      content="An interactive visualization tool to help engineering teams align on technology choices. Categorize technologies into quadrants and rings to guide adoption decisions."
+    />
+    <meta
+      property="og:image"
+      content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg"
+    />
+    <meta property="og:site_name" content="Tech Radar" />
 
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://oleksandrkucherenko.github.io/tech-radar/">
-  <meta property="og:title" content="Tech Radar - Visualize Technology Choices">
-  <meta property="og:description"
-    content="An interactive visualization tool to help engineering teams align on technology choices. Categorize technologies into quadrants and rings to guide adoption decisions.">
-  <meta property="og:image"
-    content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg">
-  <meta property="og:site_name" content="Tech Radar">
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://oleksandrkucherenko.github.io/tech-radar/" />
+    <meta name="twitter:title" content="Tech Radar - Visualize Technology Choices" />
+    <meta
+      name="twitter:description"
+      content="An interactive visualization tool to help engineering teams align on technology choices. Categorize technologies into quadrants and rings to guide adoption decisions."
+    />
+    <meta
+      name="twitter:image"
+      content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg"
+    />
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://oleksandrkucherenko.github.io/tech-radar/">
-  <meta name="twitter:title" content="Tech Radar - Visualize Technology Choices">
-  <meta name="twitter:description"
-    content="An interactive visualization tool to help engineering teams align on technology choices. Categorize technologies into quadrants and rings to guide adoption decisions.">
-  <meta name="twitter:image"
-    content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg">
+    <!-- Repository & Links -->
+    <link rel="canonical" href="https://oleksandrkucherenko.github.io/tech-radar/" />
+    <link rel="repository" href="https://github.com/OleksandrKucherenko/tech-radar" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Tech Radar" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#1976d2" />
 
-  <!-- Repository & Links -->
-  <link rel="canonical" href="https://oleksandrkucherenko.github.io/tech-radar/">
-  <link rel="repository" href="https://github.com/OleksandrKucherenko/tech-radar">
-  <meta name="theme-color" content="#1976d2">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="radar.js"></script>
 
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="radar.js"></script>
+    <link rel="stylesheet" href="radar.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
 
-  <link rel="stylesheet" href="radar.css">
-</head>
+  <body>
+    <nav class="demo-links">
+      <strong>Demo pages:</strong>
+      <a href="./index.html">Default</a>
+      <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
+      <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
+      <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
+      <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
+      <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
+      <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
+      <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
+      <span class="separator">|</span>
+      <a href="./ai.html">🤖 AI Tech Radar</a>
+      <span class="separator">|</span>
+      <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
+    </nav>
 
-<body>
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonImportButton"
+          title="Import JSON Configuration"
+          aria-label="Import JSON"
+        >
+          <i class="fas fa-file-import"></i>
+        </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonExportButton"
+          title="Export JSON Configuration"
+          aria-label="Export JSON"
+        >
+          <i class="fas fa-file-export"></i>
+        </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonResetButton"
+          title="Reset to Initial Configuration"
+          aria-label="Reset Configuration"
+        >
+          <i class="fas fa-undo"></i>
+        </button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
 
-  <nav class="demo-links">
-    <strong>Demo pages:</strong>
-    <a href="##">Default</a>
-    <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
-    <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
-    <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
-    <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
-    <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
-    <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
-    <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
-    <span class="separator">|</span>
-    <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
-  </nav>
+    <svg id="radar"></svg>
 
-  <svg id="radar"></svg>
+    <script>
+      // Configuration state
+      let currentConfig = null;
+      let initialConfig = null;
+      const demoSlug = "tech-radar";
 
-  <script>
-    fetch('./config.json').then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      radar_visualization({
-        repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
-        title: "Tech Radar",
-        date: data.date,
-        quadrants: [
-          { name: "Languages" },
-          { name: "Infrastructure" },
-          { name: "Datastores" },
-          { name: "Data Management" },
-        ],
-        rings: [
-          { name: "ADOPT", color: "#5ba300" },
-          { name: "TRIAL", color: "#009eb0" },
-          { name: "ASSESS", color: "#c7ba00" },
-          { name: "HOLD", color: "#e09b96" }
-        ],
-        entries: data.entries
-      });
-    }).catch(function (err) {
-      console.log('Error loading config.json', err);
-    });
-  </script>
+      // Get JSON I/O helpers from radar_visualization
+      const jsonIOHelpers = radar_visualization && radar_visualization.jsonIO;
+      const { exportConfig, importConfig, mergeConfigs } = jsonIOHelpers || {};
 
-  <table>
-    <tr>
-      <td>
+      // Toolbar message handling
+      const jsonToolbarMessageEl = document.getElementById("jsonToolbarMessage");
+      function showToolbarMessage(message, state = "info") {
+        if (jsonToolbarMessageEl) {
+          jsonToolbarMessageEl.textContent = message;
+          jsonToolbarMessageEl.dataset.state = state;
+          if (state !== "error") {
+            setTimeout(() => {
+              jsonToolbarMessageEl.textContent = "";
+              delete jsonToolbarMessageEl.dataset.state;
+            }, 3000);
+          }
+        }
+      }
 
-        <h3>What is the Tech Radar?</h3>
+      // Render visualization with given config
+      function renderRadar(config) {
+        currentConfig = config;
+        radar_visualization.render(config);
+      }
 
-        <p>
-          The Tech Radar is a list of technologies, complemented by an assessment result, called <em>ring
-            assignment</em>. We use four rings with the following semantics:
-        </p>
+      // Load and render initial configuration
+      fetch("./config.json")
+        .then(response => response.json())
+        .then(data => {
+          const config = {
+            repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
+            svg_id: "radar",
+            colors: {
+              background: "#fff",
+              grid: "#bbb",
+              inactive: "#ddd",
+            },
+            font_family: "Arial, Helvetica",
+            title: "Tech Radar",
+            date: data.date,
+            quadrants: [
+              { name: "Languages" },
+              { name: "Infrastructure" },
+              { name: "Datastores" },
+              { name: "Data Management" },
+            ],
+            rings: [
+              { name: "ADOPT", color: "#5ba300" },
+              { name: "TRIAL", color: "#009eb0" },
+              { name: "ASSESS", color: "#c7ba00" },
+              { name: "HOLD", color: "#e09b96" },
+            ],
+            print_layout: true,
+            links_in_new_tabs: true,
+            entries: data.entries,
+          };
+          // Store initial config for reset
+          initialConfig = JSON.parse(JSON.stringify(config));
+          renderRadar(config);
 
-        <ul>
-          <li><strong>ADOPT</strong> &mdash; Technologies we have high confidence in to serve our purpose, also in large
-            scale. Technologies with a usage culture in our production environment, low risk and recommended to
-            be widely used.</li>
-          <li><strong>TRIAL</strong> &mdash; Technologies that we have seen work with success in project work to solve a
-            real problem; first serious usage experience that confirm benefits and can uncover limitations. TRIAL
-            technologies are slightly more risky; some engineers in our organization walked this path and will share
-            knowledge and experiences.</li>
-          <li><strong>ASSESS</strong> &mdash; Technologies that are promising and have clear potential value-add for us;
-            technologies worth to invest some research and prototyping efforts in to see if it has impact. ASSESS
-            technologies have higher risks; they are often brand new and highly unproven in our organisation. You will
-            find some engineers that have knowledge in the technology and promote it, you may even find teams that have
-            started a prototyping effort.</li>
-          <li><strong>HOLD</strong> &mdash; Technologies not recommended to be used for new projects. Technologies that
-            we think are not (yet) worth to (further) invest in. HOLD technologies should not be used for new projects,
-            but usually can be continued for existing projects.</li>
-        </ul>
+          // Initialize JSON import/export if available
+          if (exportConfig && importConfig) {
+            const importButton = document.getElementById("jsonImportButton");
+            const exportButton = document.getElementById("jsonExportButton");
+            const resetButton = document.getElementById("jsonResetButton");
+            const importInput = document.getElementById("jsonImportInput");
 
-      </td>
-      <td>
+            importButton.addEventListener("click", () => importInput.click());
 
-        <h3>What is the purpose?</h3>
+            importConfig(
+              importInput,
+              importedConfig => {
+                // Merge imported config with initial config
+                const configToApply =
+                  mergeConfigs && initialConfig ? mergeConfigs(initialConfig, importedConfig) : importedConfig;
+                renderRadar(configToApply);
+              },
+              {
+                demoSlug,
+                onSuccess: ({ fileName }) => {
+                  showToolbarMessage(`Imported ${fileName || "configuration"} successfully`, "success");
+                },
+                onError: message => {
+                  showToolbarMessage(message, "error");
+                },
+              }
+            );
 
-        <p>
-          The Tech Radar is a tool to inspire and support Engineering teams to pick the best technologies for
-          new projects; it provides a platform to share knowledge and experience in technologies, to reflect on
-          technology decisions and continuously evolve our technology landscape. Based on the <a
-            href="https://www.thoughtworks.com/radar">pioneering work of ThoughtWorks</a>, our Tech Radar sets out the
-          changes in technologies that are interesting in software development &mdash; changes that we think our
-          engineering teams should pay attention to and use in their projects.
-        </p>
+            exportConfig(exportButton, () => currentConfig, {
+              demoSlug,
+              onSuccess: ({ fileName }) => {
+                showToolbarMessage(`Exported ${fileName}`, "success");
+              },
+              onError: message => {
+                showToolbarMessage(message, "error");
+              },
+            });
 
-        <h3>How do we maintain it?</h3>
+            // Setup reset button
+            if (resetButton && initialConfig) {
+              resetButton.addEventListener("click", () => {
+                if (confirm("Reset to initial configuration? This will discard all changes.")) {
+                  renderRadar(JSON.parse(JSON.stringify(initialConfig)));
+                  showToolbarMessage("Configuration reset to initial state", "success");
+                }
+              });
+            }
+          } else {
+            showToolbarMessage("JSON helpers unavailable.", "error");
+          }
+        })
+        .catch(err => {
+          console.log("Error loading config.json", err);
+          showToolbarMessage("Failed to load default configuration.", "error");
+        });
+    </script>
+    <table>
+      <tr>
+        <td>
+          <h3>What is the Tech Radar?</h3>
 
-        <p>
-          The Tech Radar is maintained by our <em>Principal Engineers</em> &mdash; who facilitate and drive the
-          technology selection discussions across the Engineering Community. Assignment of technologies to
-          rings is the outcome of ring change proposals, which are discussed and voted on. The Tech Radar is open for
-          contribution for all Engineering teams and depends on their active participation to share lessons
-          learned, pitfalls, and contribute to good practices on using the technologies.<br />
-        </p>
+          <p>
+            The Tech Radar is a list of technologies, complemented by an assessment result, called
+            <em>ring assignment</em>. We use four rings with the following semantics:
+          </p>
 
-        <p>
-          For more information on Technology Selection and how to use the Tech Radar, check out the
-          <a href="https://www.thoughtworks.com/radar/how-to-byor">ThoughtWorks guide on building your own radar</a>.
-        </p>
+          <ul>
+            <li>
+              <strong>ADOPT</strong> &mdash; Technologies we have high confidence in to serve our purpose, also in large
+              scale. Technologies with a usage culture in our production environment, low risk and recommended to be
+              widely used.
+            </li>
+            <li>
+              <strong>TRIAL</strong> &mdash; Technologies that we have seen work with success in project work to solve a
+              real problem; first serious usage experience that confirm benefits and can uncover limitations. TRIAL
+              technologies are slightly more risky; some engineers in our organization walked this path and will share
+              knowledge and experiences.
+            </li>
+            <li>
+              <strong>ASSESS</strong> &mdash; Technologies that are promising and have clear potential value-add for us;
+              technologies worth to invest some research and prototyping efforts in to see if it has impact. ASSESS
+              technologies have higher risks; they are often brand new and highly unproven in our organisation. You will
+              find some engineers that have knowledge in the technology and promote it, you may even find teams that
+              have started a prototyping effort.
+            </li>
+            <li>
+              <strong>HOLD</strong> &mdash; Technologies not recommended to be used for new projects. Technologies that
+              we think are not (yet) worth to (further) invest in. HOLD technologies should not be used for new
+              projects, but usually can be continued for existing projects.
+            </li>
+          </ul>
+        </td>
+        <td>
+          <h3>What is the purpose?</h3>
 
-        <p>
-          <em>BTW, if you would like to create your own Tech Radar &mdash; we have <a
-              href="https://github.com/OleksandrKucherenko/tech-radar">open sourced the code</a> to generate this
-            visualization.</em>
-        </p>
+          <p>
+            The Tech Radar is a tool to inspire and support Engineering teams to pick the best technologies for new
+            projects; it provides a platform to share knowledge and experience in technologies, to reflect on technology
+            decisions and continuously evolve our technology landscape. Based on the
+            <a href="https://www.thoughtworks.com/radar">pioneering work of ThoughtWorks</a>, our Tech Radar sets out
+            the changes in technologies that are interesting in software development &mdash; changes that we think our
+            engineering teams should pay attention to and use in their projects.
+          </p>
 
-      </td>
-    </tr>
-  </table>
+          <h3>How do we maintain it?</h3>
 
-  <footer
-    style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid #ddd; color: #999; font-size: 12px;">
-    Build: <code>8fb8c84</code>
-  </footer>
+          <p>
+            The Tech Radar is maintained by our <em>Principal Engineers</em> &mdash; who facilitate and drive the
+            technology selection discussions across the Engineering Community. Assignment of technologies to rings is
+            the outcome of ring change proposals, which are discussed and voted on. The Tech Radar is open for
+            contribution for all Engineering teams and depends on their active participation to share lessons learned,
+            pitfalls, and contribute to good practices on using the technologies.<br />
+          </p>
 
-</body>
+          <p>
+            For more information on Technology Selection and how to use the Tech Radar, check out the
+            <a href="https://www.thoughtworks.com/radar/how-to-byor">ThoughtWorks guide on building your own radar</a>.
+          </p>
 
+          <p>
+            <em
+              >BTW, if you would like to create your own Tech Radar &mdash; we have
+              <a href="https://github.com/OleksandrKucherenko/tech-radar">open sourced the code</a> to generate this
+              visualization.</em
+            >
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <footer
+      style="
+        text-align: center;
+        padding: 20px;
+        margin-top: 40px;
+        border-top: 1px solid #ddd;
+        color: #999;
+        font-size: 12px;
+      "
+    >
+      Build: <code>03a9647</code>
+    </footer>
+  </body>
 </html>

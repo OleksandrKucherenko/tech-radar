@@ -1,200 +1,354 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- Primary Meta Tags -->
     <title>AI Tech Radar - AI Technologies & Tools</title>
-    <meta name="title" content="AI Tech Radar - AI Technologies & Tools">
-    <meta name="description"
-        content="Comprehensive AI Tech Radar covering Core AI Providers, AI Coding Tools, RAG systems, and Vector Databases. Navigate the rapidly evolving AI landscape.">
-    <meta name="keywords" content="ai tech radar, llm, ai coding, rag, vector database, graph database, ai tools">
+    <meta name="title" content="AI Tech Radar - AI Technologies & Tools" />
+    <meta
+      name="description"
+      content="Comprehensive AI Tech Radar covering Core AI Providers, AI Coding Tools, RAG systems, and Vector Databases. Navigate the rapidly evolving AI landscape."
+    />
+    <meta name="keywords" content="ai tech radar, llm, ai coding, rag, vector database, graph database, ai tools" />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://oleksandrkucherenko.github.io/tech-radar/ai.html">
-    <meta property="og:title" content="AI Tech Radar - AI Technologies & Tools">
-    <meta property="og:description"
-        content="Comprehensive AI Tech Radar covering Core AI Providers, AI Coding Tools, RAG systems, and Vector Databases.">
-    <meta property="og:image"
-        content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg">
-    <meta property="og:site_name" content="AI Tech Radar">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://oleksandrkucherenko.github.io/tech-radar/ai.html" />
+    <meta property="og:title" content="AI Tech Radar - AI Technologies & Tools" />
+    <meta
+      property="og:description"
+      content="Comprehensive AI Tech Radar covering Core AI Providers, AI Coding Tools, RAG systems, and Vector Databases."
+    />
+    <meta
+      property="og:image"
+      content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg"
+    />
+    <meta property="og:site_name" content="AI Tech Radar" />
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://oleksandrkucherenko.github.io/tech-radar/ai.html">
-    <meta name="twitter:title" content="AI Tech Radar - AI Technologies & Tools">
-    <meta name="twitter:description"
-        content="Comprehensive AI Tech Radar covering Core AI Providers, AI Coding Tools, RAG systems, and Vector Databases.">
-    <meta name="twitter:image"
-        content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg">
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://oleksandrkucherenko.github.io/tech-radar/ai.html" />
+    <meta name="twitter:title" content="AI Tech Radar - AI Technologies & Tools" />
+    <meta
+      name="twitter:description"
+      content="Comprehensive AI Tech Radar covering Core AI Providers, AI Coding Tools, RAG systems, and Vector Databases."
+    />
+    <meta
+      name="twitter:image"
+      content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg"
+    />
 
     <!-- Repository & Links -->
-    <link rel="canonical" href="https://oleksandrkucherenko.github.io/tech-radar/ai.html">
-    <link rel="repository" href="https://github.com/OleksandrKucherenko/tech-radar">
-    <meta name="theme-color" content="#1976d2">
+    <link rel="canonical" href="https://oleksandrkucherenko.github.io/tech-radar/ai.html" />
+    <link rel="repository" href="https://github.com/OleksandrKucherenko/tech-radar" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Tech Radar" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#1976d2" />
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="radar.js"></script>
-    <link rel="stylesheet" href="radar.css">
+
+    <link rel="stylesheet" href="radar.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+      body {
+        margin: 0;
+        padding: 0;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
 
-        nav.demo-links {
-            padding: 15px 20px;
-            background: #f8f8f8;
-            border-bottom: 1px solid #e0e0e0;
-            margin: 0;
-        }
+      nav.demo-links {
+        padding: 15px 20px;
+        background: #f8f8f8;
+        border-bottom: 1px solid #e0e0e0;
+        margin: 0;
+      }
 
-        .radar-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
+      .radar-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
 
-        #radar {
-            max-width: 100%;
-            height: auto;
-        }
+      #radar {
+        max-width: 100%;
+        height: auto;
+      }
 
-        footer {
-            text-align: center;
-            padding: 15px 20px;
-            margin: 0;
-            border-top: 1px solid #e0e0e0;
-            background: #f8f8f8;
-            color: #666;
-            font-size: 12px;
-        }
+      footer {
+        text-align: center;
+        padding: 15px 20px;
+        margin: 0;
+        border-top: 1px solid #e0e0e0;
+        background: #f8f8f8;
+        color: #666;
+        font-size: 12px;
+      }
 
-        footer code {
-            background: #e8e8e8;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-        }
+      footer code {
+        background: #e8e8e8;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "Courier New", monospace;
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <nav class="demo-links">
-        <strong>Demo pages:</strong>
-        <a href="./index.html">Default</a>
-        <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
-        <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
-        <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
-        <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
-        <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
-        <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
-        <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
-        <span class="separator">|</span>
-        <a href="./ai.html" style="font-weight: bold;">AI Tech Radar</a>
-        <span class="separator">|</span>
-        <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
+      <strong>Demo pages:</strong>
+      <a href="./index.html">Default</a>
+      <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
+      <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
+      <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
+      <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
+      <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
+      <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
+      <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
+      <span class="separator">|</span>
+      <a href="./ai.html">🤖 AI Tech Radar</a>
+      <span class="separator">|</span>
+      <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
     </nav>
 
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonImportButton"
+          title="Import JSON Configuration"
+          aria-label="Import JSON"
+        >
+          <i class="fas fa-file-import"></i>
+        </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonExportButton"
+          title="Export JSON Configuration"
+          aria-label="Export JSON"
+        >
+          <i class="fas fa-file-export"></i>
+        </button>
+        <button
+          type="button"
+          class="demo-toolbar__button demo-toolbar__button--icon"
+          id="jsonResetButton"
+          title="Reset to Initial Configuration"
+          aria-label="Reset Configuration"
+        >
+          <i class="fas fa-undo"></i>
+        </button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
+
     <div class="radar-container">
-        <svg id="radar"></svg>
+      <svg id="radar"></svg>
     </div>
 
     <script>
-        radar_visualization({
-            svg_id: "radar",
-            title: "AI Tech Radar (2025-11)",
-            quadrants: [
-                { name: "Core AI Providers" },
-                { name: "AI Coding Tools" },
-                { name: "RAG & Retrieval" },
-                { name: "Databases" }
-            ],
-            rings: [
-                { name: "ADOPT", color: "#5ba300" },
-                { name: "TRIAL", color: "#009eb0" },
-                { name: "ASSESS", color: "#c7ba00" },
-                { name: "HOLD", color: "#e09b96" },
-                { name: "WATCH", color: "#bb6bd9" }
-            ],
-            entries: [
-                // Core AI Providers (Quadrant 0)
-                { label: "Azure AI Foundry", link: "https://ai.azure.com/", quadrant: 0, ring: 0, moved: 0, active: true },
-                { label: "OpenAI", link: "https://openai.com", quadrant: 0, ring: 2, moved: 0, active: true },
-                { label: "Anthropic Claude", link: "https://www.anthropic.com", quadrant: 0, ring: 2, moved: 2, active: true },
-                { label: "Google Gemini", link: "https://ai.google.dev", quadrant: 0, ring: 2, moved: 1, active: true },
-                { label: "Microsoft Copilot", link: "https://copilot.microsoft.com", quadrant: 0, ring: 0, moved: 0, active: true },
-                { label: "xAI Grok", link: "https://x.ai", quadrant: 0, ring: 2, moved: 2, active: true },
-                { label: "Amazon Q", link: "https://aws.amazon.com/amazonq", quadrant: 0, ring: 4, moved: 0, active: true },
-                { label: "Perplexity AI", link: "https://www.perplexity.ai", quadrant: 0, ring: 2, moved: 1, active: true },
-                { label: "Hugging Face", link: "https://huggingface.co", quadrant: 0, ring: 4, moved: 0, active: true },
-                { label: "DeepSeek", link: "https://deepseek.com", quadrant: 0, ring: 3, moved: 1, active: true },
-                { label: "Groq", link: "https://groq.com", quadrant: 0, ring: 4, moved: 2, active: true },
-                { label: "Ollama", link: "https://ollama.com/", quadrant: 0, ring: 4, moved: 0, active: true },
-                { label: "OpenRouter AI", link: "https://openrouter.ai/", quadrant: 0, ring: 2, moved: 0, active: true },
-                { label: "Z.AI", link: "https://z.ai/", quadrant: 0, ring: 2, moved: 0, active: true },
+      // Initialize radar instance with configuration
+      let radarInstance = radar_visualization({
+        repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
+        svg_id: "radar",
+        colors: {
+          background: "#fff",
+          grid: "#bbb",
+          inactive: "#ddd",
+        },
+        font_family: "Arial, Helvetica",
+        title: "AI Tech Radar (2025-11)",
+        quadrants: [
+          { name: "Core AI Providers" },
+          { name: "AI Coding Tools" },
+          { name: "RAG & Retrieval" },
+          { name: "Databases" },
+        ],
+        rings: [
+          { name: "ADOPT", color: "#5ba300" },
+          { name: "TRIAL", color: "#009eb0" },
+          { name: "ASSESS", color: "#c7ba00" },
+          { name: "HOLD", color: "#e09b96" },
+          { name: "WATCH", color: "#bb6bd9" },
+          { name: "AVOID", color: "#e09b96" },
+        ],
+        print_layout: true,
+        links_in_new_tabs: true,
+        entries: [
+          // Core AI Providers (Quadrant 0)
+          { label: "Azure AI Foundry", link: "https://ai.azure.com/", quadrant: 0, ring: 0, moved: 0, active: true },
+          { label: "OpenAI", link: "https://openai.com", quadrant: 0, ring: 2, moved: 0, active: true },
+          {
+            label: "Anthropic Claude",
+            link: "https://www.anthropic.com",
+            quadrant: 0,
+            ring: 2,
+            moved: 2,
+            active: true,
+          },
+          { label: "Google Gemini", link: "https://ai.google.dev", quadrant: 0, ring: 2, moved: 1, active: true },
+          {
+            label: "Microsoft Copilot",
+            link: "https://copilot.microsoft.com",
+            quadrant: 0,
+            ring: 0,
+            moved: 0,
+            active: true,
+          },
+          { label: "xAI Grok", link: "https://x.ai", quadrant: 0, ring: 2, moved: 2, active: true },
+          { label: "Amazon Q", link: "https://aws.amazon.com/amazonq", quadrant: 0, ring: 4, moved: 0, active: true },
+          { label: "Perplexity AI", link: "https://www.perplexity.ai", quadrant: 0, ring: 2, moved: 1, active: true },
+          { label: "Hugging Face", link: "https://huggingface.co", quadrant: 0, ring: 4, moved: 0, active: true },
+          { label: "DeepSeek", link: "https://deepseek.com", quadrant: 0, ring: 3, moved: 1, active: true },
+          { label: "Groq", link: "https://groq.com", quadrant: 0, ring: 4, moved: 2, active: true },
+          { label: "Ollama", link: "https://ollama.com/", quadrant: 0, ring: 4, moved: 0, active: true },
+          { label: "OpenRouter AI", link: "https://openrouter.ai/", quadrant: 0, ring: 2, moved: 0, active: true },
+          { label: "Z.AI", link: "https://z.ai/", quadrant: 0, ring: 2, moved: 0, active: true },
 
-                // AI Coding Tools - IDEs (Quadrant 1)
-                { label: "Cursor", link: "https://cursor.sh", quadrant: 1, ring: 3, moved: 1, active: true },
-                { label: "Windsurf", link: "https://codeium.com/windsurf", quadrant: 1, ring: 1, moved: 2, active: true },
-                { label: "Windsurf IntelliJ", link: "https://codeium.com/windsurf", quadrant: 1, ring: 1, moved: 1, active: true },
-                { label: "Windsurf VsCode", link: "https://codeium.com/windsurf", quadrant: 1, ring: 1, moved: 1, active: true },
-                { label: "GitHub Copilot", link: "https://github.com/features/copilot", quadrant: 1, ring: 0, moved: 0, active: true },
-                { label: "VSCode + Copilot", link: "https://code.visualstudio.com", quadrant: 1, ring: 0, moved: 0, active: true },
-                { label: "JetBrains AI", link: "https://www.jetbrains.com/ai", quadrant: 1, ring: 4, moved: 0, active: true },
-                { label: "Codeium AI IDE", link: "https://codeium.com", quadrant: 1, ring: 4, moved: 1, active: true },
-                { label: "KiloCode", link: "https://kilocode.ai", quadrant: 1, ring: 1, moved: 2, active: true },
-                { label: "KiloCode CLI", link: "https://kilocode.ai", quadrant: 1, ring: 1, moved: 1, active: true },
-                { label: "KiloCode IntelliJ", link: "https://kilocode.ai", quadrant: 1, ring: 1, moved: 1, active: true },
-                { label: "KiloCode VsCode", link: "https://kilocode.ai", quadrant: 1, ring: 1, moved: 1, active: true },
-                { label: "Gemini CLI", link: "https://ai.google.dev/gemini-cli", quadrant: 1, ring: 2, moved: 0, active: true },
-                { label: "Claude Code CLI", link: "https://claude.ai", quadrant: 1, ring: 1, moved: 0, active: true },
-                { label: "Copilot CLI", link: "https://github.com/features/copilot", quadrant: 1, ring: 0, moved: 1, active: true },
-                { label: "Opencode CLI", link: "https://opencode.ai/", quadrant: 1, ring: 2, moved: 0, active: true },
-                { label: "Codex CLI", link: "https://developers.openai.com/codex/cli/", quadrant: 1, ring: 0, moved: 0, active: true },
-                { label: "Codex VsCode", link: "https://developers.openai.com/codex/ide/", quadrant: 1, ring: 0, moved: 0, active: true },
-                { label: "Cline", link: "https://cline.dev", quadrant: 1, ring: 4, moved: 0, active: true },
-                { label: "RooCode", link: "https://roocode.ai", quadrant: 1, ring: 4, moved: 0, active: true },
+          // AI Coding Tools - IDEs (Quadrant 1)
+          { label: "Cursor", link: "https://cursor.sh", quadrant: 1, ring: 5, moved: -1, active: true },
+          { label: "Windsurf", link: "https://codeium.com/windsurf", quadrant: 1, ring: 1, moved: 2, active: true },
+          {
+            label: "Windsurf IntelliJ",
+            link: "https://codeium.com/windsurf",
+            quadrant: 1,
+            ring: 1,
+            moved: 1,
+            active: true,
+          },
+          {
+            label: "Windsurf VsCode",
+            link: "https://codeium.com/windsurf",
+            quadrant: 1,
+            ring: 1,
+            moved: 1,
+            active: true,
+          },
+          {
+            label: "GitHub Copilot",
+            link: "https://github.com/features/copilot",
+            quadrant: 1,
+            ring: 0,
+            moved: 0,
+            active: true,
+          },
+          {
+            label: "VSCode + Copilot",
+            link: "https://code.visualstudio.com",
+            quadrant: 1,
+            ring: 0,
+            moved: 0,
+            active: true,
+          },
+          { label: "JetBrains AI", link: "https://www.jetbrains.com/ai", quadrant: 1, ring: 4, moved: 0, active: true },
+          { label: "Codeium AI IDE", link: "https://codeium.com", quadrant: 1, ring: 4, moved: 1, active: true },
+          { label: "KiloCode", link: "https://kilocode.ai", quadrant: 1, ring: 1, moved: 2, active: true },
+          { label: "KiloCode CLI", link: "https://kilocode.ai", quadrant: 1, ring: 1, moved: 1, active: true },
+          { label: "KiloCode IntelliJ", link: "https://kilocode.ai", quadrant: 1, ring: 1, moved: 1, active: true },
+          { label: "KiloCode VsCode", link: "https://kilocode.ai", quadrant: 1, ring: 1, moved: 1, active: true },
+          {
+            label: "Gemini CLI",
+            link: "https://ai.google.dev/gemini-cli",
+            quadrant: 1,
+            ring: 2,
+            moved: 0,
+            active: true,
+          },
+          { label: "Claude Code CLI", link: "https://claude.ai", quadrant: 1, ring: 1, moved: 0, active: true },
+          {
+            label: "Copilot CLI",
+            link: "https://github.com/features/copilot",
+            quadrant: 1,
+            ring: 0,
+            moved: 1,
+            active: true,
+          },
+          { label: "Opencode CLI", link: "https://opencode.ai/", quadrant: 1, ring: 2, moved: 0, active: true },
+          {
+            label: "Codex CLI",
+            link: "https://developers.openai.com/codex/cli/",
+            quadrant: 1,
+            ring: 0,
+            moved: 0,
+            active: true,
+          },
+          {
+            label: "Codex VsCode",
+            link: "https://developers.openai.com/codex/ide/",
+            quadrant: 1,
+            ring: 0,
+            moved: 0,
+            active: true,
+          },
+          { label: "Cline", link: "https://cline.dev", quadrant: 1, ring: 4, moved: 0, active: true },
+          { label: "RooCode", link: "https://roocode.ai", quadrant: 1, ring: 4, moved: 0, active: true },
 
-                // RAG & Retrieval Tools (Quadrant 2)
-                { label: "LlamaIndex", link: "https://www.llamaindex.ai", quadrant: 2, ring: 4, moved: 0, active: true },
-                { label: "LangChain", link: "https://www.langchain.com", quadrant: 2, ring: 2, moved: 0, active: true },
-                { label: "NotebookLM", link: "https://notebooklm.google", quadrant: 2, ring: 1, moved: 1, active: true },
-                { label: "GraphRAG", link: "https://microsoft.github.io/graphrag", quadrant: 2, ring: 3, moved: 2, active: true },
-                { label: "LightRAG", link: "https://github.com/light-rag", quadrant: 2, ring: 1, moved: 2, active: true },
+          // RAG & Retrieval Tools (Quadrant 2)
+          { label: "LlamaIndex", link: "https://www.llamaindex.ai", quadrant: 2, ring: 4, moved: 0, active: true },
+          { label: "LangChain", link: "https://www.langchain.com", quadrant: 2, ring: 2, moved: 0, active: true },
+          { label: "NotebookLM", link: "https://notebooklm.google", quadrant: 2, ring: 1, moved: 1, active: true },
+          {
+            label: "GraphRAG",
+            link: "https://microsoft.github.io/graphrag",
+            quadrant: 2,
+            ring: 3,
+            moved: 2,
+            active: true,
+          },
+          { label: "LightRAG", link: "https://github.com/light-rag", quadrant: 2, ring: 1, moved: 2, active: true },
 
-                // Databases - Vector & Graph (Quadrant 3)
-                { label: "Pinecone", link: "https://pinecone.io", quadrant: 3, ring: 4, moved: 0, active: true },
-                { label: "Qdrant", link: "https://qdrant.tech", quadrant: 3, ring: 0, moved: 1, active: true },
-                { label: "Milvus", link: "https://milvus.io", quadrant: 3, ring: 4, moved: 0, active: true },
-                { label: "Elasticsearch", link: "https://elastic.co", quadrant: 3, ring: 2, moved: 0, active: true },
-                { label: "Neo4j", link: "https://neo4j.com", quadrant: 3, ring: 0, moved: 1, active: true },
-                { label: "ChromaDB", link: "https://chromadb.com", quadrant: 3, ring: 4, moved: 0, active: true },
-                { label: "pgvector", link: "https://github.com/pgvector/pgvector", quadrant: 3, ring: 0, moved: 0, active: true },
-                { label: "Redis Vector", link: "https://redis.io", quadrant: 3, ring: 3, moved: 0, active: true },
-                { label: "OpenSearch", link: "https://opensearch.org", quadrant: 3, ring: 2, moved: 0, active: true },
-                { label: "Memgraph", link: "https://memgraph.com", quadrant: 3, ring: 0, moved: 1, active: true },
-            ]
-        });
+          // Databases - Vector & Graph (Quadrant 3)
+          { label: "Pinecone", link: "https://pinecone.io", quadrant: 3, ring: 4, moved: 0, active: true },
+          { label: "Qdrant", link: "https://qdrant.tech", quadrant: 3, ring: 0, moved: 1, active: true },
+          { label: "Milvus", link: "https://milvus.io", quadrant: 3, ring: 4, moved: 0, active: true },
+          { label: "Elasticsearch", link: "https://elastic.co", quadrant: 3, ring: 2, moved: 0, active: true },
+          { label: "Neo4j", link: "https://neo4j.com", quadrant: 3, ring: 0, moved: 1, active: true },
+          { label: "ChromaDB", link: "https://chromadb.com", quadrant: 3, ring: 4, moved: 0, active: true },
+          {
+            label: "pgvector",
+            link: "https://github.com/pgvector/pgvector",
+            quadrant: 3,
+            ring: 0,
+            moved: 0,
+            active: true,
+          },
+          { label: "Redis Vector", link: "https://redis.io", quadrant: 3, ring: 3, moved: 0, active: true },
+          { label: "OpenSearch", link: "https://opensearch.org", quadrant: 3, ring: 2, moved: 0, active: true },
+          { label: "Memgraph", link: "https://memgraph.com", quadrant: 3, ring: 0, moved: 1, active: true },
+        ],
+      });
+
+      // Assign import/export capability to instance
+      radarInstance.importExport = radar_visualization.jsonIO;
+
+      // Initialize and assign toolbar to instance
+      // Toolbar automatically wires to instance methods (render, reset, getConfig)
+      radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
     </script>
 
-    <footer>
-        Build: <code>8fb8c84</code>
-    </footer>
-
-</body>
-
+    <footer>Build: <code>03a9647</code></footer>
+  </body>
 </html>
