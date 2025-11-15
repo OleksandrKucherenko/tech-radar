@@ -1,4 +1,4 @@
-// Build script to bundle and minify radar.js using Bun + terser
+// Build script to bundle and minify radar.js using Bun's built-in bundler
 // Phase 1 Refactoring: Now bundles ES6 modules from src/ into browser-compatible output
 //
 // Usage:
@@ -9,8 +9,7 @@
 //            Always create a new version for changes.
 //            Version must follow strict semantic versioning (MAJOR.MINOR.PATCH)
 
-import { $ } from 'bun';
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import semver from 'semver';
 
 // Parse command line arguments
@@ -155,17 +154,36 @@ if (typeof global !== 'undefined') {
   const bundledSize = wrappedCode.length;
   console.log(`✓ Bundled to: ${bundledOutputPath} (${bundledSize.toLocaleString()} bytes)`);
 
-  // Step 2: Minify the bundled version using terser
-  console.log('Phase 2: Minifying...');
-  const result = await $`npx terser ${bundledOutputPath} --compress --mangle reserved=['radar_visualization'] --output ${minifiedOutputPath}`.quiet();
+  // Step 2: Minify using Bun's built-in minifier
+  console.log('Phase 2: Minifying with Bun...');
 
-  if (result.exitCode !== 0) {
-    console.error('❌ Minification failed:', result.stderr.toString());
+  // Write wrapped code to temp file for minification
+  const tempInputPath = './temp-build/wrapped.js';
+  writeFileSync(tempInputPath, wrappedCode);
+
+  const minifyResult = await Bun.build({
+    entrypoints: [tempInputPath],
+    outdir: './temp-build',
+    naming: 'minified.js',
+    minify: true,
+    target: 'browser'
+  });
+
+  if (!minifyResult.success) {
+    console.error('❌ Minification failed:', minifyResult.logs);
     process.exit(1);
   }
 
+  // Get minified output and write to release directory
+  const minifiedCode = await minifyResult.outputs[0].text();
+  writeFileSync(minifiedOutputPath, minifiedCode);
+
+  // Clean up temp files
+  unlinkSync(tempInputPath);
+  unlinkSync('./temp-build/minified.js');
+
   // Get minified size
-  const minifiedSize = readFileSync(minifiedOutputPath, 'utf-8').length;
+  const minifiedSize = minifiedCode.length;
   const reduction = ((1 - minifiedSize / bundledSize) * 100).toFixed(1);
 
   console.log(`✓ Minified to: ${minifiedOutputPath}`);
