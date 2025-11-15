@@ -282,15 +282,39 @@ td {
   white-space: nowrap;
 }
 
+/* Icon button variant */
+.demo-toolbar__button--icon {
+  padding: 0.625rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1rem;
+}
+
+.demo-toolbar__button--icon i {
+  pointer-events: none;
+}
+
 .demo-toolbar__button:hover {
   background: #1565c0;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
 }
 
+.demo-toolbar__button--icon:hover {
+  transform: translateY(-1px) scale(1.05);
+}
+
 .demo-toolbar__button:active {
   background: #0d47a1;
   transform: translateY(0);
+}
+
+.demo-toolbar__button--icon:active {
+  transform: translateY(0) scale(0.95);
 }
 
 .demo-toolbar__message {

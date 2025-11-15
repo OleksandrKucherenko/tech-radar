@@ -95,15 +95,19 @@ function showToolbarMessage(message, state = 'info') {
 }
 
 /**
- * Get the standard toolbar HTML markup
+ * Get the standard toolbar HTML markup with Font Awesome icons
  * @returns {string} HTML string for the floating toolbar
  */
 export function getToolbarHTML() {
   return `
     <div class="demo-toolbar" role="region" aria-label="JSON configuration tools" style="position: relative;">
       <div class="demo-toolbar__controls">
-        <button type="button" class="demo-toolbar__button" id="jsonImportButton">Import JSON</button>
-        <button type="button" class="demo-toolbar__button" id="jsonExportButton">Export JSON</button>
+        <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonImportButton" title="Import JSON Configuration" aria-label="Import JSON">
+          <i class="fas fa-file-import"></i>
+        </button>
+        <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonExportButton" title="Export JSON Configuration" aria-label="Export JSON">
+          <i class="fas fa-file-export"></i>
+        </button>
         <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
       </div>
       <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
