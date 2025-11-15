@@ -64,9 +64,7 @@
   <svg id="radar"></svg>
 
   <script>
-    fetch('./config.json').then(function (response) {
-      return response.json();
-    }).then(function (data) {
+    fetch('./config.json').then((response) => response.json()).then((data) => {
       radar_visualization({
         repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
         title: "Tech Radar",
@@ -85,7 +83,7 @@
         ],
         entries: data.entries
       });
-    }).catch(function (err) {
+    }).catch((err) => {
       console.log('Error loading config.json', err);
     });
   </script>
@@ -160,7 +158,7 @@
 
   <footer
     style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid #ddd; color: #999; font-size: 12px;">
-    Build: <code>1af126f</code>
+    Build: <code>0c4c33c</code>
   </footer>
 
 </body>
