@@ -25,16 +25,20 @@ describe('Interactions', () => {
     });
 
     test('should accept radar selection and font family', () => {
-      // GIVEN: Mock radar selection
-      const radarSelection = {
-        append: () => ({
-          attr: () => ({ attr: () => ({ attr: () => ({}) }) }),
-        }),
-      };
+      // GIVEN: Real D3 selection (D3 is available via happydom)
+      const d3 = window.d3;
+      const radarSelection = d3.select('#test-radar');
 
       // WHEN: Creating bubble
-      // THEN: Should not throw
-      expect(() => createBubble(radarSelection, 'Arial')).not.toThrow();
+      createBubble(radarSelection, 'Arial');
+
+      // THEN: Should create bubble element in DOM
+      const bubble = document.querySelector('#bubble');
+      expect(bubble).not.toBeNull();
+
+      // AND: Should have text element
+      const bubbleText = bubble.querySelector('text');
+      expect(bubbleText).not.toBeNull();
     });
   });
 

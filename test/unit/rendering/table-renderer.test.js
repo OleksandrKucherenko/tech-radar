@@ -2,10 +2,15 @@
  * Tests for table-renderer.js - HTML table generation
  */
 
-import { describe, expect, test } from 'bun:test';
+import { beforeEach, describe, expect, test } from 'bun:test';
 import { renderRingDescriptionsTable } from '../../../src/rendering/table-renderer.js';
 
 describe('Table Renderer', () => {
+  beforeEach(() => {
+    // Setup DOM (happydom is configured in test setup)
+    document.body.innerHTML = '<div id="test-container"></div>';
+  });
+
   describe('renderRingDescriptionsTable', () => {
     test('should be a function', () => {
       // THEN: renderRingDescriptionsTable should be exported and be a function
@@ -13,7 +18,7 @@ describe('Table Renderer', () => {
     });
 
     test('should accept configuration parameter', () => {
-      // GIVEN: Minimal config
+      // GIVEN: Config with rings (D3 is available via happydom)
       const config = {
         quadrants: [{ name: 'Frontend' }, { name: 'Backend' }],
         rings: [
@@ -24,8 +29,12 @@ describe('Table Renderer', () => {
       };
 
       // WHEN: Calling renderRingDescriptionsTable
-      // THEN: Should not throw
-      expect(() => renderRingDescriptionsTable(config)).not.toThrow();
+      renderRingDescriptionsTable(config);
+
+      // THEN: Should create table in DOM with correct class
+      const table = document.querySelector('table');
+      expect(table).not.toBeNull();
+      expect(table.classList.contains('radar-table')).toBe(true);
     });
 
     test('should handle minimal config', () => {
@@ -35,17 +44,20 @@ describe('Table Renderer', () => {
       };
 
       // WHEN: Rendering with minimal config
-      // THEN: Should not throw
-      expect(() => renderRingDescriptionsTable(config)).not.toThrow();
+      renderRingDescriptionsTable(config);
+
+      // THEN: Should create table
+      const table = document.querySelector('table');
+      expect(table).not.toBeNull();
     });
 
-    test('should handle config without rings', () => {
+    test('should require rings array in config', () => {
       // GIVEN: Config without rings
       const config = {};
 
       // WHEN: Rendering with no rings
-      // THEN: Should not throw
-      expect(() => renderRingDescriptionsTable(config)).not.toThrow();
+      // THEN: Should throw because rings is required
+      expect(() => renderRingDescriptionsTable(config)).toThrow();
     });
   });
 });
