@@ -1,0 +1,10 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+docs/radar.js
+docs/release
+
+# Builder file contains complex template literals that break HTML parser
+docs/builder.html
