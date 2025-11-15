@@ -141,7 +141,16 @@
       }
 
       const initialConfig = {
+        repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
         svg_id: "radar",
+        width: 1450,
+        height: 1000,
+        colors: {
+          background: "#fff",
+          grid: "#bbb",
+          inactive: "#ddd",
+        },
+        font_family: "Arial, Helvetica",
         title: "6 Quadrants × 5 Rings",
         quadrants: [
           { name: "Languages" },
@@ -156,8 +165,10 @@
           { name: "TRIAL", color: "#009eb0" },
           { name: "ASSESS", color: "#c7ba00" },
           { name: "HOLD", color: "#e09b96" },
-          { name: "AVOID", color: "#cc0000" },
+          { name: "LEGACY", color: "#757575" },
         ],
+        print_layout: true,
+        links_in_new_tabs: true,
         entries: [
           { label: "Python", quadrant: 0, ring: 0, moved: 0, active: true },
           { label: "TypeScript", quadrant: 0, ring: 0, moved: 1, active: true },
@@ -237,6 +248,6 @@
       });
     </script>
 
-    <footer>Build: <code>38b61ff</code></footer>
+    <footer>Build: <code>fc05a51</code></footer>
   </body>
 </html>

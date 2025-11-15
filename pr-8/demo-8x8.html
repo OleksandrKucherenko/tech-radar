@@ -142,7 +142,16 @@
       }
 
       const initialConfig = {
+        repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
         svg_id: "radar",
+        width: 1450,
+        height: 1000,
+        colors: {
+          background: "#fff",
+          grid: "#bbb",
+          inactive: "#ddd",
+        },
+        font_family: "Arial, Helvetica",
         title: "8 Quadrants × 8 Rings (Maximum)",
         quadrants: [
           { name: "Languages" },
@@ -162,8 +171,10 @@
           { name: "WATCH", color: "#bb6bd9" },
           { name: "HOLD", color: "#e09b96" },
           { name: "AVOID", color: "#dd4400" },
-          { name: "DEPRECATED", color: "#ff0000" },
+          { name: "OBSOLETE", color: "#000000" },
         ],
+        print_layout: true,
+        links_in_new_tabs: true,
         entries: [
           { label: "Python", quadrant: 0, ring: 0, moved: 0, active: true },
           { label: "Rust", quadrant: 0, ring: 1, moved: 1, active: true },
@@ -249,6 +260,6 @@
       });
     </script>
 
-    <footer>Build: <code>38b61ff</code></footer>
+    <footer>Build: <code>fc05a51</code></footer>
   </body>
 </html>

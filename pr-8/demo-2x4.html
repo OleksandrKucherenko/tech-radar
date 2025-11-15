@@ -166,7 +166,16 @@
 
       // Initial config
       const initialConfig = {
+        repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
         svg_id: "radar",
+        width: 1450,
+        height: 1000,
+        colors: {
+          background: "#fff",
+          grid: "#bbb",
+          inactive: "#ddd",
+        },
+        font_family: "Arial, Helvetica",
         title: "2 Quadrants × 4 Rings",
         quadrants: [{ name: "Frontend" }, { name: "Backend" }],
         rings: [
@@ -175,6 +184,8 @@
           { name: "ASSESS", color: "#c7ba00" },
           { name: "HOLD", color: "#e09b96" },
         ],
+        print_layout: true,
+        links_in_new_tabs: true,
         entries: [
           { label: "React", quadrant: 0, ring: 0, moved: 0, active: true },
           { label: "Vue", quadrant: 0, ring: 0, moved: 1, active: true },
@@ -275,6 +286,6 @@
       }
     </script>
 
-    <footer>Build: <code>38b61ff</code></footer>
+    <footer>Build: <code>fc05a51</code></footer>
   </body>
 </html>
