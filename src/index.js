@@ -23,6 +23,7 @@ import {
 import { renderLegendColumns } from './rendering/legend-renderer.js';
 import { setupSvg } from './rendering/svg-setup.js';
 import { renderRingDescriptionsTable } from './rendering/table-renderer.js';
+import { initDemoToolbar } from './ui/demo-toolbar.js';
 import { validateConfig } from './validation/config-validator.js';
 
 function radar_visualization(config) {
@@ -129,6 +130,7 @@ function radar_visualization(config) {
 
 const jsonIO = createJsonIOHelpers();
 radar_visualization.jsonIO = jsonIO;
+radar_visualization.initDemoToolbar = initDemoToolbar;
 
 export default radar_visualization;
-export { radar_visualization, jsonIO };
+export { radar_visualization, jsonIO, initDemoToolbar };

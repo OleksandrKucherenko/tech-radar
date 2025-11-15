@@ -121,12 +121,27 @@
       <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
     </nav>
 
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button type="button" class="demo-toolbar__button" id="jsonImportButton">Import JSON</button>
+        <button type="button" class="demo-toolbar__button" id="jsonExportButton">Export JSON</button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
+
     <div class="radar-container">
       <svg id="radar"></svg>
     </div>
 
     <script>
-      radar_visualization({
+      let currentConfig = null;
+      function renderRadar(config) {
+        currentConfig = config;
+        radar_visualization(config);
+      }
+
+      const initialConfig = {
         svg_id: "radar",
         title: "3 Quadrants × 4 Rings",
         quadrants: [{ name: "Tools" }, { name: "Techniques" }, { name: "Platforms" }],
@@ -218,6 +233,16 @@
           { label: "Cloud9", quadrant: 2, ring: 3, moved: 0, active: true },
           { label: "Nitrous", quadrant: 2, ring: 3, moved: -1, active: true },
         ],
+      };
+
+      renderRadar(initialConfig);
+
+      // Initialize toolbar using the helper
+      radar_visualization.initDemoToolbar({
+        demoSlug: "demo-3x4",
+        getCurrentConfig: () => currentConfig,
+        onConfigImport: config => renderRadar(config),
+        jsonIO: radar_visualization.jsonIO,
       });
     </script>
 
