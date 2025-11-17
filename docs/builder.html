@@ -40,8 +40,10 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     <link rel="shortcut icon" href="./favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-    <meta name="apple-mobile-web-app-title" content="Tech Radar">
-    <link rel="manifest" href="./site.webmanifest">
+    <meta name="apple-mobile-web-app-title" content="Tech Radar Builder">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="./builder.webmanifest">
     <meta name="theme-color" content="#1976d2">
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -707,7 +709,105 @@
             updateUI();
             renderRadar();
             initializeJsonToolbar();
+            registerServiceWorker();
         });
+
+        /**
+         * Register Service Worker for PWA offline functionality
+         */
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker
+                        .register('./builder-sw.js')
+                        .then((registration) => {
+                            console.log('[PWA] Service Worker registered successfully:', registration.scope);
+
+                            // Check for updates periodically
+                            registration.addEventListener('updatefound', () => {
+                                const newWorker = registration.installing;
+                                console.log('[PWA] New Service Worker found, installing...');
+
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        // New service worker available, show update notification
+                                        showUpdateNotification();
+                                    }
+                                });
+                            });
+
+                            // Listen for service worker messages
+                            navigator.serviceWorker.addEventListener('message', (event) => {
+                                if (event.data && event.data.type === 'OFFLINE_READY') {
+                                    console.log('[PWA] App is ready for offline use');
+                                }
+                            });
+                        })
+                        .catch((error) => {
+                            console.error('[PWA] Service Worker registration failed:', error);
+                        });
+
+                    // Check if the app is already installed
+                    window.addEventListener('beforeinstallprompt', (event) => {
+                        // Prevent the default install prompt
+                        event.preventDefault();
+                        // Store the event for later use
+                        window.deferredInstallPrompt = event;
+                        console.log('[PWA] Install prompt available');
+                    });
+
+                    // Detect when the app is successfully installed
+                    window.addEventListener('appinstalled', () => {
+                        console.log('[PWA] App installed successfully');
+                        window.deferredInstallPrompt = null;
+                    });
+                });
+            } else {
+                console.warn('[PWA] Service Workers are not supported in this browser');
+            }
+        }
+
+        /**
+         * Show notification when a new version is available
+         */
+        function showUpdateNotification() {
+            const updateBanner = document.createElement('div');
+            updateBanner.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: #1976d2;
+                color: white;
+                padding: 1rem;
+                text-align: center;
+                z-index: 10000;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            `;
+            updateBanner.innerHTML = `
+                <span>A new version of Tech Radar Builder is available!</span>
+                <button style="
+                    margin-left: 1rem;
+                    padding: 0.5rem 1rem;
+                    background: white;
+                    color: #1976d2;
+                    border: none;
+                    border-radius: 4px;
+                    font-weight: 600;
+                    cursor: pointer;
+                " onclick="window.location.reload()">Update Now</button>
+                <button style="
+                    margin-left: 0.5rem;
+                    padding: 0.5rem 1rem;
+                    background: transparent;
+                    color: white;
+                    border: 1px solid white;
+                    border-radius: 4px;
+                    cursor: pointer;
+                " onclick="this.parentElement.remove()">Dismiss</button>
+            `;
+            document.body.insertBefore(updateBanner, document.body.firstChild);
+        }
 
         function initializeJsonToolbar() {
             const importButton = document.getElementById('jsonImportButton');
@@ -1002,7 +1102,7 @@
             saveToLocalStorage();
         }
 
-        function _editEntry(index) {
+        function editEntry(index) {
             const entry = state.entries[index];
             state.editingIndex = index;
 
@@ -1032,7 +1132,7 @@
             document.getElementById('entryLink').value = '';
         }
 
-        function _deleteEntry(index) {
+        function deleteEntry(index) {
             if (confirm('Are you sure you want to delete this entry?')) {
                 state.entries.splice(index, 1);
                 updateEntriesList();
@@ -1190,7 +1290,7 @@
                 return clean;
             });
 
-            const _config = {
+            const config = {
                 svg_id: 'radar',
                 width: 1000,
                 height: 800,
@@ -1205,7 +1305,7 @@
                 entries: cleanEntries
             };
 
-            const _code = `<!DOCTYPE html>
+            const code = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -1450,9 +1550,6 @@
             saveToLocalStorage();
         }
 
-        // Make functions globally available
-        window.editEntry = editEntry;
-        window.deleteEntry = deleteEntry;
     </script>
 </body>
 
