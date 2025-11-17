@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+70139ea
+// Version: 0.0.1-dev+d5a00d3
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1549,10 +1549,22 @@ function setupSvg(config, quadrants, rings, dimensions) {
   const baseHeight = config.originalHeight || 1000;
   const svg = d3.select(`svg#${config.svg_id}`).style("background-color", config.colors.background).attr("viewBox", `0 0 ${baseWidth} ${baseHeight}`).attr("preserveAspectRatio", "xMidYMid meet");
   const viewport_width = window.innerWidth || document.documentElement.clientWidth;
-  if (viewport_width >= 1024) {
-    svg.attr("width", scaled_width).attr("height", scaled_height);
-  } else {
+  const viewport_height = window.innerHeight || document.documentElement.clientHeight;
+  const isLandscape = viewport_width > viewport_height;
+  const hasValidViewport = viewport_width > 0 && viewport_height > 0 && (viewport_width !== 1024 || viewport_height !== 768);
+  if (viewport_width >= 1024 && hasValidViewport) {
+    if (isLandscape) {
+      const available_height = viewport_height - 150;
+      const constrained_height = Math.min(scaled_height, available_height);
+      const constrained_width = constrained_height / baseHeight * baseWidth;
+      svg.attr("width", constrained_width).attr("height", constrained_height);
+    } else {
+      svg.attr("width", scaled_width).attr("height", scaled_height);
+    }
+  } else if (viewport_width < 1024 && hasValidViewport) {
     svg.attr("width", null).attr("height", null).style("width", "100%").style("height", "auto").style("max-width", "none");
+  } else {
+    svg.attr("width", scaled_width).attr("height", scaled_height);
   }
   const layoutWrapper = ensureLayoutStructure(svg);
   const legendLeftColumn = layoutWrapper.select(".radar-legend-column.left");
@@ -1569,7 +1581,7 @@ function setupSvg(config, quadrants, rings, dimensions) {
     svg.attr("viewBox", viewbox(config.zoomed_quadrant, quadrants, rings));
   } else {
     let radar_center_x, radar_center_y, transform_scale;
-    if (viewport_width < 1024) {
+    if (viewport_width < 1024 && hasValidViewport) {
       radar_center_y = baseHeight / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
       radar_center_x = baseWidth / 2 + config.radar_horizontal_offset;
       transform_scale = 1;

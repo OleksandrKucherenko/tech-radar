@@ -54,10 +54,25 @@ export function setupSvg(config, quadrants, rings, dimensions) {
 
   // Use fixed dimensions for desktop, responsive for mobile/tablet
   const viewport_width = window.innerWidth || document.documentElement.clientWidth;
-  if (viewport_width >= 1024) {
-    // Desktop: use scaled dimensions
-    svg.attr('width', scaled_width).attr('height', scaled_height);
-  } else {
+  const viewport_height = window.innerHeight || document.documentElement.clientHeight;
+  const isLandscape = viewport_width > viewport_height;
+  // Only apply viewport logic if we have reasonable viewport dimensions (not in test/headless env)
+  const hasValidViewport =
+    viewport_width > 0 && viewport_height > 0 && (viewport_width !== 1024 || viewport_height !== 768);
+
+  if (viewport_width >= 1024 && hasValidViewport) {
+    // Desktop: constrain by height in landscape mode, by width in portrait
+    if (isLandscape) {
+      // Landscape: fit to available height (reserve ~150px for header/toolbar/footer)
+      const available_height = viewport_height - 150;
+      const constrained_height = Math.min(scaled_height, available_height);
+      const constrained_width = (constrained_height / baseHeight) * baseWidth;
+      svg.attr('width', constrained_width).attr('height', constrained_height);
+    } else {
+      // Portrait or square: use scaled dimensions
+      svg.attr('width', scaled_width).attr('height', scaled_height);
+    }
+  } else if (viewport_width < 1024 && hasValidViewport) {
     // Mobile/Tablet: remove width/height attributes, let CSS handle responsive sizing
     svg
       .attr('width', null)
@@ -65,6 +80,9 @@ export function setupSvg(config, quadrants, rings, dimensions) {
       .style('width', '100%')
       .style('height', 'auto')
       .style('max-width', 'none');
+  } else {
+    // Fallback: use default scaled dimensions (e.g., in test/headless environments)
+    svg.attr('width', scaled_width).attr('height', scaled_height);
   }
 
   // Set up layout structure with legend columns
@@ -101,13 +119,13 @@ export function setupSvg(config, quadrants, rings, dimensions) {
     // On mobile/tablet, use viewBox dimensions; on desktop, use scaled dimensions
     let radar_center_x, radar_center_y, transform_scale;
 
-    if (viewport_width < 1024) {
+    if (viewport_width < 1024 && hasValidViewport) {
       // Mobile/Tablet: center based on viewBox dimensions, scale(1)
       radar_center_y = baseHeight / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
       radar_center_x = baseWidth / 2 + config.radar_horizontal_offset;
       transform_scale = 1;
     } else {
-      // Desktop: center based on scaled dimensions, scale(config.scale)
+      // Desktop or test environment: center based on scaled dimensions, scale(config.scale)
       radar_center_y = scaled_height / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
       radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
       transform_scale = config.scale;

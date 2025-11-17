@@ -78,9 +78,10 @@ td {
 }
 
 .radar-svg-container {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   display: flex;
   justify-content: center;
+  align-items: center;
   overflow: visible;
   width: 100%;
 }
@@ -498,10 +499,18 @@ td {
   /* Overall layout: Side by side */
   .radar-layout {
     flex-direction: row;
+    align-items: flex-start;
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-svg-container svg {
+    max-height: calc(100vh - 150px);
   }
 
   .radar-legend-column {
     display: flex;
+    height: auto;
+    overflow-y: auto;
   }
 
   .legend-quadrant-name {
@@ -528,11 +537,19 @@ td {
   /* Overall layout: Side by side with wider legends */
   .radar-layout {
     flex-direction: row;
+    align-items: flex-start;
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-svg-container svg {
+    max-height: calc(100vh - 150px);
   }
 
   .radar-layout .radar-legend-column {
     flex: 1 0 24%;
     display: flex;
+    height: auto;
+    overflow-y: auto;
   }
 
   .left,
@@ -569,11 +586,19 @@ td {
   /* Overall layout: Side by side with wider legends */
   .radar-layout {
     flex-direction: row;
+    align-items: flex-start;
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-svg-container svg {
+    max-height: calc(100vh - 150px);
   }
 
   .radar-layout .radar-legend-column {
     flex: 1 0 26%;
     display: flex;
+    height: auto;
+    overflow-y: auto;
   }
 
   .left,
@@ -613,11 +638,19 @@ td {
   /* Overall layout: Side by side with widest legends */
   .radar-layout {
     flex-direction: row;
+    align-items: flex-start;
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-svg-container svg {
+    max-height: calc(100vh - 150px);
   }
 
   .radar-layout .radar-legend-column {
     flex: 1 0 28%;
     display: flex;
+    height: auto;
+    overflow-y: auto;
   }
 
   .left,
