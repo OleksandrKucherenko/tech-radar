@@ -184,7 +184,7 @@
             print_layout: true,
             links_in_new_tabs: true,
             entries: data.entries,
-            descriptionTransform: typeof marked !== 'undefined' ? (text) => marked.parse(text) : null,
+            descriptionTransform: typeof marked !== "undefined" ? text => marked.parse(text) : null,
           };
           // Store initial config for reset
           initialConfig = JSON.parse(JSON.stringify(config));
@@ -330,7 +330,7 @@
         font-size: 12px;
       "
     >
-      Build: <code>330d625</code>
+      Build: <code>62335e4</code>
     </footer>
   </body>
 </html>
