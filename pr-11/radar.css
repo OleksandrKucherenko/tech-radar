@@ -1,3 +1,42 @@
+/* ==========================================================================
+   DEBUG LAYOUT BORDERS - Uncomment to visualize element boundaries
+   ========================================================================== */
+
+/* Debug borders disabled - Uncomment the section below to enable */
+/*
+* {
+  outline: 1px solid rgba(255, 0, 0, 0.3) !important;
+}
+
+.radar-container {
+  outline: 3px solid blue !important;
+}
+
+.radar-layout {
+  outline: 3px solid green !important;
+}
+
+.radar-svg-container {
+  outline: 3px solid orange !important;
+}
+
+.radar-svg-container svg {
+  outline: 3px solid red !important;
+}
+
+.radar-legend-column {
+  outline: 2px solid purple !important;
+}
+
+.legend-section {
+  outline: 1px solid cyan !important;
+}
+*/
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+
 body {
   font-family: "Source Sans Pro", arial, helvetica, sans-serif;
   padding-bottom: 50px;
@@ -39,9 +78,19 @@ td {
 }
 
 .radar-svg-container {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   display: flex;
   justify-content: center;
+  align-items: center;
+  overflow: visible;
+  width: 100%;
+}
+
+.radar-svg-container svg {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
 }
 
 .radar-legend-column {
@@ -89,14 +138,16 @@ td {
 }
 
 .legend-rings {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(var(--legend-columns, 1), 1fr);
+  grid-auto-flow: row;
   gap: 10px 14px;
+  align-items: start;
 }
 
 .legend-ring {
-  flex: 1 1 calc(100% / var(--legend-columns, 2) - 14px);
-  min-width: 140px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .legend-ring-name {
@@ -227,6 +278,384 @@ td {
 
   .legend-section {
     padding: 4px;
+  }
+}
+
+/* Responsive Legend Column Layout - Mobile First Approach */
+
+/* Extra small mobile - Portrait phones: 2 columns (< 480px) */
+@media (max-width: 479px) {
+  /* Remove horizontal padding to allow full-width radar */
+  .radar-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Rings: 2 columns within each legend */
+  .legend-rings {
+    --legend-columns: 2;
+    gap: 6px 8px;
+  }
+
+  .legend-section {
+    gap: 6px;
+    padding: 6px;
+  }
+
+  /* Overall layout: Vertical stacking */
+  .radar-layout {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .radar-svg-container {
+    order: 1;
+    width: 100%;
+    min-height: 300px;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .radar-svg-container svg {
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+  }
+
+  .radar-legend-column {
+    width: 100%;
+    flex: 1 1 auto;
+    font-size: 11px;
+    display: flex;
+  }
+
+  .left {
+    position: relative;
+    width: 100%;
+    left: auto;
+    order: 2;
+  }
+
+  .right {
+    position: relative;
+    width: 100%;
+    right: auto;
+    order: 3;
+  }
+
+  .legend-quadrant-name {
+    font-size: 12px;
+  }
+
+  .legend-ring-name {
+    font-size: 10px;
+  }
+
+  .legend-entry {
+    font-size: 9px;
+    padding: 1px 3px;
+  }
+}
+
+/* Mobile: 2 columns (480px - 639px) */
+@media (min-width: 480px) and (max-width: 639px) {
+  /* Remove horizontal padding to allow full-width radar */
+  .radar-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Rings: 2 columns within each legend */
+  .legend-rings {
+    --legend-columns: 2;
+    gap: 8px 10px;
+  }
+
+  .legend-section {
+    gap: 8px;
+  }
+
+  /* Overall layout: Vertical stacking */
+  .radar-layout {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .radar-svg-container {
+    order: 1;
+    width: 100%;
+    min-height: 350px;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .radar-svg-container svg {
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+  }
+
+  .radar-legend-column {
+    width: 100%;
+    flex: 1 1 auto;
+    display: flex;
+  }
+
+  .left {
+    position: relative;
+    width: 100%;
+    left: auto;
+    order: 2;
+  }
+
+  .right {
+    position: relative;
+    width: 100%;
+    right: auto;
+    order: 3;
+  }
+
+  .legend-quadrant-name {
+    font-size: 13px;
+  }
+
+  .legend-entry {
+    font-size: 10px;
+  }
+}
+
+/* Portrait tablets: 3 columns, two-row layout (640px - 1023px) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* Rings: 3 columns within each legend */
+  .legend-rings {
+    --legend-columns: 3;
+    gap: 8px 12px;
+  }
+
+  .legend-section {
+    gap: 8px;
+  }
+
+  /* Overall layout: Row with wrapping (radar row 1, legends row 2) */
+  .radar-layout {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .radar-svg-container {
+    order: 1;
+    flex: 0 0 100%;
+    width: 100%;
+    min-height: 600px;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .radar-svg-container svg {
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+  }
+
+  /* Legends side-by-side in row 2, each taking ~50% */
+  .radar-layout .radar-legend-column {
+    flex: 1 1 calc(50% - 10px);
+    display: flex;
+  }
+
+  .radar-legend-column.left {
+    position: relative;
+    left: auto;
+    order: 2;
+  }
+
+  .radar-legend-column.right {
+    position: relative;
+    right: auto;
+    order: 3;
+  }
+
+  .legend-quadrant-name {
+    font-size: 14px;
+  }
+
+  .legend-entry {
+    font-size: 11px;
+  }
+}
+
+/* Landscape tablets and small desktops: 2-3 columns, side-by-side layout (1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  /* Rings: 2 columns within sidebar legends */
+  .legend-rings {
+    --legend-columns: 2;
+    gap: 8px 12px;
+  }
+
+  /* Overall layout: Side by side */
+  .radar-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-svg-container svg {
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-legend-column {
+    display: flex;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .legend-quadrant-name {
+    font-size: 13px;
+  }
+
+  .legend-entry {
+    font-size: 10px;
+  }
+}
+
+/* Desktop and laptops: 3 columns (1280px - 1919px) */
+@media (min-width: 1280px) and (max-width: 1919px) {
+  /* Rings: 3 columns within sidebar legends */
+  .legend-rings {
+    --legend-columns: 3;
+    gap: 8px 12px;
+  }
+
+  .legend-section {
+    padding: 8px;
+  }
+
+  /* Overall layout: Side by side with wider legends */
+  .radar-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-svg-container svg {
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-layout .radar-legend-column {
+    flex: 1 0 24%;
+    display: flex;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .left,
+  .right {
+    width: 28%;
+  }
+}
+
+/* Wide screens: 4 columns (1920px - 2559px) */
+@media (min-width: 1920px) and (max-width: 2559px) {
+  /* Rings: 4 columns within sidebar legends */
+  .legend-rings {
+    --legend-columns: 4;
+    gap: 10px 16px;
+  }
+
+  .legend-section {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .legend-quadrant-name {
+    font-size: 14px;
+  }
+
+  .legend-ring-name {
+    font-size: 12px;
+  }
+
+  .legend-entry {
+    font-size: 12px;
+  }
+
+  /* Overall layout: Side by side with wider legends */
+  .radar-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-svg-container svg {
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-layout .radar-legend-column {
+    flex: 1 0 26%;
+    display: flex;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .left,
+  .right {
+    width: 30%;
+  }
+}
+
+/* Ultra-wide displays: 5 columns (≥ 2560px) */
+@media (min-width: 2560px) {
+  /* Rings: 5 columns within sidebar legends */
+  .legend-rings {
+    --legend-columns: 5;
+    gap: 12px 18px;
+  }
+
+  .legend-section {
+    padding: 12px;
+  }
+
+  .radar-legend-column {
+    font-size: 13px;
+  }
+
+  .legend-quadrant-name {
+    font-size: 15px;
+  }
+
+  .legend-ring-name {
+    font-size: 13px;
+  }
+
+  .legend-entry {
+    font-size: 13px;
+  }
+
+  /* Overall layout: Side by side with widest legends */
+  .radar-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-svg-container svg {
+    max-height: calc(100vh - 150px);
+  }
+
+  .radar-layout .radar-legend-column {
+    flex: 1 0 28%;
+    display: flex;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .left,
+  .right {
+    width: 32%;
   }
 }
 

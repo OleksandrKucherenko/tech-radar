@@ -695,7 +695,7 @@
               "Factory is an agent-native development platform with purpose-built AI agents called Droids that automate the entire software development lifecycle.\n\n**Agent-Native SDLC:**\n- Droids for coding, testing, debugging, deployment\n- VS Code, JetBrains, and terminal integration\n- Deep organization context awareness\n- Automate beyond just coding tasks\n- Enterprise-ready platform\n- General availability since 2025\n\nFactory enables teams to build a 'droid army' of specialized AI agents that work together across the complete development workflow.",
           },
           {
-            label: "Aider",
+            label: "Aider CLI",
             link: "https://aider.chat/",
             quadrant: 1,
             ring: 4,
@@ -775,6 +775,16 @@
             active: true,
             description:
               "DeepWiki is an AI-powered knowledge management system that uses RAG to provide intelligent answers from your organization's documentation.\n\n**Knowledge Management:**\n- Connect multiple data sources\n- Intelligent document indexing\n- Conversational search\n- Team collaboration features\n- Access controls and permissions\n- Analytics on knowledge usage\n\nDeepWiki helps teams unlock insights from their institutional knowledge base.",
+          },
+          {
+            label: "Obsidian + Tars + Semantic Search + Smart Connections",
+            link: "https://obsidian.md/",
+            quadrant: 2,
+            ring: 0,
+            moved: 2,
+            active: true,
+            description:
+              "Obsidian is a powerful personal knowledge management app based on local markdown files, enhanced with AI plugins for intelligent note discovery and generation.\n\n**Core Features:**\n- Local-first markdown-based notes\n- Bi-directional linking and graph view\n- **Tars Plugin:** AI text generation using Claude, OpenAI, Gemini, and other LLMs based on tag suggestions\n- **Semantic Search:** Find notes by meaning using OpenAI embeddings\n- **Smart Connections:** Discover related notes and chat with your knowledge base using built-in local AI\n- Privacy-focused: all data stored locally\n- Extensible plugin ecosystem\n\nThis combination transforms Obsidian into an AI-powered personal knowledge base that helps you think, connect ideas, and generate content while keeping your data private and under your control.",
           },
 
           // Databases - Vector & Graph (Quadrant 3)
@@ -891,7 +901,7 @@
               "LobeChat is an open-source, modern chat framework for building AI chat applications with support for multiple LLM providers and extensive plugin ecosystem.\n\n**Framework Strengths:**\n- Multi-model support (OpenAI, Azure, Anthropic, etc.)\n- Beautiful, modern UI\n- Plugin and tool system\n- Self-hostable\n- Active development community\n- Image generation support\n\nLobeChat provides a polished alternative to building chat interfaces from scratch.",
           },
           {
-            label: "AzureDevOps Mcp",
+            label: "Azure DevOps Mcp",
             link: "https://github.com/microsoft/azure-devops-mcp",
             quadrant: 4,
             ring: 0,
@@ -914,11 +924,41 @@
             label: "z.ai WebSearch MCP",
             link: "https://docs.z.ai/devpack/mcp/search-mcp-server",
             quadrant: 4,
-            ring: 2,
-            moved: 2,
+            ring: 1,
+            moved: 1,
             active: true,
             description:
               "Z.ai's WebSearch MCP server brings real-time web search capabilities to AI assistants through the Model Context Protocol.\n\n**Search Features:**\n- Real-time web search\n- Result summarization\n- Source citation\n- Multiple search engines\n- Content extraction\n- MCP standard implementation\n\nThis server allows AI assistants to access current information from the web during conversations.",
+          },
+          {
+            label: "Exa MCP",
+            link: "https://docs.exa.ai/reference/exa-mcp",
+            quadrant: 4,
+            ring: 1,
+            moved: 0,
+            active: true,
+            description:
+              "Exa MCP Server is a powerful web search API designed to facilitate the Model Context Protocol (MCP). It serves as a bridge between AI assistants and real-time web search capabilities.\n\n**Key Features:**\n- Real-time search and research tools\n- Secure, standardized AI-to-data connections\n- Web intelligence integration\n- MCP standard compliance\n- Extended AI assistant capabilities\n- Comprehensive search results\n\nExa MCP enables AI assistants like Claude to access current web information and research data during conversations.",
+          },
+          {
+            label: "Brave Search MCP",
+            link: "https://github.com/brave/brave-search-mcp-server",
+            quadrant: 4,
+            ring: 1,
+            moved: 0,
+            active: true,
+            description:
+              "An MCP server implementation that integrates the Brave Search API, providing comprehensive search capabilities to AI assistants through the Model Context Protocol.\n\n**Search Capabilities:**\n- Web search with privacy focus\n- Local business and points of interest search\n- Image search integration\n- Video search functionality\n- Multiple search result types\n- Privacy-preserving design\n\nBrave Search MCP brings Brave's independent search index and privacy-first approach to AI assistants, offering an alternative to traditional search providers.",
+          },
+          {
+            label: "Docker MCP Toolkit",
+            link: "https://docs.docker.com/ai/mcp-catalog-and-toolkit/toolkit/",
+            quadrant: 4,
+            ring: 1,
+            moved: 0,
+            active: true,
+            description:
+              "The Docker MCP Toolkit is a management interface integrated into Docker Desktop that simplifies setting up, managing, and running containerized MCP servers.\n\n**Management Features:**\n- Set up and manage MCP servers\n- Run containerized MCP servers\n- Connect servers to AI assistants\n- Streamlined deployment workflow\n- Integration with Docker Desktop\n- Standardized MCP server hosting\n\nDocker MCP Toolkit makes it easy to deploy and manage Model Context Protocol servers, enabling seamless integration between AI applications and external tools.",
           },
           {
             label: "OpenWebUI",
@@ -941,6 +981,6 @@
       radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
     </script>
 
-    <footer>Build: <code>d5c4f45</code></footer>
+    <footer>Build: <code>382a4b9</code></footer>
   </body>
 </html>

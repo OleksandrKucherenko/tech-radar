@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+af566fb
+// Version: 0.0.1-dev+d5a00d3
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -84,6 +84,8 @@ function applyConfigDefaults(config) {
   config.svg_id = config.svg || "radar";
   config.width = config.width || 1450;
   config.height = config.height || 1000;
+  config.originalWidth = config.originalWidth || config.width;
+  config.originalHeight = config.originalHeight || config.height;
   config.colors = "colors" in config ? config.colors : {
     background: "#fff",
     grid: "#dddde0",
@@ -1543,7 +1545,27 @@ function setupSvg(config, quadrants, rings, dimensions) {
   config.scale = config.scale || 1;
   const scaled_width = config.width * config.scale;
   const scaled_height = config.height * config.scale;
-  const svg = d3.select(`svg#${config.svg_id}`).style("background-color", config.colors.background).attr("width", scaled_width).attr("height", scaled_height);
+  const baseWidth = config.originalWidth || 1450;
+  const baseHeight = config.originalHeight || 1000;
+  const svg = d3.select(`svg#${config.svg_id}`).style("background-color", config.colors.background).attr("viewBox", `0 0 ${baseWidth} ${baseHeight}`).attr("preserveAspectRatio", "xMidYMid meet");
+  const viewport_width = window.innerWidth || document.documentElement.clientWidth;
+  const viewport_height = window.innerHeight || document.documentElement.clientHeight;
+  const isLandscape = viewport_width > viewport_height;
+  const hasValidViewport = viewport_width > 0 && viewport_height > 0 && (viewport_width !== 1024 || viewport_height !== 768);
+  if (viewport_width >= 1024 && hasValidViewport) {
+    if (isLandscape) {
+      const available_height = viewport_height - 150;
+      const constrained_height = Math.min(scaled_height, available_height);
+      const constrained_width = constrained_height / baseHeight * baseWidth;
+      svg.attr("width", constrained_width).attr("height", constrained_height);
+    } else {
+      svg.attr("width", scaled_width).attr("height", scaled_height);
+    }
+  } else if (viewport_width < 1024 && hasValidViewport) {
+    svg.attr("width", null).attr("height", null).style("width", "100%").style("height", "auto").style("max-width", "none");
+  } else {
+    svg.attr("width", scaled_width).attr("height", scaled_height);
+  }
   const layoutWrapper = ensureLayoutStructure(svg);
   const legendLeftColumn = layoutWrapper.select(".radar-legend-column.left");
   const legendRightColumn = layoutWrapper.select(".radar-legend-column.right");
@@ -1558,9 +1580,17 @@ function setupSvg(config, quadrants, rings, dimensions) {
   if ("zoomed_quadrant" in config) {
     svg.attr("viewBox", viewbox(config.zoomed_quadrant, quadrants, rings));
   } else {
-    const radar_center_y = scaled_height / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
-    const radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
-    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
+    let radar_center_x, radar_center_y, transform_scale;
+    if (viewport_width < 1024 && hasValidViewport) {
+      radar_center_y = baseHeight / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
+      radar_center_x = baseWidth / 2 + config.radar_horizontal_offset;
+      transform_scale = 1;
+    } else {
+      radar_center_y = scaled_height / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
+      radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
+      transform_scale = config.scale;
+    }
+    radar.attr("transform", translate(radar_center_x, radar_center_y).concat(`scale(${transform_scale})`));
   }
   config.font_family = config.font_family || "Arial, Helvetica";
   const grid = radar.append("g");
