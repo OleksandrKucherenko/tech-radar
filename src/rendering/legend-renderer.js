@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import { showDescriptionModal } from './interactions.js';
+
 /**
  * Renders legend columns in the left and right containers.
  * Distributes quadrants across columns and renders rings with their entries.
@@ -111,10 +113,11 @@ export function renderLegendColumns(
         .data(entriesInRing)
         .enter()
         .append('a')
-        .attr('href', d => (d.link ? d.link : '#'))
-        .attr('target', d => (d.link && config.links_in_new_tabs ? '_blank' : null))
+        .attr('href', d => (d.link && !d.description ? d.link : '#'))
+        .attr('target', d => (d.link && !d.description && config.links_in_new_tabs ? '_blank' : null))
         .attr('id', d => `legendItem${d.id}`)
         .attr('class', 'legend-entry')
+        .attr('style', d => (d.description ? 'cursor: pointer;' : ''))
         .text(d => `${d.id}. ${d.label}`)
         .on('mouseover', (_event, d) => {
           showBubble(d, config);
@@ -123,6 +126,13 @@ export function renderLegendColumns(
         .on('mouseout', (_event, d) => {
           hideBubble();
           unhighlightLegendItem(d);
+        })
+        .on('click', (_event, d) => {
+          if (d.description) {
+            _event.preventDefault();
+            _event.stopPropagation();
+            showDescriptionModal(d, config);
+          }
         });
     }
   }
