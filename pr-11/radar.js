@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.17.0
+// Version: 0.0.1-dev+555165d
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1192,20 +1192,129 @@ class EntryProcessor {
   }
 }
 
-// src/rendering/blip-renderer.js
-function renderBlips(rinkSelection, entries, config, showBubble, hideBubble, highlightLegendItem, unhighlightLegendItem) {
+// src/rendering/interactions.js
+function createBubble(radarSelection, fontFamily) {
+  const bubble = radarSelection.append("g").attr("id", "bubble").attr("x", 0).attr("y", 0).style("opacity", 0).style("pointer-events", "none").style("user-select", "none");
+  bubble.append("rect").attr("rx", 4).attr("ry", 4).style("fill", "#333");
+  bubble.append("text").style("font-family", fontFamily).style("font-size", "10px").style("fill", "#fff");
+  bubble.append("path").attr("d", "M 0,0 10,0 5,8 z").style("fill", "#333");
+  return bubble;
+}
+function showBubble(d, config) {
+  if (d.active || config.print_layout) {
+    const d3 = window.d3;
+    const tooltip = d3.select("#bubble text").text(d.label);
+    const bbox = tooltip.node().getBBox();
+    const x = d.rendered_x !== undefined ? d.rendered_x : d.x;
+    const y = d.rendered_y !== undefined ? d.rendered_y : d.y;
+    d3.select("#bubble").attr("transform", translate(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
+    d3.select("#bubble rect").attr("x", -5).attr("y", -bbox.height).attr("width", bbox.width + 10).attr("height", bbox.height + 4);
+    d3.select("#bubble path").attr("transform", translate(bbox.width / 2 - 5, 3));
+  }
+}
+function hideBubble() {
   const d3 = window.d3;
-  const blips = rinkSelection.selectAll(".blip").data(entries).enter().append("g").attr("class", "blip").attr("transform", (d) => translate(d.x, d.y)).on("mouseover", (_event, d) => {
-    showBubble(d, config);
-    highlightLegendItem(d);
+  d3.select("#bubble").attr("transform", translate(0, 0)).style("opacity", 0);
+}
+function highlightLegendItem(d) {
+  const legendItem = document.getElementById(`legendItem${d.id}`);
+  if (legendItem) {
+    legendItem.classList.add("legend-highlight");
+  }
+}
+function unhighlightLegendItem(d) {
+  const legendItem = document.getElementById(`legendItem${d.id}`);
+  if (legendItem) {
+    legendItem.classList.remove("legend-highlight");
+  }
+}
+function createDescriptionModal() {
+  let modal = document.getElementById("tech-radar-description-modal");
+  if (modal) {
+    return modal;
+  }
+  modal = document.createElement("div");
+  modal.id = "tech-radar-description-modal";
+  modal.className = "tech-radar-modal";
+  modal.innerHTML = `
+    <div class="tech-radar-modal-backdrop"></div>
+    <div class="tech-radar-modal-content">
+      <button class="tech-radar-modal-close" aria-label="Close">&times;</button>
+      <h2 class="tech-radar-modal-title"></h2>
+      <div class="tech-radar-modal-body"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  const backdrop = modal.querySelector(".tech-radar-modal-backdrop");
+  const closeButton = modal.querySelector(".tech-radar-modal-close");
+  const closeModal = () => {
+    modal.style.display = "none";
+    document.body.style.overflow = "";
+  };
+  backdrop.addEventListener("click", closeModal);
+  closeButton.addEventListener("click", closeModal);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.style.display === "flex") {
+      closeModal();
+    }
+  });
+  return modal;
+}
+function showDescriptionModal(entry, config) {
+  if (!entry.description) {
+    return;
+  }
+  const modal = createDescriptionModal();
+  const title = modal.querySelector(".tech-radar-modal-title");
+  const body = modal.querySelector(".tech-radar-modal-body");
+  title.textContent = entry.label;
+  let descriptionHtml = "";
+  if (config.descriptionTransform && typeof config.descriptionTransform === "function") {
+    descriptionHtml = config.descriptionTransform(entry.description);
+  } else {
+    const paragraphs = entry.description.split(`
+
+`).map((para) => `<p>${para.replace(/\n/g, "<br>")}</p>`).join("");
+    descriptionHtml = paragraphs;
+  }
+  body.innerHTML = descriptionHtml;
+  if (entry.link) {
+    const linkEl = document.createElement("p");
+    linkEl.className = "tech-radar-modal-link";
+    const anchor = document.createElement("a");
+    anchor.href = entry.link;
+    anchor.textContent = "Learn more →";
+    if (config.links_in_new_tabs) {
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+    }
+    linkEl.appendChild(anchor);
+    body.appendChild(linkEl);
+  }
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+// src/rendering/blip-renderer.js
+function renderBlips(rinkSelection, entries, config, showBubble2, hideBubble2, highlightLegendItem2, unhighlightLegendItem2) {
+  const d3 = window.d3;
+  const blips = rinkSelection.selectAll(".blip").data(entries).enter().append("g").attr("class", "blip").attr("transform", (d) => translate(d.x, d.y)).attr("style", (d) => d.description ? "cursor: pointer;" : "").on("mouseover", (_event, d) => {
+    showBubble2(d, config);
+    highlightLegendItem2(d);
   }).on("mouseout", (_event, d) => {
-    hideBubble();
-    unhighlightLegendItem(d);
+    hideBubble2();
+    unhighlightLegendItem2(d);
+  }).on("click", (_event, d) => {
+    if (d.description) {
+      _event.preventDefault();
+      _event.stopPropagation();
+      showDescriptionModal(d, config);
+    }
   });
   blips.each(function(d) {
     const blip = d3.select(this);
     let blipContainer = blip;
-    if (d.active && Object.hasOwn(d, "link") && d.link) {
+    if (d.active && Object.hasOwn(d, "link") && d.link && !d.description) {
       blipContainer = blip.append("a").attr("xlink:href", d.link);
       if (config.links_in_new_tabs) {
         blipContainer.attr("target", "_blank");
@@ -1379,43 +1488,6 @@ function renderTitleAndFooter(radarSelection, config) {
   }
 }
 
-// src/rendering/interactions.js
-function createBubble(radarSelection, fontFamily) {
-  const bubble = radarSelection.append("g").attr("id", "bubble").attr("x", 0).attr("y", 0).style("opacity", 0).style("pointer-events", "none").style("user-select", "none");
-  bubble.append("rect").attr("rx", 4).attr("ry", 4).style("fill", "#333");
-  bubble.append("text").style("font-family", fontFamily).style("font-size", "10px").style("fill", "#fff");
-  bubble.append("path").attr("d", "M 0,0 10,0 5,8 z").style("fill", "#333");
-  return bubble;
-}
-function showBubble(d, config) {
-  if (d.active || config.print_layout) {
-    const d3 = window.d3;
-    const tooltip = d3.select("#bubble text").text(d.label);
-    const bbox = tooltip.node().getBBox();
-    const x = d.rendered_x !== undefined ? d.rendered_x : d.x;
-    const y = d.rendered_y !== undefined ? d.rendered_y : d.y;
-    d3.select("#bubble").attr("transform", translate(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
-    d3.select("#bubble rect").attr("x", -5).attr("y", -bbox.height).attr("width", bbox.width + 10).attr("height", bbox.height + 4);
-    d3.select("#bubble path").attr("transform", translate(bbox.width / 2 - 5, 3));
-  }
-}
-function hideBubble() {
-  const d3 = window.d3;
-  d3.select("#bubble").attr("transform", translate(0, 0)).style("opacity", 0);
-}
-function highlightLegendItem(d) {
-  const legendItem = document.getElementById(`legendItem${d.id}`);
-  if (legendItem) {
-    legendItem.classList.add("legend-highlight");
-  }
-}
-function unhighlightLegendItem(d) {
-  const legendItem = document.getElementById(`legendItem${d.id}`);
-  if (legendItem) {
-    legendItem.classList.remove("legend-highlight");
-  }
-}
-
 // src/rendering/legend-renderer.js
 function renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, config, numQuadrants, numRings, showBubble2, hideBubble2, highlightLegendItem2, unhighlightLegendItem2) {
   legendLeftColumn.html("");
@@ -1448,12 +1520,18 @@ function renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, con
       const ringBlock = ringsContainer.append("div").attr("class", "legend-ring");
       ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).text(config.rings[ring].name);
       const entriesList = ringBlock.append("div").attr("class", "legend-ring-entries");
-      entriesList.selectAll("a").data(entriesInRing).enter().append("a").attr("href", (d) => d.link ? d.link : "#").attr("target", (d) => d.link && config.links_in_new_tabs ? "_blank" : null).attr("id", (d) => `legendItem${d.id}`).attr("class", "legend-entry").text((d) => `${d.id}. ${d.label}`).on("mouseover", (_event, d) => {
+      entriesList.selectAll("a").data(entriesInRing).enter().append("a").attr("href", (d) => d.link && !d.description ? d.link : "#").attr("target", (d) => d.link && !d.description && config.links_in_new_tabs ? "_blank" : null).attr("id", (d) => `legendItem${d.id}`).attr("class", "legend-entry").attr("style", (d) => d.description ? "cursor: pointer;" : "").text((d) => `${d.id}. ${d.label}`).on("mouseover", (_event, d) => {
         showBubble2(d, config);
         highlightLegendItem2(d);
       }).on("mouseout", (_event, d) => {
         hideBubble2();
         unhighlightLegendItem2(d);
+      }).on("click", (_event, d) => {
+        if (d.description) {
+          _event.preventDefault();
+          _event.stopPropagation();
+          showDescriptionModal(d, config);
+        }
       });
     }
   }
