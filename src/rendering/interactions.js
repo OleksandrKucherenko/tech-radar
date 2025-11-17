@@ -130,3 +130,103 @@ export function createBlipInteractions(config) {
     },
   };
 }
+
+/**
+ * Creates or returns the description modal DOM element.
+ * The modal is created once and reused for all descriptions.
+ *
+ * @returns {HTMLElement} The modal DOM element
+ */
+export function createDescriptionModal() {
+  let modal = document.getElementById('tech-radar-description-modal');
+  if (modal) {
+    return modal;
+  }
+
+  modal = document.createElement('div');
+  modal.id = 'tech-radar-description-modal';
+  modal.className = 'tech-radar-modal';
+  modal.innerHTML = `
+    <div class="tech-radar-modal-backdrop"></div>
+    <div class="tech-radar-modal-content">
+      <button class="tech-radar-modal-close" aria-label="Close">&times;</button>
+      <h2 class="tech-radar-modal-title"></h2>
+      <div class="tech-radar-modal-body"></div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Setup close handlers
+  const backdrop = modal.querySelector('.tech-radar-modal-backdrop');
+  const closeButton = modal.querySelector('.tech-radar-modal-close');
+
+  const closeModal = () => {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
+  backdrop.addEventListener('click', closeModal);
+  closeButton.addEventListener('click', closeModal);
+
+  // ESC key handler
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closeModal();
+    }
+  });
+
+  return modal;
+}
+
+/**
+ * Shows the description modal for an entry.
+ * Displays the entry's description with optional Markdown rendering.
+ *
+ * @param {Object} entry - Entry data object with description property
+ * @param {Object} config - Configuration object with optional descriptionTransform function
+ */
+export function showDescriptionModal(entry, config) {
+  if (!entry.description) {
+    return;
+  }
+
+  const modal = createDescriptionModal();
+  const title = modal.querySelector('.tech-radar-modal-title');
+  const body = modal.querySelector('.tech-radar-modal-body');
+
+  title.textContent = entry.label;
+
+  // Transform description (e.g., Markdown to HTML)
+  let descriptionHtml = '';
+  if (config.descriptionTransform && typeof config.descriptionTransform === 'function') {
+    descriptionHtml = config.descriptionTransform(entry.description);
+  } else {
+    // Default: split into paragraphs
+    const paragraphs = entry.description
+      .split('\n\n')
+      .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
+      .join('');
+    descriptionHtml = paragraphs;
+  }
+
+  body.innerHTML = descriptionHtml;
+
+  // Add link if present
+  if (entry.link) {
+    const linkEl = document.createElement('p');
+    linkEl.className = 'tech-radar-modal-link';
+    const anchor = document.createElement('a');
+    anchor.href = entry.link;
+    anchor.textContent = 'Learn more →';
+    if (config.links_in_new_tabs) {
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+    }
+    linkEl.appendChild(anchor);
+    body.appendChild(linkEl);
+  }
+
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}

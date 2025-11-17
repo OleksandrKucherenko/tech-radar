@@ -16,6 +16,7 @@
  */
 
 import { translate } from './helpers.js';
+import { showDescriptionModal } from './interactions.js';
 
 /**
  * Renders blips (technology entry markers) on the radar.
@@ -48,6 +49,7 @@ export function renderBlips(
     .append('g')
     .attr('class', 'blip')
     .attr('transform', d => translate(d.x, d.y))
+    .attr('style', d => (d.description ? 'cursor: pointer;' : ''))
     .on('mouseover', (_event, d) => {
       showBubble(d, config);
       highlightLegendItem(d);
@@ -55,15 +57,22 @@ export function renderBlips(
     .on('mouseout', (_event, d) => {
       hideBubble();
       unhighlightLegendItem(d);
+    })
+    .on('click', (_event, d) => {
+      if (d.description) {
+        _event.preventDefault();
+        _event.stopPropagation();
+        showDescriptionModal(d, config);
+      }
     });
 
   // Configure each blip
   blips.each(function (d) {
     const blip = d3.select(this);
 
-    // Add link wrapper if entry is active and has a link
+    // Add link wrapper if entry is active and has a link (but not if it has a description)
     let blipContainer = blip;
-    if (d.active && Object.hasOwn(d, 'link') && d.link) {
+    if (d.active && Object.hasOwn(d, 'link') && d.link && !d.description) {
       blipContainer = blip.append('a').attr('xlink:href', d.link);
 
       if (config.links_in_new_tabs) {

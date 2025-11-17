@@ -29,6 +29,10 @@ export function applyConfigDefaults(config) {
   config.width = config.width || 1450;
   config.height = config.height || 1000;
 
+  // Store original dimensions for viewBox (before complexity adjustments)
+  config.originalWidth = config.originalWidth || config.width;
+  config.originalHeight = config.originalHeight || config.height;
+
   // Color scheme
   config.colors =
     'colors' in config
