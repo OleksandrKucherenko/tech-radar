@@ -50,6 +50,7 @@ The Tech Radar Builder is now a fully functional Progressive Web App (PWA) that 
 ### How It Works
 
 The PWA automatically caches all necessary resources:
+
 - HTML, CSS, and JavaScript files
 - D3.js visualization library
 - jsPDF and html2canvas for export features
@@ -70,6 +71,7 @@ The PWA automatically caches all necessary resources:
 ### Using Offline
 
 Once installed and cached:
+
 1. **Disconnect from Internet** (optional, to test)
 2. **Launch the App** from your applications menu or home screen
 3. **Create and Edit** your tech radar normally
@@ -142,6 +144,7 @@ When the PWA is working correctly, you'll see these console messages:
 ### Automatic Updates
 
 When a new version is deployed:
+
 1. The service worker detects the update
 2. A blue banner appears at the top of the page
 3. Click "Update Now" to reload and get the latest version
@@ -160,6 +163,7 @@ When a new version is deployed:
 **Problem**: No install prompt appears
 
 **Solutions**:
+
 - Ensure you're using HTTPS (required for PWA)
 - Check that the manifest file is loading correctly
 - Verify service worker is registered (check DevTools)
@@ -170,6 +174,7 @@ When a new version is deployed:
 **Problem**: App doesn't work offline
 
 **Solutions**:
+
 1. **Clear Cache and Retry**
    - DevTools → Application → Clear Storage
    - Check "Cache storage" and "Service workers"
@@ -190,6 +195,7 @@ When a new version is deployed:
 **Problem**: New version banner doesn't appear
 
 **Solutions**:
+
 - Close and reopen the app
 - Manually unregister the service worker:
   - DevTools → Application → Service Workers
@@ -198,14 +204,14 @@ When a new version is deployed:
 
 ## Browser Compatibility
 
-| Browser | Install | Offline | Notes |
-|---------|---------|---------|-------|
-| Chrome | ✅ | ✅ | Full support |
-| Edge | ✅ | ✅ | Full support |
-| Firefox | ✅ | ✅ | Full support |
-| Safari (Desktop) | ⚠️ | ✅ | Limited install support |
-| Safari (iOS) | ✅ | ✅ | Use "Add to Home Screen" |
-| Chrome (Android) | ✅ | ✅ | Full support |
+| Browser          | Install | Offline | Notes                    |
+| ---------------- | ------- | ------- | ------------------------ |
+| Chrome           | ✅      | ✅      | Full support             |
+| Edge             | ✅      | ✅      | Full support             |
+| Firefox          | ✅      | ✅      | Full support             |
+| Safari (Desktop) | ⚠️      | ✅      | Limited install support  |
+| Safari (iOS)     | ✅      | ✅      | Use "Add to Home Screen" |
+| Chrome (Android) | ✅      | ✅      | Full support             |
 
 ## Technical Details
 
@@ -230,6 +236,7 @@ When a new version is deployed:
 ### Caching Strategy
 
 **Network First with Cache Fallback**:
+
 - Try to fetch from network first
 - If successful, update the cache
 - If offline, serve from cache
@@ -238,6 +245,7 @@ When a new version is deployed:
 ### Cache Versioning
 
 Cache names include version numbers:
+
 - `tech-radar-builder-v1` - Main cache
 - `tech-radar-builder-runtime-v1` - Runtime cache
 
@@ -246,10 +254,12 @@ When updating, increment the version in `builder-sw.js` to force cache refresh.
 ## Security Considerations
 
 ### HTTPS Requirement
+
 - Service Workers require HTTPS
 - Exception: `localhost` for development
 
 ### Data Privacy
+
 - All data stored locally in browser
 - No data sent to external servers
 - LocalStorage persists across sessions
@@ -258,6 +268,7 @@ When updating, increment the version in `builder-sw.js` to force cache refresh.
 ## Support
 
 For issues or questions:
+
 - GitHub Issues: https://github.com/OleksandrKucherenko/tech-radar/issues
 - Check browser console for error messages
 - Include browser version and OS when reporting issues
@@ -265,6 +276,7 @@ For issues or questions:
 ## Version History
 
 ### v1.0 (Current)
+
 - Initial PWA implementation
 - Offline functionality
 - Auto-update notifications
