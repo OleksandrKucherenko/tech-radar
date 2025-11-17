@@ -37,5 +37,9 @@ coverageSkipTestFiles = true
 # By default, Bun looks for files ending in .test.{js,jsx,ts,tsx}
 root = "."
 
+# Exclude e2e tests (run with Playwright instead)
+# e2e tests use @playwright/test which conflicts with bun test
+exclude = ["**/e2e/**"]
+
 # Test reporters configuration
 # JUnit reporter is configured via CLI: --reporter=junit --reporter-outfile=./test-results.xml
