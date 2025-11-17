@@ -57,6 +57,7 @@
     <meta name="theme-color" content="#1976d2" />
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="radar.js"></script>
 
     <link rel="stylesheet" href="radar.css" />
@@ -183,6 +184,7 @@
             print_layout: true,
             links_in_new_tabs: true,
             entries: data.entries,
+            descriptionTransform: typeof marked !== 'undefined' ? (text) => marked.parse(text) : null,
           };
           // Store initial config for reset
           initialConfig = JSON.parse(JSON.stringify(config));
