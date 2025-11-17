@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+893b19d
+// Version: 0.0.1-dev+03a9647
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1757,8 +1757,8 @@ var src_default = radar_visualization2;
 
 
 
-  // Return the main function (bundler may rename it, so use src_default)
-  return typeof src_default !== 'undefined' ? src_default : radar_visualization;
+  // Return the main function with attached static properties (jsonIO, initDemoToolbar)
+  return src_default;
 })();
 
 // Export for all environments

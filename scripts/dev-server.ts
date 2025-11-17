@@ -46,7 +46,7 @@ function formatVersion(version: string): string {
 }
 
 function wrapBundledCode(bundledCode: string, displayVersion: string, repositoryUrl: string): string {
-  return `// Tech Radar Visualization - Bundled from ES6 modules\n// Version: ${displayVersion}\n// License: MIT\n// Source: ${repositoryUrl}\n\nvar radar_visualization = (function() {\n  'use strict';\n\n  ${bundledCode.replace(/export (default |{[^}]+};?)/g, '')}\n\n  // Return the main function\n  return radar_visualization;\n})();\n\n// Export for all environments\nif (typeof window !== 'undefined') {\n  window.radar_visualization = radar_visualization;\n}\nif (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {\n  module.exports = radar_visualization;\n}\nif (typeof global !== 'undefined') {\n  global.radar_visualization = radar_visualization;\n}\n`;
+  return `// Tech Radar Visualization - Bundled from ES6 modules\n// Version: ${displayVersion}\n// License: MIT\n// Source: ${repositoryUrl}\n\nvar radar_visualization = (function() {\n  'use strict';\n\n  ${bundledCode.replace(/export (default |{[^}]+};?)/g, '')}\n\n  // Return the main function with attached static properties (jsonIO, initDemoToolbar)\n  return src_default;\n})();\n\n// Export for all environments\nif (typeof window !== 'undefined') {\n  window.radar_visualization = radar_visualization;\n}\nif (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {\n  module.exports = radar_visualization;\n}\nif (typeof global !== 'undefined') {\n  global.radar_visualization = radar_visualization;\n}\n`;
 }
 
 async function startBrowserSync(): Promise<BrowserSyncInstance> {

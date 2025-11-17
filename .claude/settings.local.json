@@ -1,0 +1,3 @@
+{
+  "enabledMcpjsonServers": ["playwright", "zai-mcp-server", "web-search-prime"]
+}

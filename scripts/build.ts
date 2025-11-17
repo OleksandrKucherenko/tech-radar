@@ -171,8 +171,8 @@ var radar_visualization = (function() {
 
   ${bundledCode.replace(/export (default |{[^}]+};?)/g, '')}
 
-  // Return the main function (bundler may rename it, so use src_default)
-  return typeof src_default !== 'undefined' ? src_default : radar_visualization;
+  // Return the main function with attached static properties (jsonIO, initDemoToolbar)
+  return src_default;
 })();
 
 // Export for all environments
