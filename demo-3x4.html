@@ -53,6 +53,7 @@
     <meta name="theme-color" content="#1976d2" />
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="radar.js"></script>
 
     <link rel="stylesheet" href="radar.css" />
@@ -195,6 +196,7 @@
         ],
         print_layout: true,
         links_in_new_tabs: true,
+        descriptionTransform: typeof marked !== "undefined" ? text => marked.parse(text) : null,
         entries: [
           // Tools - ADOPT
           { label: "Git", quadrant: 0, ring: 0, moved: 0, active: true },
@@ -292,6 +294,6 @@
       });
     </script>
 
-    <footer>Build: <code>1d6d111</code></footer>
+    <footer>Build: <code>39ae449</code></footer>
   </body>
 </html>
