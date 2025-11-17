@@ -41,12 +41,31 @@ export function setupSvg(config, quadrants, rings, dimensions) {
   const scaled_width = config.width * config.scale;
   const scaled_height = config.height * config.scale;
 
-  // Create or select SVG element
+  // Use original base dimensions for viewBox to ensure consistent coordinate system
+  const baseWidth = config.originalWidth || 1450;
+  const baseHeight = config.originalHeight || 1000;
+
+  // Create or select SVG element with responsive viewBox
   const svg = d3
     .select(`svg#${config.svg_id}`)
     .style('background-color', config.colors.background)
-    .attr('width', scaled_width)
-    .attr('height', scaled_height);
+    .attr('viewBox', `0 0 ${baseWidth} ${baseHeight}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+
+  // Use fixed dimensions for desktop, responsive for mobile
+  const viewport_width = window.innerWidth || document.documentElement.clientWidth;
+  if (viewport_width >= 640) {
+    // Desktop: use scaled dimensions
+    svg.attr('width', scaled_width).attr('height', scaled_height);
+  } else {
+    // Mobile: remove width/height attributes, let CSS handle responsive sizing
+    svg
+      .attr('width', null)
+      .attr('height', null)
+      .style('width', '100%')
+      .style('height', 'auto')
+      .style('max-width', 'none');
+  }
 
   // Set up layout structure with legend columns
   const layoutWrapper = ensureLayoutStructure(svg);
@@ -79,10 +98,22 @@ export function setupSvg(config, quadrants, rings, dimensions) {
     svg.attr('viewBox', viewbox(config.zoomed_quadrant, quadrants, rings));
   } else {
     // Normal mode: center radar accounting for title/footer
-    const radar_center_y = scaled_height / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
-    const radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
+    // On mobile, use viewBox dimensions; on desktop, use scaled dimensions
+    let radar_center_x, radar_center_y, transform_scale;
 
-    radar.attr('transform', translate(radar_center_x, radar_center_y).concat(`scale(${config.scale})`));
+    if (viewport_width < 640) {
+      // Mobile: center based on viewBox dimensions, scale(1)
+      radar_center_y = baseHeight / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
+      radar_center_x = baseWidth / 2 + config.radar_horizontal_offset;
+      transform_scale = 1;
+    } else {
+      // Desktop: center based on scaled dimensions, scale(config.scale)
+      radar_center_y = scaled_height / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
+      radar_center_x = scaled_width / 2 + config.radar_horizontal_offset;
+      transform_scale = config.scale;
+    }
+
+    radar.attr('transform', translate(radar_center_x, radar_center_y).concat(`scale(${transform_scale})`));
   }
 
   // Set default font family
