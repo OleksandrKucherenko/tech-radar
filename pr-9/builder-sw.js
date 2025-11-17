@@ -15,7 +15,7 @@ const PRECACHE_URLS = [
   './web-app-manifest-192x192.png',
   './web-app-manifest-512x512.png',
   './favicon-96x96.png',
-  './favicon.ico'
+  './favicon.ico',
 ];
 
 // CDN resources to cache
@@ -23,13 +23,13 @@ const CDN_URLS = [
   'https://d3js.org/d3.v7.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
 ];
 
 /**
  * Install event - cache essential resources
  */
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   console.log('[Service Worker] Installing...');
 
   event.waitUntil(
@@ -67,7 +67,7 @@ self.addEventListener('install', (event) => {
 /**
  * Activate event - clean up old caches
  */
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   console.log('[Service Worker] Activating...');
 
   event.waitUntil(
@@ -76,8 +76,8 @@ self.addEventListener('activate', (event) => {
       const cacheNames = await caches.keys();
       await Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME && name !== RUNTIME_CACHE)
-          .map((name) => {
+          .filter(name => name !== CACHE_NAME && name !== RUNTIME_CACHE)
+          .map(name => {
             console.log('[Service Worker] Deleting old cache:', name);
             return caches.delete(name);
           })
@@ -91,10 +91,57 @@ self.addEventListener('activate', (event) => {
 });
 
 /**
+ * Try to find a cached response for the request
+ * @param {Request} request - The request to find in cache
+ * @returns {Promise<Response|null>} Cached response or null
+ */
+async function getCachedResponse(request) {
+  // Try runtime cache first
+  let cachedResponse = await caches.match(request);
+
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  // If not in runtime cache, try main cache
+  cachedResponse = await caches.match(request, { cacheName: CACHE_NAME });
+
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  // If still not found and it's a navigation request, serve the builder page
+  if (request.mode === 'navigate') {
+    const builderCache = await caches.match('./builder.html');
+    if (builderCache) {
+      return builderCache;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Create an offline error response
+ * @param {string} url - The URL that failed to load
+ * @returns {Response} Offline error response
+ */
+function createOfflineResponse(url) {
+  console.error('[Service Worker] No cache match for:', url);
+  return new Response('Offline - Resource not available', {
+    status: 503,
+    statusText: 'Service Unavailable',
+    headers: new Headers({
+      'Content-Type': 'text/plain',
+    }),
+  });
+}
+
+/**
  * Fetch event - serve from cache when offline, otherwise from network
  * Strategy: Network First with Cache Fallback
  */
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -122,41 +169,12 @@ self.addEventListener('fetch', (event) => {
         }
 
         return networkResponse;
-      } catch (error) {
+      } catch (_error) {
         // Network fetch failed (offline), try to serve from cache
         console.log('[Service Worker] Network failed, serving from cache:', request.url);
 
-        // Try runtime cache first
-        let cachedResponse = await caches.match(request);
-
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        // If not in runtime cache, try main cache
-        cachedResponse = await caches.match(request, { cacheName: CACHE_NAME });
-
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        // If still not found and it's a navigation request, serve the builder page
-        if (request.mode === 'navigate') {
-          const builderCache = await caches.match('./builder.html');
-          if (builderCache) {
-            return builderCache;
-          }
-        }
-
-        // Nothing found in cache
-        console.error('[Service Worker] No cache match for:', request.url);
-        return new Response('Offline - Resource not available', {
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: new Headers({
-            'Content-Type': 'text/plain'
-          })
-        });
+        const cachedResponse = await getCachedResponse(request);
+        return cachedResponse || createOfflineResponse(request.url);
       }
     })()
   );
@@ -165,7 +183,7 @@ self.addEventListener('fetch', (event) => {
 /**
  * Message event - handle messages from the page
  */
-self.addEventListener('message', (event) => {
+self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
