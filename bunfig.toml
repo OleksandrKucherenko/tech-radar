@@ -39,7 +39,9 @@ root = "."
 
 # Exclude e2e tests (run with Playwright instead)
 # e2e tests use @playwright/test which conflicts with bun test
-exclude = ["**/e2e/**"]
+# e2e tests are in the e2e/ directory at project root
+# Note: Bun's exclude doesn't work reliably, so we use .playwright.ts extension
+exclude = ["./e2e", "./e2e/**", "e2e", "e2e/**"]
 
 # Test reporters configuration
 # JUnit reporter is configured via CLI: --reporter=junit --reporter-outfile=./test-results.xml
