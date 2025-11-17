@@ -199,7 +199,7 @@
         ],
         print_layout: true,
         links_in_new_tabs: true,
-            descriptionTransform: typeof marked !== 'undefined' ? (text) => marked.parse(text) : null,
+        descriptionTransform: typeof marked !== "undefined" ? text => marked.parse(text) : null,
         entries: [
           // Core AI Providers (Quadrant 0)
           { label: "Azure AI Foundry", link: "https://ai.azure.com/", quadrant: 0, ring: 0, moved: 0, active: true },
@@ -211,6 +211,8 @@
             ring: 2,
             moved: 2,
             active: true,
+            description:
+              "Anthropic Claude is an AI assistant powered by constitutional AI principles, focusing on being helpful, harmless, and honest.\n\n**Key Features:**\n- Advanced reasoning and analysis capabilities\n- Extended context window (up to 200K tokens)\n- Strong performance on complex tasks\n- API and web interface available\n- Claude Code for development workflows\n\nClaude excels at writing, analysis, and coding tasks with a focus on safety and reliability.",
           },
           { label: "Google Gemini", link: "https://ai.google.dev", quadrant: 0, ring: 2, moved: 1, active: true },
           {
@@ -233,7 +235,16 @@
 
           // AI Coding Tools - IDEs (Quadrant 1)
           { label: "Cursor", link: "https://cursor.sh", quadrant: 1, ring: 5, moved: -1, active: true },
-          { label: "Windsurf", link: "https://codeium.com/windsurf", quadrant: 1, ring: 1, moved: 2, active: true },
+          {
+            label: "Windsurf",
+            link: "https://codeium.com/windsurf",
+            quadrant: 1,
+            ring: 1,
+            moved: 2,
+            active: true,
+            description:
+              "Windsurf is Codeium's agentic IDE that brings advanced AI capabilities to code editing. It features Cascade, an AI agent that can understand complex multi-file codebases and make coordinated changes.\n\n**Standout Features:**\n- Agentic workflows with Cascade\n- Deep codebase understanding\n- Multi-file editing and refactoring\n- Free for individual developers\n- Available as VSCode fork and IntelliJ plugin\n\nWindsurf represents a new generation of AI-native IDEs that go beyond simple autocomplete.",
+          },
           {
             label: "Windsurf IntelliJ",
             link: "https://codeium.com/windsurf",
@@ -257,6 +268,8 @@
             ring: 0,
             moved: 0,
             active: true,
+            description:
+              "GitHub Copilot is an AI-powered code completion tool developed by GitHub and OpenAI. It provides real-time code suggestions and completions directly in your IDE.\n\n**Benefits:**\n- Context-aware code completions\n- Supports multiple programming languages\n- Integrates with popular IDEs (VS Code, JetBrains, etc.)\n- CLI support for terminal operations\n- Chat interface for code discussions\n\nCopilot helps developers write code faster by suggesting entire functions, boilerplate code, and even test cases.",
           },
           {
             label: "VSCode + Copilot",
@@ -311,7 +324,16 @@
 
           // RAG & Retrieval Tools (Quadrant 2)
           { label: "LlamaIndex", link: "https://www.llamaindex.ai", quadrant: 2, ring: 4, moved: 0, active: true },
-          { label: "LangChain", link: "https://www.langchain.com", quadrant: 2, ring: 2, moved: 0, active: true },
+          {
+            label: "LangChain",
+            link: "https://www.langchain.com",
+            quadrant: 2,
+            ring: 2,
+            moved: 0,
+            active: true,
+            description:
+              "LangChain is a framework for developing applications powered by language models. It provides composable tools to build LLM applications with retrieval, agents, and chains.\n\n**Core Components:**\n- Chains for combining multiple LLM calls\n- Agents for autonomous task execution\n- Memory systems for context retention\n- Retrieval integration for RAG\n- Multi-language support (Python, JavaScript)\n\nLangChain simplifies building complex AI applications by providing modular, reusable components.",
+          },
           { label: "NotebookLM", link: "https://notebooklm.google", quadrant: 2, ring: 1, moved: 1, active: true },
           {
             label: "GraphRAG",
@@ -326,8 +348,26 @@
           { label: "DeepWiki", link: "https://deepwiki.com", quadrant: 2, ring: 2, moved: 1, active: true },
 
           // Databases - Vector & Graph (Quadrant 3)
-          { label: "Pinecone", link: "https://pinecone.io", quadrant: 3, ring: 4, moved: 0, active: true },
-          { label: "Qdrant", link: "https://qdrant.tech", quadrant: 3, ring: 0, moved: 1, active: true },
+          {
+            label: "Pinecone",
+            link: "https://pinecone.io",
+            quadrant: 3,
+            ring: 4,
+            moved: 0,
+            active: true,
+            description:
+              "Pinecone is a fully managed vector database designed for AI applications. It enables fast similarity search at scale, making it ideal for RAG systems and semantic search.\n\n**Key Features:**\n- Serverless vector database\n- High-performance similarity search\n- Real-time indexing and updates\n- Hybrid search (vector + metadata)\n- Easy integration with LLM frameworks\n\nPinecone handles billions of vectors with low-latency queries, making it popular for production AI applications.",
+          },
+          {
+            label: "Qdrant",
+            link: "https://qdrant.tech",
+            quadrant: 3,
+            ring: 0,
+            moved: 1,
+            active: true,
+            description:
+              "Qdrant is an open-source vector database written in Rust, optimized for storing and searching high-dimensional vectors. It offers excellent performance and can be self-hosted or used as a cloud service.\n\n**Advantages:**\n- Written in Rust for maximum performance\n- Rich filtering capabilities\n- Payload storage alongside vectors\n- HNSW algorithm for fast search\n- REST and gRPC APIs\n- Self-hosted or cloud options\n\nQdrant is becoming a top choice for teams wanting control over their vector database infrastructure.",
+          },
           { label: "Milvus", link: "https://milvus.io", quadrant: 3, ring: 4, moved: 0, active: true },
           { label: "Elasticsearch", link: "https://elastic.co", quadrant: 3, ring: 2, moved: 0, active: true },
           { label: "Neo4j", link: "https://neo4j.com", quadrant: 3, ring: 0, moved: 1, active: true },
@@ -353,6 +393,8 @@
             ring: 0,
             moved: 1,
             active: true,
+            description:
+              "The Azure DevOps MCP (Model Context Protocol) server enables AI assistants like Claude to interact with Azure DevOps services. MCP is an open protocol that standardizes how AI applications connect to external data sources.\n\n**What it enables:**\n- Query work items and repositories\n- Create and update Azure DevOps entities\n- Access build and release information\n- Integrate DevOps workflows with AI\n\nMCP servers act as bridges between AI models and external systems, enabling more powerful and context-aware AI applications.",
           },
           {
             label: "z.ai Vision MCP",
