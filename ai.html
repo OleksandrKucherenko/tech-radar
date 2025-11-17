@@ -186,6 +186,7 @@
           { name: "AI Coding Tools" },
           { name: "RAG & Retrieval" },
           { name: "Databases" },
+          { name: "MCP/Chats" },
         ],
         rings: [
           { name: "ADOPT", color: "#5ba300" },
@@ -319,6 +320,8 @@
             active: true,
           },
           { label: "LightRAG", link: "https://github.com/light-rag", quadrant: 2, ring: 1, moved: 2, active: true },
+          { label: "CodeWiki", link: "https://codewiki.google", quadrant: 2, ring: 3, moved: 1, active: true },
+          { label: "DeepWiki", link: "https://deepwiki.com", quadrant: 2, ring: 2, moved: 1, active: true },
 
           // Databases - Vector & Graph (Quadrant 3)
           { label: "Pinecone", link: "https://pinecone.io", quadrant: 3, ring: 4, moved: 0, active: true },
@@ -338,6 +341,34 @@
           { label: "Redis Vector", link: "https://redis.io", quadrant: 3, ring: 3, moved: 0, active: true },
           { label: "OpenSearch", link: "https://opensearch.org", quadrant: 3, ring: 2, moved: 0, active: true },
           { label: "Memgraph", link: "https://memgraph.com", quadrant: 3, ring: 0, moved: 1, active: true },
+
+          // MCP/Chat UI (Quadrant 4)
+          { label: "LobeChat", link: "https://lobechat.com/chat", quadrant: 4, ring: 2, moved: 1, active: true },
+          {
+            label: "AzureDevOps Mcp",
+            link: "https://github.com/microsoft/azure-devops-mcp",
+            quadrant: 4,
+            ring: 0,
+            moved: 1,
+            active: true,
+          },
+          {
+            label: "z.ai Vision MCP",
+            link: "https://docs.z.ai/devpack/mcp/vision-mcp-server",
+            quadrant: 4,
+            ring: 2,
+            moved: 2,
+            active: true,
+          },
+          {
+            label: "z.ai WebSearch MCP",
+            link: "https://docs.z.ai/devpack/mcp/search-mcp-server",
+            quadrant: 4,
+            ring: 2,
+            moved: 2,
+            active: true,
+          },
+          { label: "OpenWebUI", link: "https://openwebui.com/", quadrant: 4, ring: 5, moved: 0, active: true },
         ],
       });
 
@@ -349,6 +380,6 @@
       radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
     </script>
 
-    <footer>Build: <code>03a9647</code></footer>
+    <footer>Build: <code>04bae8e</code></footer>
   </body>
 </html>
