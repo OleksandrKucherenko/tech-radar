@@ -1190,7 +1190,14 @@
                         inactive: '#ddd'
                     },
                     title: 'Technology Radar',
-                    entries: state.entries
+                    entries: state.entries,
+                    descriptionTransform: (markdown) => {
+                        if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+                            return marked.parse(markdown);
+                        }
+                        // Fallback if marked is not available
+                        return markdown.replace(/\n/g, '<br>');
+                    }
                 });
             } catch (error) {
                 console.error('Error rendering radar:', error);
@@ -1349,7 +1356,15 @@
     </div>
 
     <script>
-        radar_visualization(${JSON.stringify(config, null, 2)});
+        const config = ${JSON.stringify(config, null, 2)};
+        // Add markdown rendering support for descriptions
+        config.descriptionTransform = function(markdown) {
+            if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+                return marked.parse(markdown);
+            }
+            return markdown.replace(/\\n/g, '<br>');
+        };
+        radar_visualization(config);
     <\/script>
 </body>
 </html>`;
@@ -1491,7 +1506,13 @@
                     name,
                     color: RING_CONFIGS[state.ringCount].colors[index]
                 })),
-                entries: cleanEntries
+                entries: cleanEntries,
+                descriptionTransform: (markdown) => {
+                    if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+                        return marked.parse(markdown);
+                    }
+                    return markdown.replace(/\n/g, '<br>');
+                }
             };
         }
 

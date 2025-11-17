@@ -82,4 +82,34 @@ describe('Builder Description Support', () => {
     // Check that description is marked as optional
     expect(builderHtml).toContain('Description (Optional');
   });
+
+  test('renderRadar includes descriptionTransform for markdown', () => {
+    // Check that renderRadar sets up descriptionTransform
+    const renderFunction = builderHtml.substring(
+      builderHtml.indexOf('function renderRadar()'),
+      builderHtml.indexOf('function saveToLocalStorage()')
+    );
+    expect(renderFunction).toContain('descriptionTransform:');
+    expect(renderFunction).toContain('marked.parse');
+  });
+
+  test('buildVisualizationConfigFromState includes descriptionTransform', () => {
+    // Check that visualization config includes descriptionTransform
+    const buildFunction = builderHtml.substring(
+      builderHtml.indexOf('function buildVisualizationConfigFromState()'),
+      builderHtml.indexOf('function normalizeImportedConfig(')
+    );
+    expect(buildFunction).toContain('descriptionTransform:');
+    expect(buildFunction).toContain('marked.parse');
+  });
+
+  test('generateEmbedCode includes descriptionTransform in output', () => {
+    // Check that embed code includes descriptionTransform
+    const embedFunction = builderHtml.substring(
+      builderHtml.indexOf('function generateEmbedCode()'),
+      builderHtml.indexOf('function copyEmbedCode()')
+    );
+    expect(embedFunction).toContain('config.descriptionTransform');
+    expect(embedFunction).toContain('marked.parse');
+  });
 });
