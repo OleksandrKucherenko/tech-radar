@@ -614,6 +614,11 @@
                     <input type="url" id="entryLink" placeholder="https://...">
                 </div>
 
+                <div class="form-group">
+                    <label>Description (Optional, supports Markdown)</label>
+                    <textarea id="entryDescription" rows="4" placeholder="Enter a description for this technology...&#10;Supports **bold**, *italic*, [links](url), etc."></textarea>
+                </div>
+
                 <div class="btn-group">
                     <button class="btn btn-primary btn-full" id="addEntryBtn">Add Entry</button>
                 </div>
@@ -1041,22 +1046,31 @@
                 return;
             }
 
-            list.innerHTML = state.entries.map((entry, index) => `
-                <div class="entry-item">
-                    <div class="entry-item-header">
-                        <div class="entry-item-title">${entry.label}</div>
-                        <div class="entry-item-actions">
-                            <button class="btn btn-warning" onclick="editEntry(${index})">Edit</button>
-                            <button class="btn btn-danger" onclick="deleteEntry(${index})">Delete</button>
+            list.innerHTML = state.entries.map((entry, index) => {
+                const descPreview = entry.description
+                    ? `<div style="margin-top: 0.4rem; font-size: 0.8rem; color: #666; font-style: italic;">
+                        ${entry.description.substring(0, 80)}${entry.description.length > 80 ? '...' : ''}
+                       </div>`
+                    : '';
+
+                return `
+                    <div class="entry-item">
+                        <div class="entry-item-header">
+                            <div class="entry-item-title">${entry.label}</div>
+                            <div class="entry-item-actions">
+                                <button class="btn btn-warning" onclick="editEntry(${index})">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteEntry(${index})">Delete</button>
+                            </div>
                         </div>
+                        <div class="entry-item-details">
+                            ${state.quadrantNames[entry.quadrant]} • ${state.ringNames[entry.ring]}
+                            ${entry.moved === 2 ? ' • New' : entry.moved === 1 ? ' • Moved In' : entry.moved === -1 ? ' • Moved Out' : ''}
+                            ${!entry.active ? ' • Inactive' : ''}
+                        </div>
+                        ${descPreview}
                     </div>
-                    <div class="entry-item-details">
-                        ${state.quadrantNames[entry.quadrant]} • ${state.ringNames[entry.ring]}
-                        ${entry.moved === 2 ? ' • New' : entry.moved === 1 ? ' • Moved In' : entry.moved === -1 ? ' • Moved Out' : ''}
-                        ${!entry.active ? ' • Inactive' : ''}
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function addOrUpdateEntry() {
@@ -1066,6 +1080,7 @@
             const moved = parseInt(document.getElementById('entryMoved').value, 10);
             const active = document.getElementById('entryActive').value === 'true';
             const link = document.getElementById('entryLink').value.trim();
+            const description = document.getElementById('entryDescription').value.trim();
 
             if (!label) {
                 alert('Please enter a technology name');
@@ -1078,7 +1093,8 @@
                 ring,
                 moved,
                 active,
-                link: link || undefined
+                link: link || undefined,
+                description: description || undefined
             };
 
             if (state.editingIndex >= 0) {
@@ -1097,6 +1113,7 @@
             document.getElementById('entryMoved').value = '0';
             document.getElementById('entryActive').value = 'true';
             document.getElementById('entryLink').value = '';
+            document.getElementById('entryDescription').value = '';
 
             updateEntriesList();
             renderRadar();
@@ -1113,6 +1130,7 @@
             document.getElementById('entryMoved').value = entry.moved;
             document.getElementById('entryActive').value = entry.active;
             document.getElementById('entryLink').value = entry.link || '';
+            document.getElementById('entryDescription').value = entry.description || '';
 
             document.getElementById('addEntryBtn').textContent = 'Update Entry';
             document.getElementById('editingAlert').style.display = 'block';
@@ -1131,6 +1149,7 @@
             document.getElementById('entryMoved').value = '0';
             document.getElementById('entryActive').value = 'true';
             document.getElementById('entryLink').value = '';
+            document.getElementById('entryDescription').value = '';
         }
 
         function deleteEntry(index) {
@@ -1216,6 +1235,7 @@
                     active: entry.active
                 };
                 if (entry.link) clean.link = entry.link;
+                if (entry.description) clean.description = entry.description;
                 return clean;
             });
 
@@ -1287,6 +1307,9 @@
                 };
                 if (entry.link) {
                     clean.link = entry.link;
+                }
+                if (entry.description) {
+                    clean.description = entry.description;
                 }
                 return clean;
             });
@@ -1454,6 +1477,9 @@
                 };
                 if (entry.link) {
                     clean.link = entry.link;
+                }
+                if (entry.description) {
+                    clean.description = entry.description;
                 }
                 return clean;
             });
