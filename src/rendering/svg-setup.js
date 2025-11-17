@@ -52,13 +52,13 @@ export function setupSvg(config, quadrants, rings, dimensions) {
     .attr('viewBox', `0 0 ${baseWidth} ${baseHeight}`)
     .attr('preserveAspectRatio', 'xMidYMid meet');
 
-  // Use fixed dimensions for desktop, responsive for mobile
+  // Use fixed dimensions for desktop, responsive for mobile/tablet
   const viewport_width = window.innerWidth || document.documentElement.clientWidth;
-  if (viewport_width >= 640) {
+  if (viewport_width >= 1024) {
     // Desktop: use scaled dimensions
     svg.attr('width', scaled_width).attr('height', scaled_height);
   } else {
-    // Mobile: remove width/height attributes, let CSS handle responsive sizing
+    // Mobile/Tablet: remove width/height attributes, let CSS handle responsive sizing
     svg
       .attr('width', null)
       .attr('height', null)
@@ -98,11 +98,11 @@ export function setupSvg(config, quadrants, rings, dimensions) {
     svg.attr('viewBox', viewbox(config.zoomed_quadrant, quadrants, rings));
   } else {
     // Normal mode: center radar accounting for title/footer
-    // On mobile, use viewBox dimensions; on desktop, use scaled dimensions
+    // On mobile/tablet, use viewBox dimensions; on desktop, use scaled dimensions
     let radar_center_x, radar_center_y, transform_scale;
 
-    if (viewport_width < 640) {
-      // Mobile: center based on viewBox dimensions, scale(1)
+    if (viewport_width < 1024) {
+      // Mobile/Tablet: center based on viewBox dimensions, scale(1)
       radar_center_y = baseHeight / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
       radar_center_x = baseWidth / 2 + config.radar_horizontal_offset;
       transform_scale = 1;

@@ -425,8 +425,70 @@ td {
   }
 }
 
-/* Small tablets: 2-3 columns, side-by-side layout (640px - 1279px) */
-@media (min-width: 640px) and (max-width: 1279px) {
+/* Portrait tablets: 3 columns, two-row layout (640px - 1023px) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* Rings: 3 columns within each legend */
+  .legend-rings {
+    --legend-columns: 3;
+    gap: 8px 12px;
+  }
+
+  .legend-section {
+    gap: 8px;
+  }
+
+  /* Overall layout: Row with wrapping (radar row 1, legends row 2) */
+  .radar-layout {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .radar-svg-container {
+    order: 1;
+    flex: 0 0 100%;
+    width: 100%;
+    min-height: 600px;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .radar-svg-container svg {
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+  }
+
+  /* Legends side-by-side in row 2, each taking ~50% */
+  .radar-layout .radar-legend-column {
+    flex: 1 1 calc(50% - 10px);
+    display: flex;
+  }
+
+  .radar-legend-column.left {
+    position: relative;
+    left: auto;
+    order: 2;
+  }
+
+  .radar-legend-column.right {
+    position: relative;
+    right: auto;
+    order: 3;
+  }
+
+  .legend-quadrant-name {
+    font-size: 14px;
+  }
+
+  .legend-entry {
+    font-size: 11px;
+  }
+}
+
+/* Landscape tablets and small desktops: 2-3 columns, side-by-side layout (1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
   /* Rings: 2 columns within sidebar legends */
   .legend-rings {
     --legend-columns: 2;

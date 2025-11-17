@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+1099832
+// Version: 0.0.1-dev+70139ea
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1549,7 +1549,7 @@ function setupSvg(config, quadrants, rings, dimensions) {
   const baseHeight = config.originalHeight || 1000;
   const svg = d3.select(`svg#${config.svg_id}`).style("background-color", config.colors.background).attr("viewBox", `0 0 ${baseWidth} ${baseHeight}`).attr("preserveAspectRatio", "xMidYMid meet");
   const viewport_width = window.innerWidth || document.documentElement.clientWidth;
-  if (viewport_width >= 640) {
+  if (viewport_width >= 1024) {
     svg.attr("width", scaled_width).attr("height", scaled_height);
   } else {
     svg.attr("width", null).attr("height", null).style("width", "100%").style("height", "auto").style("max-width", "none");
@@ -1569,7 +1569,7 @@ function setupSvg(config, quadrants, rings, dimensions) {
     svg.attr("viewBox", viewbox(config.zoomed_quadrant, quadrants, rings));
   } else {
     let radar_center_x, radar_center_y, transform_scale;
-    if (viewport_width < 640) {
+    if (viewport_width < 1024) {
       radar_center_y = baseHeight / 2 + (dimensions.title_height - dimensions.footer_height) / 2;
       radar_center_x = baseWidth / 2 + config.radar_horizontal_offset;
       transform_scale = 1;
