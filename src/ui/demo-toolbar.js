@@ -201,3 +201,29 @@ export function getToolbarHTML() {
     </div>
   `.trim();
 }
+
+/**
+ * Inject toolbar HTML into the specified container element
+ * Similar to SVG injection - finds element by ID and injects HTML
+ * @param {string} toolbarId - ID of the container element (without '#')
+ * @returns {boolean} True if injection succeeded, false otherwise
+ */
+export function injectToolbar(toolbarId) {
+  if (!toolbarId) {
+    return false;
+  }
+
+  const container = document.getElementById(toolbarId);
+  if (!container) {
+    console.warn(`Toolbar container element with id "${toolbarId}" not found`);
+    return false;
+  }
+
+  // Clear existing content
+  container.innerHTML = '';
+
+  // Inject toolbar HTML
+  container.innerHTML = getToolbarHTML();
+
+  return true;
+}
