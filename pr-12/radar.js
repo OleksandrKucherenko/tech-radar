@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+76b0a37
+// Version: 0.0.1-dev+88dd274
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1721,7 +1721,7 @@ function showToolbarMessage2(message, state = "info") {
 }
 function getToolbarHTML() {
   return `
-    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools" style="position: relative;">
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
       <div class="demo-toolbar__controls">
         <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonImportButton" title="Import JSON Configuration" aria-label="Import JSON">
           <i class="fas fa-file-import"></i>
