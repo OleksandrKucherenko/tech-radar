@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PWA Test Dashboard - Tech Radar Builder</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: #f5f5f5;
+        padding: 2rem;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+      }
+
+      h1 {
+        color: #1976d2;
+        margin-bottom: 0.5rem;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 2rem;
+      }
+
+      .test-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f9f9f9;
+        border-radius: 4px;
+        border-left: 4px solid #ddd;
+      }
+
+      .test-section.pass {
+        border-left-color: #4caf50;
+        background: #f1f8e9;
+      }
+
+      .test-section.fail {
+        border-left-color: #f44336;
+        background: #ffebee;
+      }
+
+      .test-section.warn {
+        border-left-color: #ff9800;
+        background: #fff3e0;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: #333;
+      }
+
+      .status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+      }
+
+      .status.pass {
+        background: #4caf50;
+        color: white;
+      }
+
+      .status.fail {
+        background: #f44336;
+        color: white;
+      }
+
+      .status.warn {
+        background: #ff9800;
+        color: white;
+      }
+
+      .status.pending {
+        background: #9e9e9e;
+        color: white;
+      }
+
+      .detail {
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 4px;
+        font-size: 0.9rem;
+      }
+
+      .detail code {
+        background: #263238;
+        color: #aed581;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-family: "Courier New", monospace;
+      }
+
+      .actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        background: #1976d2;
+        color: white;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+      }
+
+      button:hover {
+        background: #1565c0;
+      }
+
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      .console {
+        background: #263238;
+        color: #aed581;
+        padding: 1rem;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 0.85rem;
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 1rem;
+      }
+
+      .console-line {
+        margin: 0.25rem 0;
+      }
+
+      .console-error {
+        color: #ff6b6b;
+      }
+
+      .console-warn {
+        color: #ffa726;
+      }
+
+      .console-info {
+        color: #4fc3f7;
+      }
+
+      .link {
+        color: #1976d2;
+        text-decoration: none;
+      }
+
+      .link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>PWA Test Dashboard</h1>
+      <p class="subtitle">Tech Radar Builder - Progressive Web App Testing & Debugging</p>
+
+      <div id="results"></div>
+
+      <div class="test-section">
+        <h2>Actions</h2>
+        <div class="actions">
+          <button onclick="runTests()">🔄 Run All Tests</button>
+          <button onclick="clearCaches()">🗑️ Clear Caches</button>
+          <button onclick="unregisterSW()">❌ Unregister Service Worker</button>
+          <button onclick="openBuilder()">🚀 Open Builder</button>
+          <button onclick="testOffline()">📡 Test Offline Mode</button>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>Console Output</h2>
+        <div id="console" class="console"></div>
+      </div>
+    </div>
+
+    <script>
+      const consoleEl = document.getElementById("console");
+      const resultsEl = document.getElementById("results");
+
+      function log(message, type = "info") {
+        const line = document.createElement("div");
+        line.className = `console-line console-${type}`;
+        line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        consoleEl.appendChild(line);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+      }
+
+      function clearConsole() {
+        consoleEl.innerHTML = "";
+      }
+
+      async function runTests() {
+        clearConsole();
+        resultsEl.innerHTML = "";
+        log("Starting PWA tests...", "info");
+
+        const tests = [
+          testServiceWorkerSupport,
+          testManifest,
+          testServiceWorkerRegistration,
+          testServiceWorkerState,
+          testCaches,
+          testManifestIcons,
+          testOfflineCapability,
+        ];
+
+        for (const test of tests) {
+          await test();
+        }
+
+        log("All tests completed", "info");
+      }
+
+      async function testServiceWorkerSupport() {
+        const supported = "serviceWorker" in navigator;
+        renderTest(
+          "Service Worker Support",
+          supported,
+          supported ? "Service Workers are supported" : "Service Workers are NOT supported in this browser"
+        );
+        log(`Service Worker support: ${supported ? "YES" : "NO"}`, supported ? "info" : "error");
+        return supported;
+      }
+
+      async function testManifest() {
+        try {
+          const response = await fetch("./builder.webmanifest");
+          const manifest = await response.json();
+
+          const hasRequired = manifest.name && manifest.start_url && manifest.display && manifest.icons;
+
+          renderTest(
+            "Web App Manifest",
+            hasRequired,
+            hasRequired ? `Manifest loaded: ${manifest.name}` : "Manifest missing required fields",
+            manifest
+          );
+
+          log(`Manifest loaded: ${manifest.name}`, "info");
+          return hasRequired;
+        } catch (error) {
+          renderTest("Web App Manifest", false, `Error: ${error.message}`);
+          log(`Manifest error: ${error.message}`, "error");
+          return false;
+        }
+      }
+
+      async function testServiceWorkerRegistration() {
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          const registered = !!registration;
+
+          renderTest(
+            "Service Worker Registration",
+            registered,
+            registered ? `Registered at scope: ${registration.scope}` : "Service Worker not registered",
+            registration
+              ? {
+                  scope: registration.scope,
+                  installing: !!registration.installing,
+                  waiting: !!registration.waiting,
+                  active: !!registration.active,
+                }
+              : null
+          );
+
+          log(`Service Worker registration: ${registered ? "YES" : "NO"}`, registered ? "info" : "warn");
+          return registered;
+        } catch (error) {
+          renderTest("Service Worker Registration", false, `Error: ${error.message}`);
+          log(`Registration error: ${error.message}`, "error");
+          return false;
+        }
+      }
+
+      async function testServiceWorkerState() {
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (!registration) {
+            renderTest("Service Worker State", false, "No registration found");
+            return false;
+          }
+
+          const active = registration.active;
+          const state = active ? active.state : "none";
+          const isActivated = state === "activated";
+
+          renderTest("Service Worker State", isActivated, `State: ${state}`, { state, scriptURL: active?.scriptURL });
+
+          log(`Service Worker state: ${state}`, isActivated ? "info" : "warn");
+          return isActivated;
+        } catch (error) {
+          renderTest("Service Worker State", false, `Error: ${error.message}`);
+          log(`State error: ${error.message}`, "error");
+          return false;
+        }
+      }
+
+      async function testCaches() {
+        try {
+          const cacheNames = await caches.keys();
+          const builderCaches = cacheNames.filter(name => name.includes("tech-radar-builder"));
+
+          const hasCaches = builderCaches.length > 0;
+
+          let cachedUrls = [];
+          if (hasCaches) {
+            const cache = await caches.open(builderCaches[0]);
+            const requests = await cache.keys();
+            cachedUrls = requests.map(req => new URL(req.url).pathname);
+          }
+
+          renderTest(
+            "Cache Storage",
+            hasCaches,
+            hasCaches
+              ? `Found ${builderCaches.length} cache(s) with ${cachedUrls.length} items`
+              : "No PWA caches found",
+            { cacheNames: builderCaches, cachedUrls: cachedUrls.slice(0, 10) }
+          );
+
+          log(`Caches: ${builderCaches.length} found`, hasCaches ? "info" : "warn");
+          return hasCaches;
+        } catch (error) {
+          renderTest("Cache Storage", false, `Error: ${error.message}`);
+          log(`Cache error: ${error.message}`, "error");
+          return false;
+        }
+      }
+
+      async function testManifestIcons() {
+        try {
+          const response = await fetch("./builder.webmanifest");
+          const manifest = await response.json();
+
+          const iconChecks = await Promise.all(
+            manifest.icons.map(async icon => {
+              try {
+                const iconResponse = await fetch(icon.src);
+                return { src: icon.src, ok: iconResponse.ok };
+              } catch {
+                return { src: icon.src, ok: false };
+              }
+            })
+          );
+
+          const allOk = iconChecks.every(check => check.ok);
+
+          renderTest(
+            "Manifest Icons",
+            allOk,
+            allOk ? `All ${iconChecks.length} icons accessible` : "Some icons are missing",
+            iconChecks
+          );
+
+          log(`Icons: ${iconChecks.filter(c => c.ok).length}/${iconChecks.length} accessible`, allOk ? "info" : "warn");
+          return allOk;
+        } catch (error) {
+          renderTest("Manifest Icons", false, `Error: ${error.message}`);
+          log(`Icon error: ${error.message}`, "error");
+          return false;
+        }
+      }
+
+      async function testOfflineCapability() {
+        try {
+          const cacheNames = await caches.keys();
+          const builderCache = cacheNames.find(name => name.includes("tech-radar-builder"));
+
+          if (!builderCache) {
+            renderTest("Offline Capability", false, "No caches found - offline will not work");
+            return false;
+          }
+
+          const cache = await caches.open(builderCache);
+          const requests = await cache.keys();
+          const cachedUrls = requests.map(req => new URL(req.url).pathname);
+
+          const essentialFiles = ["builder.html", "radar.js", "radar.css", "builder.webmanifest"];
+
+          const missingFiles = essentialFiles.filter(file => !cachedUrls.some(url => url.includes(file)));
+
+          const ready = missingFiles.length === 0;
+
+          renderTest(
+            "Offline Capability",
+            ready,
+            ready ? "All essential files cached - ready for offline use" : `Missing files: ${missingFiles.join(", ")}`,
+            { essentialFiles, cachedUrls: cachedUrls.slice(0, 10) }
+          );
+
+          log(`Offline ready: ${ready ? "YES" : "NO"}`, ready ? "info" : "warn");
+          return ready;
+        } catch (error) {
+          renderTest("Offline Capability", false, `Error: ${error.message}`);
+          log(`Offline test error: ${error.message}`, "error");
+          return false;
+        }
+      }
+
+      function renderTest(name, passed, message, details) {
+        const section = document.createElement("div");
+        section.className = `test-section ${passed ? "pass" : "fail"}`;
+
+        const title = document.createElement("h2");
+        const status = document.createElement("span");
+        status.className = `status ${passed ? "pass" : "fail"}`;
+        status.textContent = passed ? "✓ PASS" : "✗ FAIL";
+        title.appendChild(status);
+        title.appendChild(document.createTextNode(name));
+
+        const detail = document.createElement("div");
+        detail.className = "detail";
+        detail.textContent = message;
+
+        section.appendChild(title);
+        section.appendChild(detail);
+
+        if (details) {
+          const detailsEl = document.createElement("details");
+          detailsEl.style.marginTop = "0.5rem";
+          const summary = document.createElement("summary");
+          summary.textContent = "Details";
+          summary.style.cursor = "pointer";
+          const pre = document.createElement("pre");
+          pre.style.marginTop = "0.5rem";
+          pre.style.fontSize = "0.8rem";
+          pre.textContent = JSON.stringify(details, null, 2);
+          detailsEl.appendChild(summary);
+          detailsEl.appendChild(pre);
+          section.appendChild(detailsEl);
+        }
+
+        resultsEl.appendChild(section);
+      }
+
+      async function clearCaches() {
+        log("Clearing caches...", "info");
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+          log(`Cleared ${cacheNames.length} cache(s)`, "info");
+          alert(`Cleared ${cacheNames.length} cache(s)`);
+        } catch (error) {
+          log(`Error clearing caches: ${error.message}`, "error");
+          alert(`Error: ${error.message}`);
+        }
+      }
+
+      async function unregisterSW() {
+        log("Unregistering service worker...", "info");
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (registration) {
+            await registration.unregister();
+            log("Service worker unregistered", "info");
+            alert("Service worker unregistered. Refresh the page to register again.");
+          } else {
+            log("No service worker to unregister", "warn");
+            alert("No service worker registered");
+          }
+        } catch (error) {
+          log(`Error unregistering: ${error.message}`, "error");
+          alert(`Error: ${error.message}`);
+        }
+      }
+
+      function openBuilder() {
+        window.open("./builder.html", "_blank");
+      }
+
+      async function testOffline() {
+        log("Testing offline mode...", "info");
+        alert(
+          'To test offline mode:\n1. Open DevTools (F12)\n2. Go to Network tab\n3. Enable "Offline" checkbox\n4. Try to reload the builder page\n5. It should still work!'
+        );
+      }
+
+      // Auto-run tests on load
+      window.addEventListener("load", () => {
+        log("PWA Test Dashboard loaded", "info");
+        log('Click "Run All Tests" to start', "info");
+        setTimeout(runTests, 500);
+      });
+    </script>
+  </body>
+</html>
