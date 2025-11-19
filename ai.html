@@ -243,6 +243,16 @@
               "Google Gemini is Google's most capable and multimodal AI model family, designed to be natively multimodal from the ground up.\n\n**Strengths:**\n- Native multimodality (text, image, audio, video)\n- Gemini Ultra, Pro, and Nano variants\n- Long context window (up to 2M tokens in experimental)\n- Strong reasoning and coding capabilities\n- Integration with Google Workspace\n- Available via Google AI Studio and Vertex AI\n\nGemini excels at understanding and reasoning across different types of information simultaneously.",
           },
           {
+            label: "Google Vertex AI",
+            link: "https://cloud.google.com/vertex-ai",
+            quadrant: 0,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "Google Cloud Vertex AI is Google's unified machine learning platform for building, deploying, and scaling AI models using Google's ML tools and infrastructure.\n\n**Platform Features:**\n- Unified platform for ML workflows\n- Access to Gemini and other Google models\n- AutoML and custom model training\n- Model deployment and monitoring\n- Vector Search and matching engine\n- Integration with BigQuery and Google Cloud\n- Enterprise-grade security and compliance\n\nVertex AI provides a comprehensive enterprise ML platform for organizations invested in Google Cloud infrastructure.",
+          },
+          {
             label: "Microsoft Copilot",
             link: "https://copilot.microsoft.com",
             quadrant: 0,
@@ -346,8 +356,8 @@
             label: "Google AI Studio",
             link: "https://aistudio.google.com/",
             quadrant: 0,
-            ring: 1,
-            moved: 0,
+            ring: 4,
+            moved: -1,
             active: true,
             description:
               "Google AI Studio is the fastest way to start building with Gemini models, offering a browser-based development environment for prototyping and experimentation.\n\n**Developer Tools:**\n- Interactive prompt engineering\n- Multimodal capabilities (text, image, audio, video)\n- Vibe Code: Build AI-native apps with Build Mode\n- Native text-to-speech with controllable audio\n- Direct access to Gemini Developer API\n- Free tier for experimentation\n\nGoogle AI Studio provides the quickest path for developers and students to prototype with Gemini's multimodal capabilities.",
@@ -715,11 +725,31 @@
               "Aider is AI pair programming in your terminal, offering tight Git integration and the ability to edit code in your local repository.\n\n**Terminal Pair Programming:**\n- Works with GPT-4, Claude, and other models\n- Direct Git repository integration\n- Automatic commits with sensible messages\n- Edit multiple files in one request\n- /undo command for instant rollback\n- Voice coding support\n\nAider is widely praised as one of the best terminal-based AI coding assistants, perfect for developers who prefer command-line workflows.",
           },
           {
+            label: "Kiro",
+            link: "https://kiro.dev/",
+            quadrant: 1,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "Kiro is an AI-powered development platform and IDE that focuses on intelligent code generation and developer productivity.\n\n**Platform Features:**\n- AI-native code editor\n- Intelligent code completion\n- Project-aware assistance\n- Modern developer experience\n- Multi-language support\n- Integrated development workflow\n\nKiro aims to provide a streamlined AI-enhanced coding experience for modern developers.",
+          },
+          {
+            label: "Firebase Studio",
+            link: "https://firebase.studio/",
+            quadrant: 1,
+            ring: 5,
+            moved: 2,
+            active: true,
+            description:
+              "Firebase Studio is an experimental AI-powered tool for Firebase development, though it has raised concerns in the developer community.\n\n**Experimental Features:**\n- AI-assisted Firebase configuration\n- Code generation for Firebase projects\n- Integration with Firebase services\n- Automated setup workflows\n\n**Concerns:**\n- Limited community adoption\n- Unclear value proposition\n- Alternative tools may be more reliable\n\nDevelopers should carefully evaluate Firebase Studio before incorporating it into production workflows.",
+          },
+          {
             label: "Antigravity",
             link: "https://antigravity.google/",
             quadrant: 1,
-            ring: 0,
-            moved: 0,
+            ring: 1,
+            moved: 1,
             active: true,
             description:
               "Antigravity is a powerful agentic AI coding assistant designed by the Google Deepmind team working on Advanced Agentic Coding.\n\n**Key Capabilities:**\n- Advanced agentic coding workflows\n- Deep codebase understanding\n- Autonomous task execution\n- Pair programming with users\n\nAntigravity represents the cutting edge of agentic AI for software development.",
@@ -1001,6 +1031,6 @@
       radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
     </script>
 
-    <footer>Build: <code>482c016</code></footer>
+    <footer>Build: <code>60b5989</code></footer>
   </body>
 </html>
