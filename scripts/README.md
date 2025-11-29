@@ -125,3 +125,104 @@ export GITHUB_SHA="abc123def456"
 3. **Reusability** - Functions can be sourced individually
 4. **Readability** - Clean workflow file, detailed logic in bash
 5. **Debugging** - Easier to trace issues in bash vs inline YAML
+
+---
+
+## download-logos.sh
+
+Downloads, resizes, and standardizes entity logos from URLs defined in `config.json`.
+
+### Features
+
+- **Automatic download**: Fetches logos from URLs in the config file
+- **Resize**: Standardizes all logos to 64x64 pixels
+- **Format conversion**: Converts to WebP (preferred) or PNG (fallback)
+- **Naming convention**: `{vendor}-logo-64x64.{webp|png}`
+- **Error handling**: Gracefully handles download and conversion failures
+
+### Prerequisites
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install curl imagemagick jq
+
+# macOS
+brew install curl imagemagick jq
+
+# Arch Linux
+sudo pacman -S curl imagemagick jq
+```
+
+### Usage
+
+```bash
+# Download all logos from config.json
+./scripts/download-logos.sh
+
+# Specify a different config file
+./scripts/download-logos.sh path/to/config.json
+```
+
+### Output
+
+Logos are saved to `docs/logos/` with the naming pattern:
+- `postgresql-logo-64x64.webp`
+- `kubernetes-logo-64x64.webp`
+- `python-logo-64x64.png`
+- `kafka-logo-64x64.webp`
+
+### How it Works
+
+1. **Parse config.json**: Extracts all entries with a `logo` field
+2. **Download**: Uses `curl` to fetch the logo from the URL
+3. **Process**: Uses ImageMagick to:
+   - Resize to 64x64 pixels
+   - Center crop if needed
+   - Convert to WebP or PNG
+   - Optimize quality (90%)
+4. **Save**: Stores in `docs/logos/` with standardized naming
+
+### Configuration
+
+Edit the script to customize:
+
+```bash
+SIZE="64x64"              # Output size
+PREFERRED_FORMAT="webp"   # Preferred format
+FALLBACK_FORMAT="png"     # Fallback format
+LOGOS_DIR="docs/logos"    # Output directory
+```
+
+### Using Local Logos
+
+After downloading, update your `config.json` to use local paths:
+
+```json
+{
+  "label": "PostgreSQL",
+  "logo": "logos/postgresql-logo-64x64.webp"
+}
+```
+
+Benefits of local logos:
+- ✅ Faster loading (no external requests)
+- ✅ Works offline
+- ✅ Consistent sizing and format
+- ✅ No external dependencies
+- ✅ Better privacy (no external tracking)
+
+### Troubleshooting
+
+**WebP not supported:**
+- The script automatically falls back to PNG if WebP is not supported
+- To enable WebP support: `sudo apt-get install webp libwebp-dev`
+
+**Download failures:**
+- Check your internet connection
+- Verify logo URLs are accessible
+- Some servers may block automated requests
+
+**Image conversion errors:**
+- Ensure the source is a valid image file
+- Check ImageMagick installation: `convert --version`
+- Try updating ImageMagick: `sudo apt-get upgrade imagemagick`
