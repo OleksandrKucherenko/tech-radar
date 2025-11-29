@@ -3,7 +3,7 @@
   "entries": [
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "n8n",
       "link": "https://github.com/n8n-io/n8n",
       "active": true,
@@ -12,7 +12,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "Activepieces",
       "link": "https://www.activepieces.com/open-source",
       "active": true,
@@ -21,7 +21,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "Node-RED",
       "link": "https://nodered.org/",
       "active": true,
@@ -30,7 +30,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "Appsmith",
       "link": "https://www.appsmith.com/",
       "active": true,
@@ -39,7 +39,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "ToolJet",
       "link": "https://www.tooljet.com/",
       "active": true,
@@ -48,7 +48,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "Budibase",
       "link": "https://github.com/Budibase/budibase",
       "active": true,
@@ -57,7 +57,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "NocoDB",
       "link": "https://github.com/nocodb/nocodb",
       "active": true,
@@ -66,7 +66,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "Baserow",
       "link": "https://baserow.io/",
       "active": true,
@@ -75,7 +75,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "NocoBase",
       "link": "https://www.nocobase.com/",
       "active": true,
@@ -84,7 +84,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "Directus",
       "link": "https://directus.io/",
       "active": true,
@@ -93,7 +93,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "Flowise",
       "link": "https://flowiseai.com/",
       "active": true,
@@ -102,7 +102,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "Langflow",
       "link": "https://github.com/langflow-ai/langflow",
       "active": true,
@@ -111,7 +111,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 0,
+      "ring": 4,
       "label": "Dify",
       "link": "https://github.com/langgenius/dify",
       "active": true,
@@ -120,7 +120,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 1,
+      "ring": 4,
       "label": "ILLA Builder",
       "link": "https://www.illacloud.com/",
       "active": true,
@@ -129,7 +129,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 1,
+      "ring": 4,
       "label": "Openblocks",
       "link": "https://github.com/openblocks-dev/openblocks",
       "active": true,
@@ -138,7 +138,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 1,
+      "ring": 4,
       "label": "Windmill",
       "link": "https://www.windmill.dev/",
       "active": true,
@@ -147,7 +147,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 1,
+      "ring": 4,
       "label": "Automatisch",
       "link": "https://automatisch.io/",
       "active": true,
@@ -156,7 +156,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 1,
+      "ring": 4,
       "label": "APITable",
       "link": "https://github.com/apitable/apitable",
       "active": true,
@@ -165,7 +165,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 1,
+      "ring": 4,
       "label": "Rowy",
       "link": "https://www.rowy.io/",
       "active": true,
@@ -174,7 +174,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 1,
+      "ring": 4,
       "label": "PocketBase",
       "link": "https://pocketbase.io/",
       "active": true,
@@ -183,7 +183,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 1,
+      "ring": 4,
       "label": "Saltcorn",
       "link": "https://saltcorn.com/",
       "active": true,
@@ -192,7 +192,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 2,
+      "ring": 4,
       "label": "Joget",
       "link": "https://www.joget.org/",
       "active": true,
@@ -201,7 +201,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 2,
+      "ring": 4,
       "label": "lsFusion",
       "link": "https://lsfusion.org/",
       "active": true,
@@ -210,7 +210,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 2,
+      "ring": 4,
       "label": "Huginn",
       "link": "https://github.com/huginn/huginn",
       "active": true,
@@ -219,7 +219,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 2,
+      "ring": 4,
       "label": "StackStorm",
       "link": "https://github.com/StackStorm/st2",
       "active": true,
