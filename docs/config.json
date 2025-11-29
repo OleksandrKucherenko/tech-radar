@@ -3,7 +3,7 @@
   "entries": [
     {
       "quadrant": 4,
-      "ring": 4,
+      "ring": 1,
       "label": "n8n",
       "link": "https://github.com/n8n-io/n8n",
       "active": true,
@@ -30,7 +30,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 4,
+      "ring": 2,
       "label": "Appsmith",
       "link": "https://www.appsmith.com/",
       "active": true,
@@ -56,7 +56,7 @@
       "description": "OSS low-code app builder for internal tools, self-hostable with REST and automation support. Good for CRUD-heavy tools with DevOps/AI side actions."
     },
     {
-      "quadrant": 4,
+      "quadrant": 2,
       "ring": 4,
       "label": "NocoDB",
       "link": "https://github.com/nocodb/nocodb",
@@ -65,7 +65,7 @@
       "description": "OSS Airtable-like database on SQL with APIs and automations. Great data backend for low-code apps and AI pipelines."
     },
     {
-      "quadrant": 4,
+      "quadrant": 2,
       "ring": 4,
       "label": "Baserow",
       "link": "https://baserow.io/",
@@ -85,15 +85,6 @@
     {
       "quadrant": 4,
       "ring": 4,
-      "label": "Directus",
-      "link": "https://directus.io/",
-      "active": true,
-      "moved": 2,
-      "description": "OSS data platform/headless CMS on SQL with flows, hooks, and automations. Good for data-centric apps where AI is just another service."
-    },
-    {
-      "quadrant": 4,
-      "ring": 4,
       "label": "Flowise",
       "link": "https://flowiseai.com/",
       "active": true,
@@ -102,7 +93,7 @@
     },
     {
       "quadrant": 4,
-      "ring": 4,
+      "ring": 2,
       "label": "Langflow",
       "link": "https://github.com/langflow-ai/langflow",
       "active": true,
@@ -128,7 +119,7 @@
       "description": "OSS low-code internal-tools builder in TypeScript. Integrates with Hugging Face and AI sources out-of-the-box, supports many data sources."
     },
     {
-      "quadrant": 4,
+      "quadrant": 2,
       "ring": 4,
       "label": "Openblocks",
       "link": "https://github.com/openblocks-dev/openblocks",
@@ -155,7 +146,7 @@
       "description": "OSS Zapier alternative with visual flows, self-hostable with many connectors. Generic HTTP and custom connectors for AI and Azure DevOps."
     },
     {
-      "quadrant": 4,
+      "quadrant": 2,
       "ring": 4,
       "label": "APITable",
       "link": "https://github.com/apitable/apitable",
@@ -164,7 +155,7 @@
       "description": "OSS API-oriented Airtable alternative with collaborative table UI and strong API. Use as data hub for prompts/configs with DevOps metadata."
     },
     {
-      "quadrant": 4,
+      "quadrant": 2,
       "ring": 4,
       "label": "Rowy",
       "link": "https://www.rowy.io/",
@@ -173,7 +164,7 @@
       "description": "OSS low-code backend on Firebase/Google Cloud with spreadsheet UI and JS/TS cloud functions. Very natural to call AI APIs and Azure DevOps REST APIs from TS functions."
     },
     {
-      "quadrant": 4,
+      "quadrant": 2,
       "ring": 4,
       "label": "PocketBase",
       "link": "https://pocketbase.io/",
@@ -182,7 +173,7 @@
       "description": "OSS Go-based backend with DB, auth, files, and admin UI. Great backend foundation for low-code apps, use with external automations for AI integration."
     },
     {
-      "quadrant": 4,
+      "quadrant": 2,
       "ring": 4,
       "label": "Saltcorn",
       "link": "https://saltcorn.com/",
