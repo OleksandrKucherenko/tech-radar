@@ -1242,7 +1242,6 @@ function createDescriptionModal() {
     <div class="tech-radar-modal-backdrop"></div>
     <div class="tech-radar-modal-content">
       <button class="tech-radar-modal-close" aria-label="Close">&times;</button>
-      <h2 class="tech-radar-modal-title"></h2>
       <div class="tech-radar-modal-body"></div>
     </div>
   `;
@@ -1267,9 +1266,27 @@ function showDescriptionModal(entry, config) {
     return;
   }
   const modal = createDescriptionModal();
-  const title = modal.querySelector(".tech-radar-modal-title");
+  const modalContent = modal.querySelector(".tech-radar-modal-content");
+  const closeButton = modal.querySelector(".tech-radar-modal-close");
   const body = modal.querySelector(".tech-radar-modal-body");
+  modalContent.querySelectorAll(".tech-radar-modal-header, .tech-radar-modal-title").forEach((el) => el.remove());
+  const header = document.createElement("div");
+  header.className = "tech-radar-modal-header";
+  if (entry.logo) {
+    const logo = document.createElement("img");
+    logo.className = "tech-radar-modal-logo";
+    logo.src = entry.logo;
+    logo.alt = `${entry.label} logo`;
+    logo.onerror = function() {
+      this.style.display = "none";
+    };
+    header.appendChild(logo);
+  }
+  const title = document.createElement("h2");
+  title.className = "tech-radar-modal-title";
   title.textContent = entry.label;
+  header.appendChild(title);
+  modalContent.insertBefore(header, body);
   let descriptionHtml = "";
   if (config.descriptionTransform && typeof config.descriptionTransform === "function") {
     descriptionHtml = config.descriptionTransform(entry.description);
