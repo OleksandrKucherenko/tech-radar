@@ -24,7 +24,7 @@ import {
 import { renderLegendColumns } from './rendering/legend-renderer.js';
 import { setupSvg } from './rendering/svg-setup.js';
 import { renderRingDescriptionsTable } from './rendering/table-renderer.js';
-import { initDemoToolbar } from './ui/demo-toolbar.js';
+import { getToolbarHTML, initDemoToolbar, injectToolbar } from './ui/demo-toolbar.js';
 import { validateConfig } from './validation/config-validator.js';
 
 /**
@@ -36,6 +36,11 @@ function _renderRadar(config) {
   const svg = document.getElementById(config.svg_id || 'radar');
   if (svg) {
     svg.innerHTML = '';
+  }
+
+  // Inject toolbar HTML if toolbar_id is specified
+  if (config.toolbar_id) {
+    injectToolbar(config.toolbar_id);
   }
 
   applyConfigDefaults(config);
@@ -222,6 +227,8 @@ function radar_visualization(initialConfig) {
 const jsonIO = createJsonIOHelpers();
 radar_visualization.jsonIO = jsonIO;
 radar_visualization.initDemoToolbar = initDemoToolbar;
+radar_visualization.injectToolbar = injectToolbar;
+radar_visualization.getToolbarHTML = getToolbarHTML;
 
 // Backward compatibility: keep render as static method
 radar_visualization.render = config => {
@@ -239,4 +246,4 @@ export {
 } from './plugins/index.js';
 
 export default radar_visualization;
-export { radar_visualization, jsonIO, initDemoToolbar };
+export { radar_visualization, jsonIO, initDemoToolbar, injectToolbar, getToolbarHTML };

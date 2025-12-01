@@ -16,6 +16,7 @@
       "!**/temp-build",
       "!**/docs/release",
       "!**/docs/radar.js",
+      "!**/docs/vendor",
       "!**/docs/screenshots",
       "!**/test-results.xml",
       "!**/coverage",

@@ -184,7 +184,7 @@ function showToolbarMessage(message, state = 'info') {
  */
 export function getToolbarHTML() {
   return `
-    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools" style="position: relative;">
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
       <div class="demo-toolbar__controls">
         <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonImportButton" title="Import JSON Configuration" aria-label="Import JSON">
           <i class="fas fa-file-import"></i>
@@ -200,4 +200,37 @@ export function getToolbarHTML() {
       <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
     </div>
   `.trim();
+}
+
+/**
+ * Inject toolbar HTML into the specified container element
+ * Similar to SVG injection - finds element by ID and injects HTML
+ * Only injects if toolbar doesn't already exist to preserve event listeners
+ * @param {string} toolbarId - ID of the container element (without '#')
+ * @returns {boolean} True if injection succeeded, false otherwise
+ */
+export function injectToolbar(toolbarId) {
+  if (!toolbarId) {
+    return false;
+  }
+
+  const container = document.getElementById(toolbarId);
+  if (!container) {
+    console.warn(`Toolbar container element with id "${toolbarId}" not found`);
+    return false;
+  }
+
+  // Check if toolbar already exists - if so, skip injection to preserve event listeners
+  const existingToolbar = container.querySelector('.demo-toolbar');
+  if (existingToolbar) {
+    return true; // Already injected, listeners preserved
+  }
+
+  // Clear existing content
+  container.innerHTML = '';
+
+  // Inject toolbar HTML
+  container.innerHTML = getToolbarHTML();
+
+  return true;
 }
