@@ -270,7 +270,7 @@ brew install curl imagemagick jq
 # 1. Generate mapping file
 ./scripts/download-ai-logos.sh --generate-mapping
 
-# 2. Auto-fetch missing logos using LogoKit
+# 2. Auto-fetch missing logos using LogoKit (default provider)
 ./scripts/download-ai-logos.sh --auto-fetch YOUR_LOGOKIT_TOKEN
 
 # 3. Download all logos
@@ -278,6 +278,19 @@ brew install curl imagemagick jq
 
 # 4. Check which logos are ready for ai.html
 ./scripts/download-ai-logos.sh --update-html
+```
+
+**Automated workflow with Logo.dev:**
+
+```bash
+# 1. Generate mapping file
+./scripts/download-ai-logos.sh --generate-mapping
+
+# 2. Auto-fetch missing logos using Logo.dev
+./scripts/download-ai-logos.sh --auto-fetch YOUR_LOGODEV_TOKEN logodev
+
+# 3. Download all logos
+./scripts/download-ai-logos.sh --download
 ```
 
 **Manual workflow:**
@@ -306,11 +319,20 @@ vim scripts/ai-logo-urls.json
 ### Commands
 
 - `--generate-mapping` - Extract vendors from ai.html and create/update URL mapping
-- `--auto-fetch <TOKEN>` - Auto-fetch missing logos using LogoKit API (NEW!)
+- `--auto-fetch <TOKEN> [PROVIDER]` - Auto-fetch missing logos using Logo API (default: logokit)
 - `--download` - Download all logos from mapping file (skips placeholders)
 - `--update-html` - Show which logos are available for ai.html
 - `--all` - Run all steps: generate, download, update
 - `-h, --help` - Show help message
+
+### Providers
+
+Two logo API providers are supported:
+
+| Provider | Free Tier | Resolution | Attribution | Get Token |
+|----------|-----------|------------|-------------|-----------|
+| **logokit** (default) | ✅ Yes | 64×64 | Not required | [logokit.com](https://logokit.com) |
+| **logodev** | ✅ Yes | High-res | Required | [logo.dev](https://logo.dev) |
 
 ### Output Files
 
@@ -337,9 +359,11 @@ vim scripts/ai-logo-urls.json
 - `openai-logo-64x64.webp`
 - `cursor-logo-64x64.webp`
 
-### LogoKit API Integration (NEW!)
+### Logo API Integration (NEW!)
 
-The script now supports automatic logo fetching using the **LogoKit API**:
+The script now supports automatic logo fetching using **multiple Logo API providers**:
+
+#### LogoKit (Default, Recommended)
 
 **Get Your Free Token:**
 1. Visit [https://logokit.com](https://logokit.com)
@@ -348,19 +372,37 @@ The script now supports automatic logo fetching using the **LogoKit API**:
 
 **Benefits:**
 - ✅ **Free tier**: 64×64 resolution logos (exactly what we need!)
-- ✅ **Automated**: No manual URL hunting
+- ✅ **No attribution required**: Use logos freely
 - ✅ **Fast**: <100ms response time via global CDN
 - ✅ **High coverage**: Automatically finds ~50-70% of missing logos
 - ✅ **Safe**: Publishable token can be used in scripts
 
-**How it Works:**
+**Endpoint:** `https://img.logokit.com/{domain}?token={TOKEN}`
+
+#### Logo.dev (Alternative)
+
+**Get Your Free Token:**
+1. Visit [https://logo.dev](https://logo.dev)
+2. Sign up for a free account
+3. Get your publishable API token (starts with `pk_`)
+
+**Benefits:**
+- ✅ **Free tier**: High-resolution logos
+- ✅ **Official Clearbit replacement**: Trusted by many companies
+- ✅ **Fast**: Optimized CDN delivery
+- ⚠️ **Attribution required**: Free tier requires attribution to Logo.dev
+
+**Endpoint:** `https://img.logo.dev/{domain}?token={TOKEN}`
+
+#### How it Works
+
 1. Script converts vendor names to likely domains (e.g., "Anthropic Claude" → "anthropic.com")
-2. Queries LogoKit API: `https://img.logokit.com/anthropic.com?token=YOUR_TOKEN`
+2. Queries selected Logo API provider with the domain
 3. Verifies the response is a valid image
 4. Updates mapping file with found logo URLs
 5. You then download the logos using `--download`
 
-**Example:**
+**Example with LogoKit (default):**
 ```bash
 $ ./scripts/download-ai-logos.sh --auto-fetch pk_abc123xyz
 

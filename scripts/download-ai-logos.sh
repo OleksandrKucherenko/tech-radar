@@ -258,20 +258,47 @@ vendor_to_domain() {
     esac
 }
 
-# Auto-fetch logos using LogoKit API
+# Auto-fetch logos using Logo API providers
 auto_fetch_logos() {
     local api_token="$1"
+    local provider="${2:-logokit}"  # Default to logokit if not specified
 
     if [ -z "$api_token" ]; then
-        echo -e "${RED}Error: LogoKit API token required${NC}"
-        echo "Usage: $0 --auto-fetch YOUR_LOGOKIT_TOKEN"
+        echo -e "${RED}Error: API token required${NC}"
+        echo "Usage: $0 --auto-fetch YOUR_API_TOKEN [PROVIDER]"
         echo ""
-        echo "Get your free token at: https://logokit.com"
-        echo "Free tier: 64x64 resolution logos (perfect for our needs!)"
+        echo "Providers:"
+        echo "  logokit  - LogoKit API (default) - https://logokit.com"
+        echo "  logodev  - Logo.dev API - https://logo.dev"
+        echo ""
+        echo "Examples:"
+        echo "  $0 --auto-fetch pk_abc123xyz logokit"
+        echo "  $0 --auto-fetch pk_Z7FJx3u logodev"
         exit 1
     fi
 
-    echo -e "${BLUE}Auto-fetching logos using LogoKit API${NC}"
+    # Validate provider
+    if [[ "$provider" != "logokit" && "$provider" != "logodev" ]]; then
+        echo -e "${RED}Error: Invalid provider '$provider'${NC}"
+        echo "Valid providers: logokit, logodev"
+        exit 1
+    fi
+
+    # Set provider-specific details
+    local provider_name
+    local api_base_url
+    case "$provider" in
+        logokit)
+            provider_name="LogoKit"
+            api_base_url="https://img.logokit.com"
+            ;;
+        logodev)
+            provider_name="Logo.dev"
+            api_base_url="https://img.logo.dev"
+            ;;
+    esac
+
+    echo -e "${BLUE}Auto-fetching logos using ${provider_name} API${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
@@ -320,17 +347,17 @@ auto_fetch_logos() {
 
         echo -e "  Domain: $domain"
 
-        # Try LogoKit API
-        local logokit_url="https://img.logokit.com/${domain}?token=${api_token}"
+        # Try Logo API
+        local logo_url="${api_base_url}/${domain}?token=${api_token}"
         local test_file=$(mktemp)
 
-        if curl -sf -o "$test_file" "$logokit_url" 2>/dev/null; then
+        if curl -sf -o "$test_file" "$logo_url" 2>/dev/null; then
             # Verify it's actually an image
             if file "$test_file" | grep -q "image"; then
-                echo -e "  ${GREEN}✓ Found logo via LogoKit${NC}"
+                echo -e "  ${GREEN}✓ Found logo via ${provider_name}${NC}"
 
                 # Update mapping file
-                local updated_json=$(jq --arg label "$label" --arg url "$logokit_url" \
+                local updated_json=$(jq --arg label "$label" --arg url "$logo_url" \
                     'map(if .label == $label then .url = $url | .status = "found" else . end)' \
                     "$temp_mapping")
                 echo "$updated_json" > "$temp_mapping"
@@ -603,16 +630,20 @@ Usage: $0 [OPTIONS]
 AI Tech Radar Logo Downloader - Extract vendors from ai.html and download logos
 
 OPTIONS:
-    --generate-mapping         Extract vendors and create/update URL mapping file
-    --auto-fetch <TOKEN>       Auto-fetch logos using LogoKit API (requires free token)
-    --download                 Download logos from mapping file
-    --update-html              Show which logos are available for ai.html
-    --all                      Do everything: generate, download, update
-    -h, --help                 Show this help message
+    --generate-mapping              Extract vendors and create/update URL mapping file
+    --auto-fetch <TOKEN> [PROVIDER] Auto-fetch logos using Logo API (default: logokit)
+    --download                      Download logos from mapping file
+    --update-html                   Show which logos are available for ai.html
+    --all                           Do everything: generate, download, update
+    -h, --help                      Show this help message
 
-WORKFLOW (Automated with LogoKit):
+PROVIDERS:
+    logokit  - LogoKit API (default) - Free tier: 64x64 logos
+    logodev  - Logo.dev API - Free tier with attribution
+
+WORKFLOW (Automated):
     1. Generate mapping:  $0 --generate-mapping
-    2. Auto-fetch logos:  $0 --auto-fetch YOUR_LOGOKIT_TOKEN
+    2. Auto-fetch logos:  $0 --auto-fetch YOUR_TOKEN [PROVIDER]
     3. Download logos:    $0 --download
 
 WORKFLOW (Manual):
@@ -623,10 +654,18 @@ WORKFLOW (Manual):
     4. Update HTML:       Manually add logo paths to ai.html
 
 EXAMPLES:
-    # Automated workflow with LogoKit (recommended)
+    # Automated workflow with LogoKit (default)
     $0 --generate-mapping
-    $0 --auto-fetch pk_abc123xyz  # Get free token at https://logokit.com
+    $0 --auto-fetch pk_abc123xyz
     $0 --download
+
+    # Automated workflow with Logo.dev
+    $0 --generate-mapping
+    $0 --auto-fetch pk_Z7FJx3u logodev
+    $0 --download
+
+    # Specify provider explicitly
+    $0 --auto-fetch pk_abc123xyz logokit
 
     # Manual workflow
     $0 --generate-mapping
@@ -636,10 +675,12 @@ EXAMPLES:
     # Quick start (manual placeholders)
     $0 --all
 
-LOGOKIT API:
-    Get your free publishable token at: https://logokit.com
-    Free tier provides 64x64 resolution logos (perfect for our needs!)
-    The token is publishable and safe to use in scripts.
+LOGO API TOKENS:
+    LogoKit: Get free token at https://logokit.com
+             Free tier: 64x64 resolution logos (perfect for our needs!)
+
+    Logo.dev: Get free token at https://logo.dev
+              Free tier: Requires attribution, high-resolution logos
 
 EOF
 }
@@ -667,7 +708,8 @@ main() {
             ;;
         --auto-fetch)
             local token="${2:-}"
-            auto_fetch_logos "$token"
+            local provider="${3:-logokit}"
+            auto_fetch_logos "$token" "$provider"
             ;;
         --download)
             download_all_logos
