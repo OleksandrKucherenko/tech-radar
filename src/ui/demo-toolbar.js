@@ -205,6 +205,7 @@ export function getToolbarHTML() {
 /**
  * Inject toolbar HTML into the specified container element
  * Similar to SVG injection - finds element by ID and injects HTML
+ * Only injects if toolbar doesn't already exist to preserve event listeners
  * @param {string} toolbarId - ID of the container element (without '#')
  * @returns {boolean} True if injection succeeded, false otherwise
  */
@@ -217,6 +218,12 @@ export function injectToolbar(toolbarId) {
   if (!container) {
     console.warn(`Toolbar container element with id "${toolbarId}" not found`);
     return false;
+  }
+
+  // Check if toolbar already exists - if so, skip injection to preserve event listeners
+  const existingToolbar = container.querySelector('.demo-toolbar');
+  if (existingToolbar) {
+    return true; // Already injected, listeners preserved
   }
 
   // Clear existing content

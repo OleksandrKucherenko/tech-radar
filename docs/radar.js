@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+88dd274
+// Version: 0.0.1-dev+7d03dc8
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1746,6 +1746,10 @@ function injectToolbar(toolbarId) {
   if (!container) {
     console.warn(`Toolbar container element with id "${toolbarId}" not found`);
     return false;
+  }
+  const existingToolbar = container.querySelector(".demo-toolbar");
+  if (existingToolbar) {
+    return true;
   }
   container.innerHTML = "";
   container.innerHTML = getToolbarHTML();

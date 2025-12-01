@@ -309,5 +309,63 @@ describe('Demo Toolbar', () => {
         expect(expectedHTML.includes('fa-undo')).toBe(receivedHTML.includes('fa-undo'));
       }
     });
+
+    test('should not re-inject if toolbar already exists (preserves listeners)', () => {
+      // GIVEN: A container with toolbar already injected
+      if (typeof document !== 'undefined') {
+        const container = document.createElement('div');
+        container.id = 'toolbar';
+        document.body.appendChild(container);
+
+        // First injection
+        injectToolbar('toolbar');
+
+        // Add a custom attribute to track the original toolbar
+        const toolbar = container.querySelector('.demo-toolbar');
+        toolbar.setAttribute('data-test', 'original');
+
+        // WHEN: Calling injectToolbar again (simulating re-render)
+        const result = injectToolbar('toolbar');
+
+        // THEN: Should return true but not re-inject
+        expect(result).toBe(true);
+
+        // Verify the original toolbar is still there (not re-created)
+        // If it was re-created, the data-test attribute would be gone
+        const toolbarAfter = container.querySelector('.demo-toolbar');
+        expect(toolbarAfter.getAttribute('data-test')).toBe('original');
+      }
+    });
+
+    test('should preserve event listeners across multiple render calls', () => {
+      // GIVEN: A container with toolbar and event listener
+      if (typeof document !== 'undefined') {
+        const container = document.createElement('div');
+        container.id = 'toolbar';
+        document.body.appendChild(container);
+
+        // First injection
+        injectToolbar('toolbar');
+
+        // Add event listener to a button
+        let clickCount = 0;
+        const importButton = document.getElementById('jsonImportButton');
+        importButton.addEventListener('click', () => {
+          clickCount++;
+        });
+
+        // WHEN: Calling injectToolbar again (simulating re-render)
+        injectToolbar('toolbar');
+
+        // THEN: Event listener should still work
+        const buttonAfter = document.getElementById('jsonImportButton');
+        buttonAfter.click();
+        expect(clickCount).toBe(1);
+
+        // Click again to verify it still works
+        buttonAfter.click();
+        expect(clickCount).toBe(2);
+      }
+    });
   });
 });
