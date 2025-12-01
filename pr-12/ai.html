@@ -148,9 +148,9 @@
         quadrants: [
           { name: "Core AI Providers" },
           { name: "AI Coding Tools" },
-          { name: "RAG & Retrieval" },
+          { name: "RAG & Retrieval & Knowledge Base" },
           { name: "Databases" },
-          { name: "MCP/Chats" },
+          { name: "Low-Code & MCP" },
         ],
         rings: [
           { name: "ADOPT", color: "#5ba300" },
@@ -902,7 +902,250 @@
               "Memgraph is a high-performance, in-memory graph database optimized for real-time graph analytics and streaming data, increasingly used for dynamic knowledge graphs.\n\n**Performance Focus:**\n- In-memory graph processing\n- Real-time analytics\n- Cypher query language (Neo4j compatible)\n- Stream processing integration\n- ACID guarantees\n- Perfect for dynamic knowledge graphs\n\nMemgraph excels when you need graph database performance for real-time AI decision-making.",
           },
 
-          // MCP/Chat UI (Quadrant 4)
+          // Low-Code & MCP (Quadrant 4)
+          // Low-Code AI Automation Platforms
+          {
+            label: "n8n",
+            link: "https://github.com/n8n-io/n8n",
+            quadrant: 4,
+            ring: 1,
+            moved: 2,
+            active: true,
+            description:
+              "Fair-code visual workflow automation with strong AI/LLM integration and Azure DevOps support via community node.\n\n**Key Capabilities:**\n- Visual workflow builder with 400+ integrations\n- Built-in AI/LLM nodes (OpenAI, Claude, etc.)\n- Azure DevOps community integration\n- Self-hostable with fair-code license\n- Active community and marketplace\n- HTTP/REST for custom integrations\n\nExcellent for glue workflows between AI services and DevOps pipelines.",
+          },
+          {
+            label: "Activepieces",
+            link: "https://www.activepieces.com/open-source",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "Open-source AI-first automation platform with TypeScript-based 'pieces' framework, designed for AI workflows and agents.\n\n**Strengths:**\n- TypeScript-based extensible 'pieces'\n- Native OpenAI and AI integrations\n- Self-hostable automation platform\n- Visual flow builder\n- Easy custom piece development\n- Azure DevOps via HTTP or custom pieces\n\nStrong candidate for developers wanting TS-based AI automation extensions.",
+          },
+          {
+            label: "Node-RED",
+            link: "https://nodered.org/",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "Veteran flow-based programming tool for IoT and integrations, with community AI nodes and easy JavaScript scripting.\n\n**Proven Platform:**\n- Battle-tested since 2013\n- 4000+ community nodes\n- AI/LLM community contributions\n- Runs on edge devices to cloud\n- Easy JavaScript function nodes\n- MQTT, HTTP, WebSocket support\n\nRock-solid automation glue for industrial and IoT AI applications.",
+          },
+          {
+            label: "Appsmith",
+            link: "https://www.appsmith.com/",
+            quadrant: 4,
+            ring: 2,
+            moved: 2,
+            active: true,
+            description:
+              "Open-source internal tools builder with self-hosted option. Connects to any REST API including AI and Azure DevOps.\n\n**Internal Tools Focus:**\n- Drag-and-drop UI builder\n- 50+ pre-built widgets\n- JavaScript everywhere for logic\n- Git sync for version control\n- REST/GraphQL/Database connectors\n- Self-hostable\n\nGreat for building DevOps dashboards with AI insights.",
+          },
+          {
+            label: "ToolJet",
+            link: "https://www.tooljet.com/",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS low-code platform for internal tools with Azure Repos plugin, AI integrations, and rich component library.\n\n**DevOps Integration:**\n- Official Azure Repos data source\n- 50+ data source integrations\n- AI integration positioning\n- Workflow automation\n- Self-hostable on Kubernetes/Docker\n- Marketplace for plugins\n\nVery nice for DevOps control panels with AI capabilities.",
+          },
+          {
+            label: "Budibase",
+            link: "https://github.com/Budibase/budibase",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS low-code app builder for internal tools, self-hostable with REST and automation support.\n\n**Quick Development:**\n- Generate apps from databases\n- Automation workflows\n- Custom components\n- RBAC and SSO\n- REST API integration for AI/DevOps\n- Docker/Kubernetes deployment\n\nGood for CRUD-heavy internal tools with DevOps/AI side actions.",
+          },
+          {
+            label: "NocoDB",
+            link: "https://github.com/nocodb/nocodb",
+            quadrant: 2,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS Airtable alternative on SQL databases with APIs, automations, and views.\n\n**Data-Centric:**\n- Turn any database into smart spreadsheet\n- REST/GraphQL APIs auto-generated\n- Webhooks and automations\n- Collaboration features\n- Self-hosted data control\n- Great for AI prompt/config storage\n\nGreat data backend for low-code AI apps and DevOps workflows.",
+          },
+          {
+            label: "Baserow",
+            link: "https://baserow.io/",
+            quadrant: 2,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS self-hosted Airtable alternative with REST API, plugins, and AI-assisted features.\n\n**No-Code Database:**\n- Real-time collaboration\n- REST API for all operations\n- Plugin system for extensions\n- AI formula assistance\n- Self-hosted data sovereignty\n- Import from Airtable/CSV/JSON\n\nVery nice as data hub for LLM apps with structured prompts and configurations.",
+          },
+          {
+            label: "NocoBase",
+            link: "https://www.nocobase.com/",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS self-hosted no-code platform for complex business apps with integrated AI features and strong plugin framework.\n\n**Enterprise Features:**\n- Plugin-based architecture\n- Built-in AI capabilities\n- Workflow automation\n- Complex data modeling\n- Multi-tenant support\n- TypeScript/Node.js stack\n\nEnterprise-grade data model with workflow and AI integration.",
+          },
+          {
+            label: "Flowise",
+            link: "https://flowiseai.com/",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS visual LLM app builder with nodes for prompts, tools, vector DBs, and agents.\n\n**AI-Native Builder:**\n- Drag-and-drop LLM chains\n- RAG and vector store support\n- OpenAI, Anthropic, Azure OpenAI\n- Agent and tool integration\n- API endpoints for flows\n- Self-hostable\n\nCore purpose is building AI agents & chatbots visually with full control.",
+          },
+          {
+            label: "Langflow",
+            link: "https://github.com/langflow-ai/langflow",
+            quadrant: 4,
+            ring: 2,
+            moved: 2,
+            active: true,
+            description:
+              "Visual builder for LLM flows with native support for wide range of LLMs & vector stores.\n\n**LangChain GUI:**\n- Based on LangChain framework\n- Visual graph interface\n- Supports 100+ integrations\n- Custom components\n- Export as Python code\n- Playground for testing\n\nLangChain-style building with a visual UX editor for rapid prototyping.",
+          },
+          {
+            label: "Dify",
+            link: "https://github.com/langgenius/dify",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS platform for LLM apps & RAG with UI for Chat, Agents, and Workflows.\n\n**Enterprise RAG Platform:**\n- Visual LLM orchestration\n- Prompt engineering studio\n- RAG pipeline builder\n- Agent framework\n- API-first architecture\n- Multi-tenant support\n\nStrong AI-native story with prompt management, agents, and tools - complete enterprise RAG/agent platform.",
+          },
+          {
+            label: "ILLA Builder",
+            link: "https://www.illacloud.com/",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS low-code internal-tools builder in TypeScript. Integrates with Hugging Face and AI sources out-of-the-box.\n\n**Features:**\n- React-based component library\n- Hugging Face integration\n- SQL/REST/GraphQL data sources\n- Collaborative editing\n- Self-hosted deployment\n- TypeScript for custom logic\n\nSupports many data sources and AI providers for internal tool development.",
+          },
+          {
+            label: "Openblocks",
+            link: "https://github.com/openblocks-dev/openblocks",
+            quadrant: 2,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS Retool-style platform for internal apps with 50+ components.\n\n**Retool Alternative:**\n- 50+ built-in components\n- JavaScript queries and transformers\n- Multiple data sources\n- Self-hostable\n- RBAC and audit logs\n- REST/GraphQL support\n\nREST and JS queries make AI integration straightforward.",
+          },
+          {
+            label: "Windmill",
+            link: "https://www.windmill.dev/",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS workflow engine & internal tools builder. Write scripts in TypeScript/Python with auto-generated UI.\n\n**Developer-First:**\n- Code-first approach\n- Auto-generate UI from scripts\n- Workflows and schedules\n- Version control integration\n- Distributed execution\n- Type-safe APIs\n\nVery natural for calling LLMs and Azure DevOps from TypeScript/Python code.",
+          },
+          {
+            label: "Automatisch",
+            link: "https://automatisch.io/",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS Zapier alternative with visual flows and self-hosting.\n\n**Workflow Automation:**\n- Visual workflow builder\n- 200+ app integrations\n- Self-hosted deployment\n- Open-source (AGPL-3.0)\n- Webhooks and HTTP requests\n- Multi-step automations\n\nGeneric HTTP and custom connectors enable AI and Azure DevOps integration.",
+          },
+          {
+            label: "APITable",
+            link: "https://github.com/apitable/apitable",
+            quadrant: 2,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS API-oriented Airtable alternative with collaborative tables and strong APIs.\n\n**API-First:**\n- Real-time collaboration\n- Rich data types\n- Automation robots\n- Extensive REST API\n- Self-hostable\n- Multi-dimensional tables\n\nGreat as data hub for AI prompts/configs and DevOps metadata with programmatic access.",
+          },
+          {
+            label: "Rowy",
+            link: "https://www.rowy.io/",
+            quadrant: 2,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS low-code backend on Firebase/Google Cloud with spreadsheet UI and TypeScript cloud functions.\n\n**Firebase Integration:**\n- Firestore database UI\n- Cloud Functions in browser\n- TypeScript/JavaScript extensions\n- Real-time updates\n- Authentication integration\n- Third-party API connectors\n\nVery natural to call AI APIs and Azure DevOps REST from TypeScript functions.",
+          },
+          {
+            label: "PocketBase",
+            link: "https://pocketbase.io/",
+            quadrant: 2,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS Go-based backend with embedded database, auth, file storage, and admin UI in a single file.\n\n**All-in-One Backend:**\n- SQLite embedded database\n- Authentication & authorization\n- File storage\n- Realtime subscriptions\n- REST-ish API\n- Extend with Go or JavaScript\n\nGreat lightweight backend for low-code apps, pair with automation tools for AI integration.",
+          },
+          {
+            label: "Saltcorn",
+            link: "https://saltcorn.com/",
+            quadrant: 2,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS no-code web app builder on Postgres with drag-and-drop UI and plugin system.\n\n**Database-First:**\n- PostgreSQL backend\n- Table builder and views\n- Workflow automation\n- Plugin architecture\n- User management\n- Forms and reports\n\nAdd AI calls through plugins or HTTP actions for intelligent features.",
+          },
+          {
+            label: "Joget",
+            link: "https://www.joget.org/",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "Java-based OSS low-code platform with workflows, forms, and native Joget AI features.\n\n**Enterprise Platform:**\n- Process automation (BPM)\n- Form builder\n- Joget AI Bundle (TensorFlow integration)\n- Generative AI capabilities\n- Plugin marketplace\n- Community Edition (GPL v3)\n\nEnterprise-focused platform with native AI features and extensive workflow capabilities.",
+          },
+          {
+            label: "lsFusion",
+            link: "https://lsfusion.org/",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS declarative low-code platform for complex business systems (ERP-style).\n\n**Declarative Development:**\n- Domain-specific language\n- ERP/business logic focus\n- PostgreSQL backend\n- Event-driven architecture\n- Rich client capabilities\n- HTTP service integration\n\nCan call external HTTP/AI services and integrate with SQL databases for complex business logic.",
+          },
+          {
+            label: "Huginn",
+            link: "https://github.com/huginn/huginn",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS self-hosted agents platform with event graph for automation workflows.\n\n**Agent-Based:**\n- Event-driven agent system\n- Data flow graphs\n- 50+ built-in agents\n- Scenario builder\n- Privacy-focused\n- Ruby-based extensibility\n\nGood for custom AI automations if comfortable with Ruby configuration. More config-heavy, less visual.",
+          },
+          {
+            label: "StackStorm",
+            link: "https://github.com/StackStorm/st2",
+            quadrant: 4,
+            ring: 4,
+            moved: 2,
+            active: true,
+            description:
+              "OSS event-driven automation platform (IFTTT for Ops) with rules engine and workflows.\n\n**DevOps/SRE Focus:**\n- Event-driven automation\n- ChatOps integration\n- Workflow orchestration\n- Sensor framework\n- Action packs (Python)\n- Auto-remediation\n\nVery DevOps/SRE-oriented, treat AI as action packs for intelligent incident remediation.",
+          },
+
+          // MCP Servers & Chat Interfaces
           {
             label: "LobeChat",
             link: "https://lobechat.com/chat",
@@ -964,6 +1207,26 @@
               "An MCP server implementation that integrates the Brave Search API, providing comprehensive search capabilities to AI assistants through the Model Context Protocol.\n\n**Search Capabilities:**\n- Web search with privacy focus\n- Local business and points of interest search\n- Image search integration\n- Video search functionality\n- Multiple search result types\n- Privacy-preserving design\n\nBrave Search MCP brings Brave's independent search index and privacy-first approach to AI assistants, offering an alternative to traditional search providers.",
           },
           {
+            label: "Jina AI",
+            link: "https://jina.ai/",
+            quadrant: 4,
+            ring: 1,
+            moved: 2,
+            active: true,
+            description:
+              "Jina AI provides multimodal AI infrastructure including embeddings, reranking, and web search APIs optimized for AI and RAG applications.\n\n**Key Services:**\n- Reader API: Convert any URL to LLM-friendly text\n- Search API: Grounded web search for AI applications\n- Embeddings API: State-of-the-art text and multimodal embeddings\n- Reranker API: Improve search relevance for RAG\n- Support for 100+ languages\n- High-performance infrastructure\n\nJina AI's Reader API is particularly popular for converting web content into clean, LLM-ready markdown for RAG pipelines.",
+          },
+          {
+            label: "Tavily",
+            link: "https://www.tavily.com/",
+            quadrant: 4,
+            ring: 1,
+            moved: 2,
+            active: true,
+            description:
+              "Tavily is an AI-powered search API specifically optimized for LLMs and RAG applications, providing real-time, accurate, and factual results.\n\n**AI-Optimized Search:**\n- Search API designed for AI agents and RAG\n- Real-time web search with factual accuracy\n- Source extraction and citation\n- Curated results optimized for LLM consumption\n- Answer API for direct question answering\n- Developer-friendly JSON responses\n\nTavily differentiates itself by being built specifically for AI applications, with results optimized for LLM processing rather than human browsing.",
+          },
+          {
             label: "Docker MCP Toolkit",
             link: "https://docs.docker.com/ai/mcp-catalog-and-toolkit/toolkit/",
             quadrant: 4,
@@ -994,6 +1257,6 @@
       radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
     </script>
 
-    <footer>Build: <code>18961a9</code></footer>
+    <footer>Build: <code>5c081bb</code></footer>
   </body>
 </html>
