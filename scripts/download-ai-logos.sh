@@ -319,71 +319,108 @@ auto_fetch_logos() {
 
     local total_vendors=$(jq 'length' "$MAPPING_FILE")
     local missing_vendors=$(jq '[.[] | select(.status == "missing")] | length' "$MAPPING_FILE")
+    local existing_vendors=$(jq '[.[] | select(.status == "found")] | length' "$MAPPING_FILE")
     local processed=0
     local found=0
+    local fixed=0
     local failed=0
 
     echo -e "Total vendors: $total_vendors"
-    echo -e "Missing logos: $missing_vendors"
+    echo -e "  Existing logos: $existing_vendors"
+    echo -e "  Missing logos: $missing_vendors"
     echo ""
 
     # Create temporary file for updates
     local temp_mapping=$(mktemp)
     cp "$MAPPING_FILE" "$temp_mapping"
 
-    # Process each missing vendor
+    # Process ALL vendors (validate existing + fetch missing)
     while IFS= read -r entry; do
         local label=$(echo "$entry" | jq -r '.label')
         local slug=$(echo "$entry" | jq -r '.slug')
         local current_url=$(echo "$entry" | jq -r '.url')
-
-        # Skip if already has a URL
-        if [[ "$current_url" != *"PLACEHOLDER"* ]]; then
-            continue
-        fi
+        local current_status=$(echo "$entry" | jq -r '.status')
 
         processed=$((processed + 1))
-        echo -e "${CYAN}[$processed/$missing_vendors]${NC} $label"
+        echo -e "${CYAN}[$processed/$total_vendors]${NC} $label"
 
         # Get likely domain
         local domain=$(vendor_to_domain "$label")
 
         if [ -z "$domain" ]; then
             echo -e "  ${YELLOW}⚠ Could not determine domain${NC}"
-            failed=$((failed + 1))
+            if [[ "$current_url" == *"PLACEHOLDER"* ]]; then
+                failed=$((failed + 1))
+            fi
+            echo ""
             continue
         fi
 
         echo -e "  Domain: $domain"
 
-        # Try Logo API
-        local logo_url="${api_base_url}/${domain}?token=${api_token}"
-        local test_file=$(mktemp)
+        # Check if existing URL is valid
+        local needs_update=false
+        if [[ "$current_url" != *"PLACEHOLDER"* ]]; then
+            echo -e "  Current: $current_url"
+            echo -e "  ${BLUE}Validating existing URL...${NC}"
 
-        if curl -sf -o "$test_file" "$logo_url" 2>/dev/null; then
-            # Verify it's actually an image
-            if file "$test_file" | grep -q "image"; then
-                echo -e "  ${GREEN}✓ Found logo via ${provider_name}${NC}"
-
-                # Update mapping file
-                local updated_json=$(jq --arg label "$label" --arg url "$logo_url" \
-                    'map(if .label == $label then .url = $url | .status = "found" else . end)' \
-                    "$temp_mapping")
-                echo "$updated_json" > "$temp_mapping"
-
-                found=$((found + 1))
+            local validate_file=$(mktemp)
+            if curl -sf -o "$validate_file" "$current_url" 2>/dev/null; then
+                if file "$validate_file" | grep -q "image"; then
+                    echo -e "  ${GREEN}✓ Existing URL is valid${NC}"
+                    rm -f "$validate_file"
+                    echo ""
+                    continue
+                else
+                    echo -e "  ${YELLOW}⚠ Existing URL returned invalid image${NC}"
+                    needs_update=true
+                fi
             else
-                echo -e "  ${YELLOW}⚠ Invalid image response${NC}"
-                failed=$((failed + 1))
+                echo -e "  ${RED}✗ Existing URL is broken${NC}"
+                needs_update=true
             fi
+            rm -f "$validate_file"
         else
-            echo -e "  ${YELLOW}⚠ Logo not found${NC}"
-            failed=$((failed + 1))
+            needs_update=true
         fi
 
-        rm -f "$test_file"
+        # Try to fetch from provider
+        if [ "$needs_update" = true ]; then
+            local logo_url="${api_base_url}/${domain}?token=${api_token}"
+            local test_file=$(mktemp)
+
+            echo -e "  ${BLUE}Fetching from ${provider_name}...${NC}"
+
+            if curl -sf -o "$test_file" "$logo_url" 2>/dev/null; then
+                # Verify it's actually an image
+                if file "$test_file" | grep -q "image"; then
+                    if [[ "$current_url" == *"PLACEHOLDER"* ]]; then
+                        echo -e "  ${GREEN}✓ Found new logo via ${provider_name}${NC}"
+                        found=$((found + 1))
+                    else
+                        echo -e "  ${GREEN}✓ Fixed broken URL via ${provider_name}${NC}"
+                        fixed=$((fixed + 1))
+                    fi
+
+                    # Update mapping file
+                    local updated_json=$(jq --arg label "$label" --arg url "$logo_url" \
+                        'map(if .label == $label then .url = $url | .status = "found" else . end)' \
+                        "$temp_mapping")
+                    echo "$updated_json" > "$temp_mapping"
+                else
+                    echo -e "  ${YELLOW}⚠ Invalid image response from ${provider_name}${NC}"
+                    failed=$((failed + 1))
+                fi
+            else
+                echo -e "  ${YELLOW}⚠ Logo not found on ${provider_name}${NC}"
+                failed=$((failed + 1))
+            fi
+
+            rm -f "$test_file"
+        fi
+
         echo ""
-    done < <(jq -c '.[] | select(.status == "missing")' "$MAPPING_FILE")
+    done < <(jq -c '.[]' "$MAPPING_FILE")
 
     # Save updated mapping
     mv "$temp_mapping" "$MAPPING_FILE"
@@ -393,7 +430,10 @@ auto_fetch_logos() {
     echo -e "${BLUE}Summary${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "  Processed: $processed"
-    echo -e "  ${GREEN}Found: $found${NC}"
+    echo -e "  ${GREEN}New logos found: $found${NC}"
+    if [ "$fixed" -gt 0 ]; then
+        echo -e "  ${GREEN}Broken URLs fixed: $fixed${NC}"
+    fi
     echo -e "  ${YELLOW}Not found: $failed${NC}"
     echo ""
 
@@ -405,9 +445,10 @@ auto_fetch_logos() {
     echo -e "  Still missing: ${YELLOW}$remaining${NC}"
     echo ""
 
-    if [ "$found" -gt 0 ]; then
-        echo -e "${GREEN}✓ Found $found new logos!${NC}"
-        echo -e "Run ${CYAN}--download${NC} to download the newly found logos"
+    if [ "$found" -gt 0 ] || [ "$fixed" -gt 0 ]; then
+        local changes=$((found + fixed))
+        echo -e "${GREEN}✓ Updated $changes logo URL(s)!${NC}"
+        echo -e "Run ${CYAN}--download${NC} to download the logos"
     fi
 }
 

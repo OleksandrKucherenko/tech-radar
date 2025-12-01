@@ -397,10 +397,18 @@ The script now supports automatic logo fetching using **multiple Logo API provid
 #### How it Works
 
 1. Script converts vendor names to likely domains (e.g., "Anthropic Claude" → "anthropic.com")
-2. Queries selected Logo API provider with the domain
-3. Verifies the response is a valid image
-4. Updates mapping file with found logo URLs
-5. You then download the logos using `--download`
+2. **Validates existing URLs**: Tests if current URLs still work
+3. **Auto-fixes broken URLs**: If validation fails, fetches replacement from provider
+4. **Finds missing logos**: Queries provider for entries with PLACEHOLDERs
+5. Verifies all responses are valid images
+6. Updates mapping file with found/fixed logo URLs
+7. You then download the logos using `--download`
+
+**URL Validation Feature (NEW!):**
+- Auto-fetch now validates ALL existing logo URLs
+- Detects broken links (404, timeouts, invalid images)
+- Automatically fetches replacements from provider
+- Shows separate counts for "New logos found" and "Broken URLs fixed"
 
 **Example with LogoKit (default):**
 ```bash
@@ -410,25 +418,38 @@ Auto-fetching logos using LogoKit API
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Total vendors: 107
-Missing logos: 75
+  Existing logos: 32
+  Missing logos: 75
 
-[1/75] Bolt.new
+[1/107] Anthropic Claude
+  Domain: anthropic.com
+  Current: https://www.anthropic.com/images/icons/app-icon.png
+  Validating existing URL...
+  ✓ Existing URL is valid
+
+[2/107] Cursor
+  Domain: cursor.sh
+  Current: https://old-broken-url.com/logo.png
+  Validating existing URL...
+  ✗ Existing URL is broken
+  Fetching from LogoKit...
+  ✓ Fixed broken URL via LogoKit
+
+[33/107] Bolt.new
   Domain: bolt.new
-  ✓ Found logo via LogoKit
-
-[2/75] Windsurf
-  Domain: windsurf.com
-  ✓ Found logo via LogoKit
+  Fetching from LogoKit...
+  ✓ Found new logo via LogoKit
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Summary
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Processed: 75
-  Found: 45
-  Not found: 30
+  Processed: 107
+  New logos found: 45
+  Broken URLs fixed: 2
+  Not found: 28
 
-✓ Found 45 new logos!
-Run --download to download the newly found logos
+✓ Updated 47 logo URL(s)!
+Run --download to download the logos
 ```
 
 ### Built-in Logo Database
