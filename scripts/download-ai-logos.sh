@@ -333,7 +333,7 @@ auto_fetch_logos() {
             continue
         fi
 
-        ((processed++))
+        processed=$((processed + 1))
         echo -e "${CYAN}[$processed/$missing_vendors]${NC} $label"
 
         # Get likely domain
@@ -341,7 +341,7 @@ auto_fetch_logos() {
 
         if [ -z "$domain" ]; then
             echo -e "  ${YELLOW}⚠ Could not determine domain${NC}"
-            ((failed++))
+            failed=$((failed + 1))
             continue
         fi
 
@@ -362,14 +362,14 @@ auto_fetch_logos() {
                     "$temp_mapping")
                 echo "$updated_json" > "$temp_mapping"
 
-                ((found++))
+                found=$((found + 1))
             else
                 echo -e "  ${YELLOW}⚠ Invalid image response${NC}"
-                ((failed++))
+                failed=$((failed + 1))
             fi
         else
             echo -e "  ${YELLOW}⚠ Logo not found${NC}"
-            ((failed++))
+            failed=$((failed + 1))
         fi
 
         rm -f "$test_file"
