@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+fe3eb0a
+// Version: 0.0.1-dev+7d03dc8
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1736,6 +1736,42 @@ function showToolbarMessage2(message, state = "info") {
     }
   }
 }
+function getToolbarHTML() {
+  return `
+    <div class="demo-toolbar" role="region" aria-label="JSON configuration tools">
+      <div class="demo-toolbar__controls">
+        <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonImportButton" title="Import JSON Configuration" aria-label="Import JSON">
+          <i class="fas fa-file-import"></i>
+        </button>
+        <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonExportButton" title="Export JSON Configuration" aria-label="Export JSON">
+          <i class="fas fa-file-export"></i>
+        </button>
+        <button type="button" class="demo-toolbar__button demo-toolbar__button--icon" id="jsonResetButton" title="Reset to Initial Configuration" aria-label="Reset Configuration">
+          <i class="fas fa-undo"></i>
+        </button>
+        <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+      </div>
+      <p class="demo-toolbar__message" id="jsonToolbarMessage" role="status" aria-live="polite"></p>
+    </div>
+  `.trim();
+}
+function injectToolbar(toolbarId) {
+  if (!toolbarId) {
+    return false;
+  }
+  const container = document.getElementById(toolbarId);
+  if (!container) {
+    console.warn(`Toolbar container element with id "${toolbarId}" not found`);
+    return false;
+  }
+  const existingToolbar = container.querySelector(".demo-toolbar");
+  if (existingToolbar) {
+    return true;
+  }
+  container.innerHTML = "";
+  container.innerHTML = getToolbarHTML();
+  return true;
+}
 
 // src/validation/config-validator.js
 class ConfigValidationError extends Error {
@@ -1775,6 +1811,9 @@ function _renderRadar(config) {
   const svg = document.getElementById(config.svg_id || "radar");
   if (svg) {
     svg.innerHTML = "";
+  }
+  if (config.toolbar_id) {
+    injectToolbar(config.toolbar_id);
   }
   applyConfigDefaults(config);
   const dimensions = calculateDimensions(config);
@@ -1874,6 +1913,8 @@ function radar_visualization2(initialConfig) {
 var jsonIO = createJsonIOHelpers();
 radar_visualization2.jsonIO = jsonIO;
 radar_visualization2.initDemoToolbar = initDemoToolbar;
+radar_visualization2.injectToolbar = injectToolbar;
+radar_visualization2.getToolbarHTML = getToolbarHTML;
 radar_visualization2.render = (config) => {
   _renderRadar(config);
   return config;
