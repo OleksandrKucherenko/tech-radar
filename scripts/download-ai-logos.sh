@@ -540,7 +540,7 @@ download_all_logos() {
     local failed=0
 
     while IFS= read -r entry; do
-        ((total++))
+        total=$((total + 1))
 
         local label=$(echo "$entry" | jq -r '.label')
         local slug=$(echo "$entry" | jq -r '.slug')
@@ -548,12 +548,12 @@ download_all_logos() {
 
         if download_logo "$label" "$slug" "$url"; then
             if [[ "$url" == *"PLACEHOLDER"* ]]; then
-                ((skipped++))
+                skipped=$((skipped + 1))
             else
-                ((success++))
+                success=$((success + 1))
             fi
         else
-            ((failed++))
+            failed=$((failed + 1))
         fi
         echo ""
     done < <(jq -c '.[]' "$MAPPING_FILE")
