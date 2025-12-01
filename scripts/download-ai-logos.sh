@@ -33,12 +33,15 @@ check_dependencies() {
         missing_deps+=("jq")
     fi
 
-    # curl and imagemagick only needed for download operations
-    if [[ "$action" == "--download" ]] || [[ "$action" == "--all" ]]; then
+    # curl needed for auto-fetch and download operations
+    if [[ "$action" == "--auto-fetch" ]] || [[ "$action" == "--download" ]] || [[ "$action" == "--all" ]]; then
         if ! command -v curl &> /dev/null; then
             missing_deps+=("curl")
         fi
+    fi
 
+    # imagemagick only needed for download operations
+    if [[ "$action" == "--download" ]] || [[ "$action" == "--all" ]]; then
         if ! command -v convert &> /dev/null; then
             missing_deps+=("imagemagick")
         fi
@@ -167,6 +170,209 @@ get_common_logo_url() {
             echo ""
             ;;
     esac
+}
+
+# Convert vendor name to likely domain
+vendor_to_domain() {
+    local vendor="$1"
+    local vendor_lower=$(echo "$vendor" | tr '[:upper:]' '[:lower:]')
+
+    # Handle specific known mappings
+    case "$vendor_lower" in
+        "anthropic claude"|"claude desktop"|"claude code cli")
+            echo "anthropic.com"
+            ;;
+        "chatgpt desktop"|"openai")
+            echo "openai.com"
+            ;;
+        "google gemini"|"google ai studio"|"google vertex ai"|"notebooklm")
+            echo "google.com"
+            ;;
+        "microsoft copilot")
+            echo "microsoft.com"
+            ;;
+        "github copilot"|"copilot cli"|"codex cli"|"codex vscode")
+            echo "github.com"
+            ;;
+        "vscode + copilot")
+            echo "code.visualstudio.com"
+            ;;
+        "jetbrains ai")
+            echo "jetbrains.com"
+            ;;
+        "docker mcp toolkit")
+            echo "docker.com"
+            ;;
+        "perplexity ai")
+            echo "perplexity.ai"
+            ;;
+        "hugging face")
+            echo "huggingface.co"
+            ;;
+        "xai grok")
+            echo "x.ai"
+            ;;
+        "amazon q"|"amazon q developer cli")
+            echo "aws.amazon.com"
+            ;;
+        "azure ai foundry"|"azure devops mcp")
+            echo "azure.microsoft.com"
+            ;;
+        "brave search mcp")
+            echo "brave.com"
+            ;;
+        "exa mcp")
+            echo "exa.ai"
+            ;;
+        "gemini cli")
+            echo "google.com"
+            ;;
+        "aider cli")
+            echo "aider.chat"
+            ;;
+        "bolt.new")
+            echo "bolt.new"
+            ;;
+        "v0")
+            echo "v0.dev"
+            ;;
+        *)
+            # Generic conversion: extract main word and add .com/.ai/.io
+            local main_word=$(echo "$vendor_lower" | \
+                sed 's/ cli$//' | \
+                sed 's/ desktop$//' | \
+                sed 's/ vscode$//' | \
+                sed 's/ intellij$//' | \
+                sed 's/ mcp$//' | \
+                sed 's/ ai$//' | \
+                sed 's/[^a-z0-9]//g' | \
+                head -c 20)
+
+            # Try common TLDs
+            if [ -n "$main_word" ]; then
+                echo "${main_word}.com"
+            else
+                echo ""
+            fi
+            ;;
+    esac
+}
+
+# Auto-fetch logos using LogoKit API
+auto_fetch_logos() {
+    local api_token="$1"
+
+    if [ -z "$api_token" ]; then
+        echo -e "${RED}Error: LogoKit API token required${NC}"
+        echo "Usage: $0 --auto-fetch YOUR_LOGOKIT_TOKEN"
+        echo ""
+        echo "Get your free token at: https://logokit.com"
+        echo "Free tier: 64x64 resolution logos (perfect for our needs!)"
+        exit 1
+    fi
+
+    echo -e "${BLUE}Auto-fetching logos using LogoKit API${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+
+    if [ ! -f "$MAPPING_FILE" ]; then
+        echo -e "${RED}Error: Mapping file not found: $MAPPING_FILE${NC}"
+        echo "Please run --generate-mapping first"
+        exit 1
+    fi
+
+    local total_vendors=$(jq 'length' "$MAPPING_FILE")
+    local missing_vendors=$(jq '[.[] | select(.status == "missing")] | length' "$MAPPING_FILE")
+    local processed=0
+    local found=0
+    local failed=0
+
+    echo -e "Total vendors: $total_vendors"
+    echo -e "Missing logos: $missing_vendors"
+    echo ""
+
+    # Create temporary file for updates
+    local temp_mapping=$(mktemp)
+    cp "$MAPPING_FILE" "$temp_mapping"
+
+    # Process each missing vendor
+    while IFS= read -r entry; do
+        local label=$(echo "$entry" | jq -r '.label')
+        local slug=$(echo "$entry" | jq -r '.slug')
+        local current_url=$(echo "$entry" | jq -r '.url')
+
+        # Skip if already has a URL
+        if [[ "$current_url" != *"PLACEHOLDER"* ]]; then
+            continue
+        fi
+
+        ((processed++))
+        echo -e "${CYAN}[$processed/$missing_vendors]${NC} $label"
+
+        # Get likely domain
+        local domain=$(vendor_to_domain "$label")
+
+        if [ -z "$domain" ]; then
+            echo -e "  ${YELLOW}⚠ Could not determine domain${NC}"
+            ((failed++))
+            continue
+        fi
+
+        echo -e "  Domain: $domain"
+
+        # Try LogoKit API
+        local logokit_url="https://img.logokit.com/${domain}?token=${api_token}"
+        local test_file=$(mktemp)
+
+        if curl -sf -o "$test_file" "$logokit_url" 2>/dev/null; then
+            # Verify it's actually an image
+            if file "$test_file" | grep -q "image"; then
+                echo -e "  ${GREEN}✓ Found logo via LogoKit${NC}"
+
+                # Update mapping file
+                local updated_json=$(jq --arg label "$label" --arg url "$logokit_url" \
+                    'map(if .label == $label then .url = $url | .status = "found" else . end)' \
+                    "$temp_mapping")
+                echo "$updated_json" > "$temp_mapping"
+
+                ((found++))
+            else
+                echo -e "  ${YELLOW}⚠ Invalid image response${NC}"
+                ((failed++))
+            fi
+        else
+            echo -e "  ${YELLOW}⚠ Logo not found${NC}"
+            ((failed++))
+        fi
+
+        rm -f "$test_file"
+        echo ""
+    done < <(jq -c '.[] | select(.status == "missing")' "$MAPPING_FILE")
+
+    # Save updated mapping
+    mv "$temp_mapping" "$MAPPING_FILE"
+
+    # Show summary
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}Summary${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  Processed: $processed"
+    echo -e "  ${GREEN}Found: $found${NC}"
+    echo -e "  ${YELLOW}Not found: $failed${NC}"
+    echo ""
+
+    local remaining=$(jq '[.[] | select(.status == "missing")] | length' "$MAPPING_FILE")
+    local total_found=$(jq '[.[] | select(.status == "found")] | length' "$MAPPING_FILE")
+
+    echo -e "Updated mapping file: $MAPPING_FILE"
+    echo -e "  Total found: ${GREEN}$total_found${NC}/$total_vendors"
+    echo -e "  Still missing: ${YELLOW}$remaining${NC}"
+    echo ""
+
+    if [ "$found" -gt 0 ]; then
+        echo -e "${GREEN}✓ Found $found new logos!${NC}"
+        echo -e "Run ${CYAN}--download${NC} to download the newly found logos"
+    fi
 }
 
 # Create or update mapping file
@@ -397,13 +603,19 @@ Usage: $0 [OPTIONS]
 AI Tech Radar Logo Downloader - Extract vendors from ai.html and download logos
 
 OPTIONS:
-    --generate-mapping    Extract vendors and create/update URL mapping file
-    --download           Download logos from mapping file
-    --update-html        Show which logos are available for ai.html
-    --all                Do everything: generate, download, update
-    -h, --help           Show this help message
+    --generate-mapping         Extract vendors and create/update URL mapping file
+    --auto-fetch <TOKEN>       Auto-fetch logos using LogoKit API (requires free token)
+    --download                 Download logos from mapping file
+    --update-html              Show which logos are available for ai.html
+    --all                      Do everything: generate, download, update
+    -h, --help                 Show this help message
 
-WORKFLOW:
+WORKFLOW (Automated with LogoKit):
+    1. Generate mapping:  $0 --generate-mapping
+    2. Auto-fetch logos:  $0 --auto-fetch YOUR_LOGOKIT_TOKEN
+    3. Download logos:    $0 --download
+
+WORKFLOW (Manual):
     1. Generate mapping:  $0 --generate-mapping
     2. Edit mapping file: $MAPPING_FILE
        (Replace PLACEHOLDER with actual logo URLs)
@@ -411,13 +623,23 @@ WORKFLOW:
     4. Update HTML:       Manually add logo paths to ai.html
 
 EXAMPLES:
-    # Full workflow
+    # Automated workflow with LogoKit (recommended)
+    $0 --generate-mapping
+    $0 --auto-fetch pk_abc123xyz  # Get free token at https://logokit.com
+    $0 --download
+
+    # Manual workflow
     $0 --generate-mapping
     vim $MAPPING_FILE  # Add missing URLs
     $0 --download
 
-    # Or do it all at once (will have placeholders for unknown logos)
+    # Quick start (manual placeholders)
     $0 --all
+
+LOGOKIT API:
+    Get your free publishable token at: https://logokit.com
+    Free tier provides 64x64 resolution logos (perfect for our needs!)
+    The token is publishable and safe to use in scripts.
 
 EOF
 }
@@ -442,6 +664,10 @@ main() {
     case "$action" in
         --generate-mapping)
             create_mapping_file
+            ;;
+        --auto-fetch)
+            local token="${2:-}"
+            auto_fetch_logos "$token"
             ;;
         --download)
             download_all_logos

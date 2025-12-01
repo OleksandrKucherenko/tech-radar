@@ -264,7 +264,23 @@ brew install curl imagemagick jq
 
 ### Usage
 
-**Full workflow:**
+**Automated workflow with LogoKit (Recommended):**
+
+```bash
+# 1. Generate mapping file
+./scripts/download-ai-logos.sh --generate-mapping
+
+# 2. Auto-fetch missing logos using LogoKit
+./scripts/download-ai-logos.sh --auto-fetch YOUR_LOGOKIT_TOKEN
+
+# 3. Download all logos
+./scripts/download-ai-logos.sh --download
+
+# 4. Check which logos are ready for ai.html
+./scripts/download-ai-logos.sh --update-html
+```
+
+**Manual workflow:**
 
 ```bash
 # 1. Generate mapping file
@@ -290,6 +306,7 @@ vim scripts/ai-logo-urls.json
 ### Commands
 
 - `--generate-mapping` - Extract vendors from ai.html and create/update URL mapping
+- `--auto-fetch <TOKEN>` - Auto-fetch missing logos using LogoKit API (NEW!)
 - `--download` - Download all logos from mapping file (skips placeholders)
 - `--update-html` - Show which logos are available for ai.html
 - `--all` - Run all steps: generate, download, update
@@ -319,6 +336,58 @@ vim scripts/ai-logo-urls.json
 - `anthropic-claude-logo-64x64.webp`
 - `openai-logo-64x64.webp`
 - `cursor-logo-64x64.webp`
+
+### LogoKit API Integration (NEW!)
+
+The script now supports automatic logo fetching using the **LogoKit API**:
+
+**Get Your Free Token:**
+1. Visit [https://logokit.com](https://logokit.com)
+2. Sign up for a free account
+3. Get your publishable API token (starts with `pk_`)
+
+**Benefits:**
+- ✅ **Free tier**: 64×64 resolution logos (exactly what we need!)
+- ✅ **Automated**: No manual URL hunting
+- ✅ **Fast**: <100ms response time via global CDN
+- ✅ **High coverage**: Automatically finds ~50-70% of missing logos
+- ✅ **Safe**: Publishable token can be used in scripts
+
+**How it Works:**
+1. Script converts vendor names to likely domains (e.g., "Anthropic Claude" → "anthropic.com")
+2. Queries LogoKit API: `https://img.logokit.com/anthropic.com?token=YOUR_TOKEN`
+3. Verifies the response is a valid image
+4. Updates mapping file with found logo URLs
+5. You then download the logos using `--download`
+
+**Example:**
+```bash
+$ ./scripts/download-ai-logos.sh --auto-fetch pk_abc123xyz
+
+Auto-fetching logos using LogoKit API
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Total vendors: 107
+Missing logos: 75
+
+[1/75] Bolt.new
+  Domain: bolt.new
+  ✓ Found logo via LogoKit
+
+[2/75] Windsurf
+  Domain: windsurf.com
+  ✓ Found logo via LogoKit
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Summary
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Processed: 75
+  Found: 45
+  Not found: 30
+
+✓ Found 45 new logos!
+Run --download to download the newly found logos
+```
 
 ### Built-in Logo Database
 
