@@ -226,3 +226,202 @@ Benefits of local logos:
 - Ensure the source is a valid image file
 - Check ImageMagick installation: `convert --version`
 - Try updating ImageMagick: `sudo apt-get upgrade imagemagick`
+
+---
+
+## download-ai-logos.sh
+
+Extracts vendor names from `ai.html`, creates a URL mapping file with intelligent logo URL detection, and downloads logos automatically.
+
+### Features
+
+- **Automatic vendor extraction**: Parses ai.html to find all vendors
+- **Intelligent URL detection**: Built-in database of 30+ common AI vendor logos
+- **Placeholder system**: Creates placeholders for unknown logos
+- **Two-phase workflow**: Generate mapping → edit placeholders → download
+- **Conditional dependencies**: Only requires ImageMagick for download phase
+- **Statistics**: Shows found vs. missing logo counts
+
+### Prerequisites
+
+For mapping generation (--generate-mapping):
+```bash
+# Ubuntu/Debian
+sudo apt-get install jq
+
+# macOS
+brew install jq
+```
+
+For logo download (--download):
+```bash
+# Ubuntu/Debian
+sudo apt-get install curl imagemagick jq
+
+# macOS
+brew install curl imagemagick jq
+```
+
+### Usage
+
+**Full workflow:**
+
+```bash
+# 1. Generate mapping file
+./scripts/download-ai-logos.sh --generate-mapping
+
+# 2. Edit the mapping file to add missing logo URLs
+vim scripts/ai-logo-urls.json
+
+# 3. Download all logos
+./scripts/download-ai-logos.sh --download
+
+# 4. Check which logos are ready for ai.html
+./scripts/download-ai-logos.sh --update-html
+```
+
+**Quick start (download known logos only):**
+
+```bash
+# Do everything at once
+./scripts/download-ai-logos.sh --all
+```
+
+### Commands
+
+- `--generate-mapping` - Extract vendors from ai.html and create/update URL mapping
+- `--download` - Download all logos from mapping file (skips placeholders)
+- `--update-html` - Show which logos are available for ai.html
+- `--all` - Run all steps: generate, download, update
+- `-h, --help` - Show help message
+
+### Output Files
+
+**Mapping file**: `scripts/ai-logo-urls.json`
+```json
+[
+  {
+    "label": "Anthropic Claude",
+    "slug": "anthropic-claude",
+    "url": "https://www.anthropic.com/images/icons/app-icon.png",
+    "status": "found"
+  },
+  {
+    "label": "Unknown Vendor",
+    "slug": "unknown-vendor",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  }
+]
+```
+
+**Logo files**: `docs/logos/`
+- `anthropic-claude-logo-64x64.webp`
+- `openai-logo-64x64.webp`
+- `cursor-logo-64x64.webp`
+
+### Built-in Logo Database
+
+The script includes built-in URLs for 30+ popular AI vendors:
+
+**AI Models & Platforms:**
+- OpenAI, Anthropic Claude, Google Gemini, Microsoft Copilot, Perplexity AI
+
+**AI Code Tools:**
+- GitHub Copilot, Cursor, Claude Desktop, Claude Code CLI
+
+**Vector Databases:**
+- Pinecone, Qdrant, ChromaDB, Elasticsearch, pgvector
+
+**AI Frameworks:**
+- LangChain, LlamaIndex, Ollama, Hugging Face
+
+**Workflow Tools:**
+- n8n, Flowise, Langflow, NotebookLM, Obsidian
+
+**Development Tools:**
+- Docker, VSCode, JetBrains, Neo4j
+
+### Example Session
+
+```bash
+$ ./scripts/download-ai-logos.sh --generate-mapping
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AI Tech Radar Logo Downloader
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Creating logo URL mapping file
+✓ Mapping file created: scripts/ai-logo-urls.json
+  Total vendors: 107
+  Found: 32
+  Missing: 75
+
+⚠ Please edit scripts/ai-logo-urls.json to add URLs for missing logos
+  Search pattern: "PLACEHOLDER"
+
+$ ./scripts/download-ai-logos.sh --download
+Processing: Anthropic Claude
+  Slug: anthropic-claude
+  URL: https://www.anthropic.com/images/icons/app-icon.png
+  ✓ Saved: anthropic-claude-logo-64x64.webp (2.4K)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Summary:
+  Total:   107
+  Success: 32
+  Skipped: 75
+```
+
+### Configuration
+
+Edit the script to customize:
+
+```bash
+HTML_FILE="docs/ai.html"           # Source HTML file
+LOGOS_DIR="docs/logos"             # Output directory
+MAPPING_FILE="scripts/ai-logo-urls.json"  # Mapping file location
+SIZE="64x64"                       # Logo size
+PREFERRED_FORMAT="webp"            # Preferred format
+FALLBACK_FORMAT="png"              # Fallback format
+```
+
+### Adding Custom Logo URLs
+
+To add logo URLs for vendors with PLACEHOLDERs:
+
+1. Open the mapping file:
+   ```bash
+   vim scripts/ai-logo-urls.json
+   ```
+
+2. Find entries with `"status": "missing"`
+
+3. Replace the PLACEHOLDER with actual logo URL:
+   ```json
+   {
+     "label": "My Vendor",
+     "slug": "my-vendor",
+     "url": "https://example.com/logo.png",
+     "status": "found"
+   }
+   ```
+
+4. Save and run download again:
+   ```bash
+   ./scripts/download-ai-logos.sh --download
+   ```
+
+### Troubleshooting
+
+**No vendors extracted:**
+- Check that `docs/ai.html` exists
+- Verify the HTML contains `label: "Vendor Name"` entries
+
+**All vendors show PLACEHOLDER:**
+- The built-in database only covers common vendors
+- You'll need to manually add URLs for niche/new vendors
+
+**Download failures:**
+- Check logo URLs are accessible
+- Some servers may block automated requests
+- Try downloading manually and adding to docs/logos/

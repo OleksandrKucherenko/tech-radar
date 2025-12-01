@@ -1,0 +1,644 @@
+[
+  {
+    "label": "APITable",
+    "slug": "apitable",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Activepieces",
+    "slug": "activepieces",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Aider CLI",
+    "slug": "aider-cli",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Amazon Q",
+    "slug": "amazon-q",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Amazon Q Developer CLI",
+    "slug": "amazon-q-developer-cli",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Anthropic Claude",
+    "slug": "anthropic-claude",
+    "url": "https://www.anthropic.com/images/icons/app-icon.png",
+    "status": "found"
+  },
+  {
+    "label": "Antigravity",
+    "slug": "antigravity",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Appsmith",
+    "slug": "appsmith",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Automatisch",
+    "slug": "automatisch",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Azure AI Foundry",
+    "slug": "azure-ai-foundry",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Azure DevOps Mcp",
+    "slug": "azure-devops-mcp",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Baserow",
+    "slug": "baserow",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Bolt.new",
+    "slug": "bolt-new",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Brave Search MCP",
+    "slug": "brave-search-mcp",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Budibase",
+    "slug": "budibase",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "ChatGPT Desktop",
+    "slug": "chatgpt-desktop",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "ChromaDB",
+    "slug": "chromadb",
+    "url": "https://www.trychroma.com/chroma-logo.png",
+    "status": "found"
+  },
+  {
+    "label": "Claude Code CLI",
+    "slug": "claude-code-cli",
+    "url": "https://www.anthropic.com/images/icons/app-icon.png",
+    "status": "found"
+  },
+  {
+    "label": "Claude Desktop",
+    "slug": "claude-desktop",
+    "url": "https://www.anthropic.com/images/icons/app-icon.png",
+    "status": "found"
+  },
+  {
+    "label": "Cline",
+    "slug": "cline",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "CodeWiki",
+    "slug": "codewiki",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Codeium AI IDE",
+    "slug": "codeium-ai-ide",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Codex CLI",
+    "slug": "codex-cli",
+    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
+    "status": "found"
+  },
+  {
+    "label": "Codex VsCode",
+    "slug": "codex-vscode",
+    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
+    "status": "found"
+  },
+  {
+    "label": "Copilot CLI",
+    "slug": "copilot-cli",
+    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
+    "status": "found"
+  },
+  {
+    "label": "Cursor",
+    "slug": "cursor",
+    "url": "https://cursor.sh/brand/icon.svg",
+    "status": "found"
+  },
+  {
+    "label": "DeepSeek",
+    "slug": "deepseek",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "DeepWiki",
+    "slug": "deepwiki",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Dify",
+    "slug": "dify",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Docker MCP Toolkit",
+    "slug": "docker-mcp-toolkit",
+    "url": "https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png",
+    "status": "found"
+  },
+  {
+    "label": "Elasticsearch",
+    "slug": "elasticsearch",
+    "url": "https://www.elastic.co/static-res/images/elastic-logo-200.png",
+    "status": "found"
+  },
+  {
+    "label": "Exa MCP",
+    "slug": "exa-mcp",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Factory Droids",
+    "slug": "factory-droids",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Firebase Studio",
+    "slug": "firebase-studio",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Flowise",
+    "slug": "flowise",
+    "url": "https://raw.githubusercontent.com/FlowiseAI/Flowise/main/images/flowise.png",
+    "status": "found"
+  },
+  {
+    "label": "Gemini CLI",
+    "slug": "gemini-cli",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "GitHub Copilot",
+    "slug": "github-copilot",
+    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
+    "status": "found"
+  },
+  {
+    "label": "Google AI Studio",
+    "slug": "google-ai-studio",
+    "url": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
+    "status": "found"
+  },
+  {
+    "label": "Google Gemini",
+    "slug": "google-gemini",
+    "url": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
+    "status": "found"
+  },
+  {
+    "label": "Google Vertex AI",
+    "slug": "google-vertex-ai",
+    "url": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
+    "status": "found"
+  },
+  {
+    "label": "GraphRAG",
+    "slug": "graphrag",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Groq",
+    "slug": "groq",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Hugging Face",
+    "slug": "hugging-face",
+    "url": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
+    "status": "found"
+  },
+  {
+    "label": "Huginn",
+    "slug": "huginn",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "ILLA Builder",
+    "slug": "illa-builder",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "JetBrains AI",
+    "slug": "jetbrains-ai",
+    "url": "https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg",
+    "status": "found"
+  },
+  {
+    "label": "Jina AI",
+    "slug": "jina-ai",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Joget",
+    "slug": "joget",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "KiloCode",
+    "slug": "kilocode",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "KiloCode CLI",
+    "slug": "kilocode-cli",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "KiloCode IntelliJ",
+    "slug": "kilocode-intellij",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "KiloCode VsCode",
+    "slug": "kilocode-vscode",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Kimi",
+    "slug": "kimi",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Kiro",
+    "slug": "kiro",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "LM Studio",
+    "slug": "lm-studio",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "LangChain",
+    "slug": "langchain",
+    "url": "https://python.langchain.com/img/brand/wordmark.png",
+    "status": "found"
+  },
+  {
+    "label": "Langflow",
+    "slug": "langflow",
+    "url": "https://raw.githubusercontent.com/langflow-ai/langflow/main/docs/static/img/langflow-icon.png",
+    "status": "found"
+  },
+  {
+    "label": "LightRAG",
+    "slug": "lightrag",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "LlamaIndex",
+    "slug": "llamaindex",
+    "url": "https://www.llamaindex.ai/favicon.svg",
+    "status": "found"
+  },
+  {
+    "label": "LobeChat",
+    "slug": "lobechat",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Lovable",
+    "slug": "lovable",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Memgraph",
+    "slug": "memgraph",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Microsoft Copilot",
+    "slug": "microsoft-copilot",
+    "url": "https://www.microsoft.com/en-us/microsoft-365/blog/wp-content/uploads/sites/2/2023/11/Microsoft-Copilot_Icon_1200x630.png",
+    "status": "found"
+  },
+  {
+    "label": "Milvus",
+    "slug": "milvus",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "MiniMax",
+    "slug": "minimax",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Natively",
+    "slug": "natively",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Neo4j",
+    "slug": "neo4j",
+    "url": "https://dist.neo4j.com/wp-content/uploads/neo4j-logo-2020-1.svg",
+    "status": "found"
+  },
+  {
+    "label": "NocoBase",
+    "slug": "nocobase",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "NocoDB",
+    "slug": "nocodb",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Node-RED",
+    "slug": "node-red",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "NotebookLM",
+    "slug": "notebooklm",
+    "url": "https://www.gstatic.com/lamda/images/notebooklm_app_icon_1920x1920_cd8af91fe8c5063c5244.png",
+    "status": "found"
+  },
+  {
+    "label": "Obsidian + Tars + Semantic Search + Smart Connections",
+    "slug": "obsidian-tars-semantic-search-smart-connections",
+    "url": "https://obsidian.md/images/obsidian-logo-gradient.svg",
+    "status": "found"
+  },
+  {
+    "label": "Ollama",
+    "slug": "ollama",
+    "url": "https://github.com/ollama/ollama/raw/main/docs/images/ollama.png",
+    "status": "found"
+  },
+  {
+    "label": "OpenAI",
+    "slug": "openai",
+    "url": "https://cdn.openai.com/assets/og-image.png",
+    "status": "found"
+  },
+  {
+    "label": "OpenHands",
+    "slug": "openhands",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "OpenRouter AI",
+    "slug": "openrouter-ai",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "OpenSearch",
+    "slug": "opensearch",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "OpenWebUI",
+    "slug": "openwebui",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Openblocks",
+    "slug": "openblocks",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Opencode CLI",
+    "slug": "opencode-cli",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Perplexity AI",
+    "slug": "perplexity-ai",
+    "url": "https://www.perplexity.ai/favicon.svg",
+    "status": "found"
+  },
+  {
+    "label": "Pinecone",
+    "slug": "pinecone",
+    "url": "https://www.pinecone.io/images/pinecone-logo.svg",
+    "status": "found"
+  },
+  {
+    "label": "PocketBase",
+    "slug": "pocketbase",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Qdrant",
+    "slug": "qdrant",
+    "url": "https://qdrant.tech/img/logo_with_text.png",
+    "status": "found"
+  },
+  {
+    "label": "Qwen",
+    "slug": "qwen",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Redis Vector",
+    "slug": "redis-vector",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "RooCode",
+    "slug": "roocode",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Rowy",
+    "slug": "rowy",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Saltcorn",
+    "slug": "saltcorn",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "StackStorm",
+    "slug": "stackstorm",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Tavily",
+    "slug": "tavily",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "ToolJet",
+    "slug": "tooljet",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "VSCode + Copilot",
+    "slug": "vscode-copilot",
+    "url": "https://code.visualstudio.com/assets/images/code-stable.png",
+    "status": "found"
+  },
+  {
+    "label": "Warp",
+    "slug": "warp",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Windmill",
+    "slug": "windmill",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Windsurf",
+    "slug": "windsurf",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Windsurf IntelliJ",
+    "slug": "windsurf-intellij",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Windsurf VsCode",
+    "slug": "windsurf-vscode",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Z.AI",
+    "slug": "z-ai",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "Zed",
+    "slug": "zed",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "lsFusion",
+    "slug": "lsfusion",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "n8n",
+    "slug": "n8n",
+    "url": "https://n8n.io/favicon.svg",
+    "status": "found"
+  },
+  {
+    "label": "pgvector",
+    "slug": "pgvector",
+    "url": "https://www.postgresql.org/media/img/about/press/elephant.png",
+    "status": "found"
+  },
+  {
+    "label": "v0",
+    "slug": "v0",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "xAI Grok",
+    "slug": "xai-grok",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "z.ai Vision MCP",
+    "slug": "z-ai-vision-mcp",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  },
+  {
+    "label": "z.ai WebSearch MCP",
+    "slug": "z-ai-websearch-mcp",
+    "url": "PLACEHOLDER - Add logo URL here",
+    "status": "missing"
+  }
+]
