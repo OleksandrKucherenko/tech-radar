@@ -23,6 +23,15 @@ MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Detect ImageMagick version and set appropriate command
+if command -v magick &> /dev/null; then
+    MAGICK_CMD="magick"  # ImageMagick v7
+elif command -v convert &> /dev/null; then
+    MAGICK_CMD="convert"  # ImageMagick v6
+else
+    MAGICK_CMD=""  # Not installed
+fi
+
 # Check dependencies
 check_dependencies() {
     local action="$1"
@@ -42,7 +51,7 @@ check_dependencies() {
 
     # imagemagick only needed for download operations
     if [[ "$action" == "--download" ]] || [[ "$action" == "--all" ]]; then
-        if ! command -v convert &> /dev/null; then
+        if [ -z "$MAGICK_CMD" ]; then
             missing_deps+=("imagemagick")
         fi
     fi
@@ -496,7 +505,7 @@ download_logo() {
 
     # Detect format
     local format="$PREFERRED_FORMAT"
-    if ! convert -list format | grep -q "WEBP"; then
+    if ! $MAGICK_CMD -list format | grep -q "WEBP"; then
         format="$FALLBACK_FORMAT"
         echo -e "${YELLOW}  ⚠ WebP not supported, using PNG${NC}"
     fi
@@ -504,7 +513,7 @@ download_logo() {
     local output_file="$LOGOS_DIR/${slug}-logo-${SIZE}.${format}"
 
     # Process image
-    if convert "$temp_file" \
+    if $MAGICK_CMD "$temp_file" \
         -resize "${SIZE}^" \
         -gravity center \
         -extent "$SIZE" \
@@ -517,7 +526,7 @@ download_logo() {
         rm -f "$temp_file"
         return 0
     else
-        echo -e "${RED}  ✗ Failed to convert image${NC}"
+        echo -e "${RED}  ✗ Failed to process image${NC}"
         rm -f "$temp_file"
         return 1
     fi
