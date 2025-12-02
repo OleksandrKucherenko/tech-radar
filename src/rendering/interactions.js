@@ -196,11 +196,9 @@ export function showDescriptionModal(entry, config) {
   const body = modal.querySelector('.tech-radar-modal-body');
 
   // Remove existing header/title if any (for modal reuse)
-  modalContent
-    .querySelectorAll('.tech-radar-modal-header, .tech-radar-modal-title')
-    .forEach((el) => {
-      el.remove();
-    });
+  modalContent.querySelectorAll('.tech-radar-modal-header, .tech-radar-modal-title').forEach(el => {
+    el.remove();
+  });
 
   // Create header container
   const header = document.createElement('div');
