@@ -287,8 +287,8 @@ td {
 @media (max-width: 479px) {
   /* Remove horizontal padding to allow full-width radar */
   .radar-container {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   /* Rings: 2 columns within each legend */
@@ -318,9 +318,9 @@ td {
   }
 
   .radar-svg-container svg {
-    width: 100% !important;
-    height: auto !important;
-    max-width: none !important;
+    width: 100%;
+    height: auto;
+    max-width: none;
   }
 
   .radar-legend-column {
@@ -362,8 +362,8 @@ td {
 @media (min-width: 480px) and (max-width: 639px) {
   /* Remove horizontal padding to allow full-width radar */
   .radar-container {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   /* Rings: 2 columns within each legend */
@@ -392,9 +392,9 @@ td {
   }
 
   .radar-svg-container svg {
-    width: 100% !important;
-    height: auto !important;
-    max-width: none !important;
+    width: 100%;
+    height: auto;
+    max-width: none;
   }
 
   .radar-legend-column {
@@ -456,9 +456,9 @@ td {
   }
 
   .radar-svg-container svg {
-    width: 100% !important;
-    height: auto !important;
-    max-width: none !important;
+    width: 100%;
+    height: auto;
+    max-width: none;
   }
 
   /* Legends side-by-side in row 2, each taking ~50% */
