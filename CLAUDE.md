@@ -24,6 +24,8 @@ This repository generates a **Technology Radar visualization** for engineering t
   - `active`: Boolean flag
   - `moved`: Movement indicator (-1=out, 0=no change, 1=in, 2=new)
   - `link`: Optional URL to more info
+  - `description`: Optional detailed description (enables clickable modal)
+  - `logo`: Optional logo URL or path (displayed in description modal as 64x64px circular image)
 
 - **`docs/index.html`**: Demo page that loads config.json and initializes the radar visualization
 
@@ -186,3 +188,63 @@ The radar.js automatically validates:
 ## Deployment
 
 This is a static site - deploy the `docs/` directory to any static hosting provider (GitHub Pages, Netlify, Vercel, S3, etc.).
+
+## Entity Logos
+
+The Tech Radar supports displaying logos for entities in the details modal dialog.
+
+### Adding Logos
+
+Add a `logo` field to any entry in `config.json`:
+
+```json
+{
+  "label": "PostgreSQL",
+  "description": "PostgreSQL is a powerful, open-source database...",
+  "logo": "https://www.postgresql.org/media/img/about/press/elephant.png"
+}
+```
+
+**Logo specifications:**
+- Size: 64x64 pixels (automatically displayed as circular)
+- Format: Any web-compatible format (PNG, SVG, WebP, JPG)
+- Position: Top-left corner of the details dialog, next to the title
+- Responsive: Scales to 48x48px on mobile devices
+
+### Logo Download Script
+
+Use the provided script to download, resize, and standardize logos:
+
+```bash
+# Download all logos from config.json
+./scripts/download-logos.sh
+
+# Logos will be saved to docs/logos/ with standardized naming:
+# - postgresql-logo-64x64.webp
+# - kubernetes-logo-64x64.webp
+# - python-logo-64x64.png
+```
+
+**Prerequisites:** curl, ImageMagick, jq
+
+See `scripts/README.md` for detailed documentation.
+
+### Local vs Remote Logos
+
+**Remote URLs** (current default):
+```json
+"logo": "https://www.postgresql.org/media/img/about/press/elephant.png"
+```
+
+**Local files** (recommended for production):
+```json
+"logo": "logos/postgresql-logo-64x64.webp"
+```
+
+Benefits of local logos:
+- ✅ Faster loading (no external requests)
+- ✅ Works offline
+- ✅ Better privacy (no external tracking)
+- ✅ Consistent sizing and format
+- ✅ Version controlled
+

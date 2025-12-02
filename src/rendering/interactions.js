@@ -150,7 +150,6 @@ export function createDescriptionModal() {
     <div class="tech-radar-modal-backdrop"></div>
     <div class="tech-radar-modal-content">
       <button class="tech-radar-modal-close" aria-label="Close">&times;</button>
-      <h2 class="tech-radar-modal-title"></h2>
       <div class="tech-radar-modal-body"></div>
     </div>
   `;
@@ -182,8 +181,9 @@ export function createDescriptionModal() {
 /**
  * Shows the description modal for an entry.
  * Displays the entry's description with optional Markdown rendering.
+ * Displays the entity logo if available (64x64px circular image).
  *
- * @param {Object} entry - Entry data object with description property
+ * @param {Object} entry - Entry data object with description and optional logo property
  * @param {Object} config - Configuration object with optional descriptionTransform function
  */
 export function showDescriptionModal(entry, config) {
@@ -192,10 +192,39 @@ export function showDescriptionModal(entry, config) {
   }
 
   const modal = createDescriptionModal();
-  const title = modal.querySelector('.tech-radar-modal-title');
+  const modalContent = modal.querySelector('.tech-radar-modal-content');
   const body = modal.querySelector('.tech-radar-modal-body');
 
+  // Remove existing header/title if any (for modal reuse)
+  modalContent.querySelectorAll('.tech-radar-modal-header, .tech-radar-modal-title').forEach(el => {
+    el.remove();
+  });
+
+  // Create header container
+  const header = document.createElement('div');
+  header.className = 'tech-radar-modal-header';
+
+  // Add logo if available
+  if (entry.logo) {
+    const logo = document.createElement('img');
+    logo.className = 'tech-radar-modal-logo';
+    logo.src = entry.logo;
+    logo.alt = `${entry.label} logo`;
+    // Hide logo if it fails to load
+    logo.onerror = function () {
+      this.style.display = 'none';
+    };
+    header.appendChild(logo);
+  }
+
+  // Create and add title
+  const title = document.createElement('h2');
+  title.className = 'tech-radar-modal-title';
   title.textContent = entry.label;
+  header.appendChild(title);
+
+  // Insert header before body
+  modalContent.insertBefore(header, body);
 
   // Transform description (e.g., Markdown to HTML)
   let descriptionHtml = '';
