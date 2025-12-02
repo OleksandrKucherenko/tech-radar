@@ -237,7 +237,8 @@
       "link": "https://engineering.zalando.com/tags/postgresql.html",
       "active": true,
       "moved": 0,
-      "description": "PostgreSQL is a powerful, open-source object-relational database system with over 35 years of active development. It has earned a strong reputation for reliability, feature robustness, and performance.\n\nPostgreSQL supports advanced data types, full-text search, JSON/JSONB, and provides ACID compliance. It's highly extensible and supports custom functions, operators, and data types."
+      "description": "PostgreSQL is a powerful, open-source object-relational database system with over 35 years of active development. It has earned a strong reputation for reliability, feature robustness, and performance.\n\nPostgreSQL supports advanced data types, full-text search, JSON/JSONB, and provides ACID compliance. It's highly extensible and supports custom functions, operators, and data types.",
+      "logo": "https://www.postgresql.org/media/img/about/press/elephant.png"
     },
     {
       "quadrant": 2,
@@ -361,7 +362,8 @@
       "link": "https://engineering.zalando.com/tags/kubernetes.html",
       "active": true,
       "moved": 0,
-      "description": "Kubernetes is an open-source container orchestration platform that automates the deployment, scaling, and management of containerized applications.\n\nKey features include:\n- Automated rollouts and rollbacks\n- Service discovery and load balancing\n- Storage orchestration\n- Self-healing capabilities\n\nKubernetes has become the de facto standard for container orchestration in production environments."
+      "description": "Kubernetes is an open-source container orchestration platform that automates the deployment, scaling, and management of containerized applications.\n\nKey features include:\n- Automated rollouts and rollbacks\n- Service discovery and load balancing\n- Storage orchestration\n- Self-healing capabilities\n\nKubernetes has become the de facto standard for container orchestration in production environments.",
+      "logo": "https://raw.githubusercontent.com/kubernetes/kubernetes/master/logo/logo.png"
     },
     {
       "quadrant": 1,
@@ -483,7 +485,8 @@
       "link": "https://engineering.zalando.com/tags/python.html",
       "active": true,
       "moved": 0,
-      "description": "Python is a high-level, interpreted programming language with dynamic semantics. Its high-level built-in data structures, combined with dynamic typing and dynamic binding, make it very attractive for Rapid Application Development.\n\nPython's simple, easy-to-learn syntax emphasizes readability and therefore reduces the cost of program maintenance. Python supports modules and packages, which encourages program modularity and code reuse."
+      "description": "Python is a high-level, interpreted programming language with dynamic semantics. Its high-level built-in data structures, combined with dynamic typing and dynamic binding, make it very attractive for Rapid Application Development.\n\nPython's simple, easy-to-learn syntax emphasizes readability and therefore reduces the cost of program maintenance. Python supports modules and packages, which encourages program modularity and code reuse.",
+      "logo": "https://www.python.org/static/community_logos/python-logo-generic.svg"
     },
     {
       "quadrant": 0,
@@ -552,7 +555,8 @@
       "link": "https://engineering.zalando.com/tags/apache-kafka.html",
       "active": true,
       "moved": 0,
-      "description": "Apache Kafka is a distributed event streaming platform capable of handling trillions of events a day. Originally developed at LinkedIn, it has become the standard for building real-time data pipelines and streaming applications.\n\nKafka provides high-throughput, low-latency processing with fault-tolerance and scalability built-in. It's commonly used for:\n- Real-time data processing\n- Event sourcing\n- Log aggregation\n- Stream processing with Kafka Streams"
+      "description": "Apache Kafka is a distributed event streaming platform capable of handling trillions of events a day. Originally developed at LinkedIn, it has become the standard for building real-time data pipelines and streaming applications.\n\nKafka provides high-throughput, low-latency processing with fault-tolerance and scalability built-in. It's commonly used for:\n- Real-time data processing\n- Event sourcing\n- Log aggregation\n- Stream processing with Kafka Streams",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/0/05/Apache_kafka.svg"
     },
     {
       "quadrant": 3,
