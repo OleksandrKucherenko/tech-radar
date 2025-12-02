@@ -1269,9 +1269,11 @@ function showDescriptionModal(entry, config) {
   const modalContent = modal.querySelector(".tech-radar-modal-content");
   const closeButton = modal.querySelector(".tech-radar-modal-close");
   const body = modal.querySelector(".tech-radar-modal-body");
-  modalContent.querySelectorAll(".tech-radar-modal-header, .tech-radar-modal-title").forEach((el) => {
-    el.remove();
-  });
+  modalContent
+    .querySelectorAll(".tech-radar-modal-header, .tech-radar-modal-title")
+    .forEach((el) => {
+      el.remove();
+    });
   const header = document.createElement("div");
   header.className = "tech-radar-modal-header";
   if (entry.logo) {
