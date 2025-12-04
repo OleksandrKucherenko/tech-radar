@@ -48,6 +48,12 @@
     "status": "found"
   },
   {
+    "label": "Arize Phoenix",
+    "slug": "arize-phoenix",
+    "url": "https://img.logo.dev/arizephoenix.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "Automatisch",
     "slug": "automatisch",
     "url": "https://img.logo.dev/automatisch.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
@@ -156,6 +162,12 @@
     "status": "found"
   },
   {
+    "label": "DeepEval",
+    "slug": "deepeval",
+    "url": "https://img.logo.dev/deepeval.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "DeepSeek",
     "slug": "deepseek",
     "url": "https://img.logo.dev/deepseek.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
@@ -252,6 +264,12 @@
     "status": "found"
   },
   {
+    "label": "Helicone",
+    "slug": "helicone",
+    "url": "https://img.logo.dev/helicone.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "Hugging Face",
     "slug": "hugging-face",
     "url": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
@@ -261,6 +279,12 @@
     "label": "Huginn",
     "slug": "huginn",
     "url": "https://img.logo.dev/huginn.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Humanloop",
+    "slug": "humanloop",
+    "url": "https://img.logo.dev/humanloop.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
@@ -495,6 +519,12 @@
     "label": "PocketBase",
     "slug": "pocketbase",
     "url": "https://img.logo.dev/pocketbase.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Promptfoo",
+    "slug": "promptfoo",
+    "url": "https://img.logo.dev/promptfoo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
