@@ -151,6 +151,7 @@
           { name: "RAG & Retrieval & Knowledge Base" },
           { name: "Databases" },
           { name: "Low-Code & MCP" },
+          { name: "Observability & Testing" },
         ],
         rings: [
           { name: "ADOPT", color: "#5ba300" },
@@ -1353,6 +1354,63 @@
             description:
               "OpenWebUI is a self-hosted web interface for interacting with LLMs, particularly Ollama, providing a ChatGPT-like experience for local models.\n\n**Self-Hosted Benefits:**\n- Privacy-first local deployment\n- Works with Ollama and other APIs\n- User management and authentication\n- Conversation history\n- Model switching\n- Document upload and RAG\n\nOpenWebUI is being deprecated in favor of more feature-complete alternatives but served as an important early option for self-hosted AI chat.",
           },
+
+          // Observability & Testing (Quadrant 5)
+          {
+            label: "DeepEval",
+            logo: "logos/deepeval-logo-64x64.webp",
+            link: "https://deepeval.com/",
+            quadrant: 5,
+            ring: 2,
+            moved: 2,
+            active: true,
+            description:
+              "DeepEval is an open-source LLM evaluation framework designed for unit testing LLM outputs, similar to Pytest but specialized for AI applications.\n\n**Key Capabilities:**\n- 50+ research-backed metrics (G-Eval, hallucination, answer relevancy, RAGAS)\n- Native integration with Pytest for seamless workflow integration\n- End-to-end and component-level LLM evaluation\n- CI/CD integration for continuous testing\n- Synthetic dataset generation for comprehensive testing\n- Support for RAG pipelines, chatbots, and AI agents\n\nDeepEval helps teams evaluate LLM applications with metrics powered by LLMs and NLP models running locally, enabling confident model selection and architecture optimization.",
+          },
+          {
+            label: "Promptfoo",
+            logo: "logos/promptfoo-logo-64x64.webp",
+            link: "https://www.promptfoo.dev/",
+            quadrant: 5,
+            ring: 2,
+            moved: 2,
+            active: true,
+            description:
+              "Promptfoo is an open-source CLI and library for testing prompts, agents, and RAGs with AI red teaming and vulnerability scanning capabilities.\n\n**Developer-Friendly Testing:**\n- Test prompts, agents, and RAG systems\n- Compare performance across GPT, Claude, Gemini, Llama, and more\n- Simple declarative configs without code or heavy notebooks\n- Language-agnostic support (Python, JavaScript, etc.)\n- Fast execution with live reloads and caching\n- Runs entirely locally on your machine\n- AI red teaming and pentesting for LLMs\n- Command line and CI/CD integration\n\nBuilt for production LLM apps serving millions of users, Promptfoo offers the fastest integration and easiest setup for comprehensive prompt testing and evaluation.",
+          },
+          {
+            label: "Humanloop",
+            logo: "logos/humanloop-logo-64x64.webp",
+            link: "https://humanloop.com/home",
+            quadrant: 5,
+            ring: 2,
+            moved: 2,
+            active: true,
+            description:
+              "Humanloop is an enterprise LLM evaluations platform providing integrated tooling for prompt management, evaluation, and observability.\n\n**Enterprise Platform Features:**\n- Collaborative prompt engineering workspace\n- Version control and A/B testing for prompts\n- Offline evaluators with predefined datasets\n- Evals-driven development workflow\n- Seamless collaboration between engineers and domain experts\n- CI environment integration for regression testing\n- Deep integration of prompts with evaluations and observability\n\n**Important Note:** Following Anthropic's acquisition, Humanloop will be sunset on September 8, 2025, with all accounts and data deleted. Users should export data before shutdown.",
+          },
+          {
+            label: "Helicone",
+            logo: "logos/helicone-logo-64x64.webp",
+            link: "https://www.helicone.ai/",
+            quadrant: 5,
+            ring: 2,
+            moved: 2,
+            active: true,
+            description:
+              "Helicone is an open-source LLM observability platform and AI gateway providing monitoring, routing, and reliability for AI applications.\n\n**Core Capabilities:**\n- Comprehensive LLM observability with tracing and analysis\n- AI gateway with caching and custom rate limits\n- Prompt engineering tools and LLM tracing\n- LLM security features and evaluation tools\n- Cloudflare Workers deployment (~10ms latency overhead)\n- Generous free tier (10k requests/month, no credit card)\n- One-line integration (single base URL change)\n\nHelicone delivers the fastest time-to-value for LLM monitoring, trusted by the fastest-growing AI companies for production observability.",
+          },
+          {
+            label: "Arize Phoenix",
+            logo: "logos/arize-phoenix-logo-64x64.webp",
+            link: "https://arize.com/docs/phoenix",
+            quadrant: 5,
+            ring: 2,
+            moved: 2,
+            active: true,
+            description:
+              "Arize Phoenix is an open-source AI observability platform for experimentation, evaluation, and troubleshooting of LLM applications.\n\n**Platform Features:**\n- OpenTelemetry protocol (OTLP) tracing support\n- First-class instrumentation for LlamaIndex, LangChain, DSPy\n- Multi-provider support (OpenAI, Bedrock, Mistral, Vertex)\n- LLM-powered evaluation and benchmarking\n- Datasets and versioned examples for experimentation\n- Playground for prompt optimization and model comparison\n- Prompt management with version control\n- Vendor and language agnostic architecture\n\nFully open-source with no feature gates, Phoenix runs anywhere—local machine, Jupyter, containers, or cloud—making it ideal for comprehensive AI application observability.",
+          },
         ],
       });
 
@@ -1364,6 +1422,6 @@
       radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
     </script>
 
-    <footer>Build: <code>64cfe65</code></footer>
+    <footer>Build: <code>534ccd7</code></footer>
   </body>
 </html>
