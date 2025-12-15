@@ -126,6 +126,12 @@
     "status": "found"
   },
   {
+    "label": "CodeRabbit",
+    "slug": "coderabbit",
+    "url": "https://img.logo.dev/coderabbit.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "CodeWiki",
     "slug": "codewiki",
     "url": "https://img.logo.dev/codewiki.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
@@ -255,6 +261,12 @@
     "label": "GraphRAG",
     "slug": "graphrag",
     "url": "https://img.logo.dev/graphrag.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Greptile",
+    "slug": "greptile",
+    "url": "https://img.logo.dev/greptile.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
