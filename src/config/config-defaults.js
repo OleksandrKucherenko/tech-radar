@@ -24,14 +24,17 @@ import { computeLegendOffsets } from '../rendering/helpers.js';
  */
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Legacy function with many config options
 export function applyConfigDefaults(config) {
+  const hasOriginalWidth = Object.hasOwn(config, 'originalWidth');
+  const hasOriginalHeight = Object.hasOwn(config, 'originalHeight');
+
   // SVG element configuration
   config.svg_id = config.svg || 'radar';
   config.width = config.width || 1450;
   config.height = config.height || 1000;
 
   // Store original dimensions for viewBox (before complexity adjustments)
-  config.originalWidth = config.originalWidth || config.width;
-  config.originalHeight = config.originalHeight || config.height;
+  config.originalWidth = hasOriginalWidth ? config.originalWidth : config.width;
+  config.originalHeight = hasOriginalHeight ? config.originalHeight : config.height;
 
   // Color scheme
   config.colors =
@@ -95,6 +98,13 @@ export function applyConfigDefaults(config) {
     if (grid_quadrants >= 7 || grid_rings >= 7) {
       config.blip_collision_radius = Math.max(10, config.blip_collision_radius * 0.9);
     }
+  }
+
+  if (!hasOriginalWidth) {
+    config.originalWidth = config.width;
+  }
+  if (!hasOriginalHeight) {
+    config.originalHeight = config.height;
   }
 }
 
