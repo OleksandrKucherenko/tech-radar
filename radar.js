@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+7d03dc8
+// Version: 0.0.1-dev+89616c2
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -81,11 +81,13 @@ function ensureLayoutStructure(svgSelection) {
 
 // src/config/config-defaults.js
 function applyConfigDefaults(config) {
+  const hasOriginalWidth = Object.hasOwn(config, "originalWidth");
+  const hasOriginalHeight = Object.hasOwn(config, "originalHeight");
   config.svg_id = config.svg || "radar";
   config.width = config.width || 1450;
   config.height = config.height || 1000;
-  config.originalWidth = config.originalWidth || config.width;
-  config.originalHeight = config.originalHeight || config.height;
+  config.originalWidth = hasOriginalWidth ? config.originalWidth : config.width;
+  config.originalHeight = hasOriginalHeight ? config.originalHeight : config.height;
   config.colors = "colors" in config ? config.colors : {
     background: "#fff",
     grid: "#dddde0",
@@ -123,6 +125,12 @@ function applyConfigDefaults(config) {
     if (grid_quadrants >= 7 || grid_rings >= 7) {
       config.blip_collision_radius = Math.max(10, config.blip_collision_radius * 0.9);
     }
+  }
+  if (!hasOriginalWidth) {
+    config.originalWidth = config.width;
+  }
+  if (!hasOriginalHeight) {
+    config.originalHeight = config.height;
   }
 }
 function calculateDimensions(config) {
@@ -1267,9 +1275,8 @@ function showDescriptionModal(entry, config) {
   }
   const modal = createDescriptionModal();
   const modalContent = modal.querySelector(".tech-radar-modal-content");
-  const closeButton = modal.querySelector(".tech-radar-modal-close");
   const body = modal.querySelector(".tech-radar-modal-body");
-  modalContent.querySelectorAll(".tech-radar-modal-header, .tech-radar-modal-title").forEach(el => {
+  modalContent.querySelectorAll(".tech-radar-modal-header, .tech-radar-modal-title").forEach((el) => {
     el.remove();
   });
   const header = document.createElement("div");
