@@ -90,6 +90,17 @@
         height: auto;
       }
 
+      .radar-notes {
+        max-width: 1200px;
+        margin: 10px auto 40px;
+        padding: 0 20px;
+      }
+
+      .radar-notes ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
       footer {
         text-align: center;
         padding: 15px 20px;
@@ -132,6 +143,37 @@
       <svg id="radar"></svg>
     </div>
 
+    <section class="radar-notes">
+      <h3>What do the rings mean?</h3>
+      <p>
+        The AI Tech Radar is a list of technologies, complemented by an assessment result, called
+        <em>ring assignment</em>. We use the following ring semantics:
+      </p>
+
+      <ul>
+        <li>
+          <strong>ADOPT</strong> &mdash; Tools we should migrate to, from HOLD or other non-AI tools. These are the
+          strategic defaults we actively promote and move toward.
+        </li>
+        <li>
+          <strong>VALUE</strong> &mdash; Tools that show clear value for new projects. We want to use them when the fit
+          is good and the expected impact is high.
+        </li>
+        <li><strong>HOLD</strong> &mdash; Tools we can use and maintain, but will not choose for new projects.</li>
+        <li>
+          <strong>SKIP</strong> &mdash; Tools we intentionally skip due to fit, maturity, cost, or strategic focus.
+        </li>
+        <li>
+          <strong>TRIAL</strong> &mdash; Tools we try in practice to evaluate them. We create accounts, run pilots, and
+          validate real-world usage.
+        </li>
+        <li>
+          <strong>WATCH</strong> &mdash; Tool awareness: we start to see the tool and track signals before committing to
+          hands-on evaluation.
+        </li>
+      </ul>
+    </section>
+
     <script>
       let radarInstance = null;
 
@@ -148,7 +190,7 @@
               inactive: "#ddd",
             },
             font_family: "Arial, Helvetica",
-            title: "AI Tech Radar (2025-11)",
+            title: "AI Tech Radar (2026)",
             quadrants: [
               { name: "Core AI Providers" },
               { name: "AI Coding Tools" },
@@ -159,11 +201,11 @@
             ],
             rings: [
               { name: "ADOPT", color: "#5ba300" },
-              { name: "TRIAL", color: "#009eb0" },
-              { name: "ASSESS", color: "#c7ba00" },
+              { name: "VALUE", color: "#c7ba00" },
               { name: "HOLD", color: "#e09b96" },
-              { name: "WATCH", color: "#bb6bd9" },
               { name: "SKIP", color: "#e09b96" },
+              { name: "TRIAL", color: "#009eb0" },
+              { name: "WATCH", color: "#bb6bd9" },
             ],
             print_layout: true,
             links_in_new_tabs: true,
