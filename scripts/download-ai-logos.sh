@@ -54,6 +54,9 @@ check_dependencies() {
         if [ -z "$MAGICK_CMD" ]; then
             missing_deps+=("imagemagick")
         fi
+        if ! command -v bun &> /dev/null; then
+            missing_deps+=("bun")
+        fi
     fi
 
     if [ ${#missing_deps[@]} -ne 0 ]; then
@@ -62,9 +65,11 @@ check_dependencies() {
         echo ""
         echo "On Ubuntu/Debian:"
         echo "  sudo apt-get install curl imagemagick jq"
+        echo "  # plus Bun: https://bun.sh/docs/installation"
         echo ""
         echo "On macOS:"
         echo "  brew install curl imagemagick jq"
+        echo "  # plus Bun: https://bun.sh/docs/installation"
         exit 1
     fi
 }
@@ -542,6 +547,19 @@ download_logo() {
         echo -e "${RED}  ✗ Failed to download${NC}"
         rm -f "$temp_file"
         return 1
+    fi
+
+    # Patch SVGs that use advanced CSS colors (e.g. OKLCH) that many SVG rasterizers don't support.
+    # This prevents unexpected color shifts when ImageMagick rasterizes the SVG for resizing.
+    if head -c 256 "$temp_file" | grep -qi "<svg"; then
+        if grep -qi "oklch(" "$temp_file"; then
+            echo -e "  ${BLUE}Patching SVG OKLCH colors...${NC}"
+            if ! bun scripts/svg-patch.ts "$temp_file" >/dev/null; then
+                echo -e "${RED}  ✗ Failed to patch SVG colors${NC}"
+                rm -f "$temp_file"
+                return 1
+            fi
+        fi
     fi
 
     # Detect format
