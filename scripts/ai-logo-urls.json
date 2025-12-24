@@ -54,6 +54,12 @@
     "status": "found"
   },
   {
+    "label": "Augment Code",
+    "slug": "augment-code",
+    "url": "https://img.logo.dev/augmentcode.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "Automatisch",
     "slug": "automatisch",
     "url": "https://img.logo.dev/automatisch.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
@@ -78,6 +84,12 @@
     "status": "found"
   },
   {
+    "label": "Beetle AI",
+    "slug": "beetle-ai",
+    "url": "https://img.logo.dev/beetle.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "Bolt.new",
     "slug": "bolt-new",
     "url": "https://img.logo.dev/bolt.new?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
@@ -93,6 +105,18 @@
     "label": "Budibase",
     "slug": "budibase",
     "url": "https://img.logo.dev/budibase.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "BugBot",
+    "slug": "bugbot",
+    "url": "https://img.logo.dev/bugbot.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Capy",
+    "slug": "capy",
+    "url": "https://img.logo.dev/capy.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
@@ -150,6 +174,12 @@
     "status": "found"
   },
   {
+    "label": "Codex Code Review",
+    "slug": "codex-code-review",
+    "url": "https://img.logo.dev/codexcodereview.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "Codex VsCode",
     "slug": "codex-vscode",
     "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
@@ -159,6 +189,12 @@
     "label": "Copilot CLI",
     "slug": "copilot-cli",
     "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
+    "status": "found"
+  },
+  {
+    "label": "Cubic",
+    "slug": "cubic",
+    "url": "https://img.logo.dev/cubic.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
@@ -234,9 +270,27 @@
     "status": "found"
   },
   {
+    "label": "Gemini Code Assist",
+    "slug": "gemini-code-assist",
+    "url": "https://img.logo.dev/geminicodeassist.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "GitHub Copilot",
     "slug": "github-copilot",
     "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
+    "status": "found"
+  },
+  {
+    "label": "GitHub Copilot Review",
+    "slug": "github-copilot-review",
+    "url": "https://img.logo.dev/githubcopilotreview.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Gitar",
+    "slug": "gitar",
+    "url": "https://img.logo.dev/gitar.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
@@ -261,6 +315,12 @@
     "label": "GraphRAG",
     "slug": "graphrag",
     "url": "https://img.logo.dev/graphrag.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Graphite",
+    "slug": "graphite",
+    "url": "https://img.logo.dev/graphite.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
@@ -306,6 +366,12 @@
     "status": "found"
   },
   {
+    "label": "Indent",
+    "slug": "indent",
+    "url": "https://img.logo.dev/indent.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "JetBrains AI",
     "slug": "jetbrains-ai",
     "url": "https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg",
@@ -326,25 +392,31 @@
   {
     "label": "KiloCode",
     "slug": "kilocode",
-    "url": "https://img.logo.dev/kilocode.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "url": "https://kilo.ai/favicon/favicon.svg",
     "status": "found"
   },
   {
     "label": "KiloCode CLI",
     "slug": "kilocode-cli",
-    "url": "https://img.logo.dev/kilocode.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "url": "https://kilo.ai/favicon/favicon.svg",
+    "status": "found"
+  },
+  {
+    "label": "KiloCode Code Review",
+    "slug": "kilocode-code-review",
+    "url": "https://img.logo.dev/kilocodecodereview.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
     "label": "KiloCode IntelliJ",
     "slug": "kilocode-intellij",
-    "url": "https://img.logo.dev/kilocode.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "url": "https://kilo.ai/favicon/favicon.svg",
     "status": "found"
   },
   {
     "label": "KiloCode VsCode",
     "slug": "kilocode-vscode",
-    "url": "https://img.logo.dev/kilocode.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "url": "https://kilo.ai/favicon/favicon.svg",
     "status": "found"
   },
   {
@@ -357,6 +429,12 @@
     "label": "Kiro",
     "slug": "kiro",
     "url": "https://img.logo.dev/kiro.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Kodus",
+    "slug": "kodus",
+    "url": "https://img.logo.dev/kodus.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
@@ -405,6 +483,12 @@
     "label": "Memgraph",
     "slug": "memgraph",
     "url": "https://img.logo.dev/memgraph.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Mesa",
+    "slug": "mesa",
+    "url": "https://img.logo.dev/mesa.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
@@ -534,15 +618,33 @@
     "status": "found"
   },
   {
+    "label": "Polarity Paragon",
+    "slug": "polarity-paragon",
+    "url": "https://img.logo.dev/polarityparagon.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "Promptfoo",
     "slug": "promptfoo",
     "url": "https://img.logo.dev/promptfoo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
+    "label": "Pullfrog",
+    "slug": "pullfrog",
+    "url": "https://img.logo.dev/pullfrog.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "Qdrant",
     "slug": "qdrant",
     "url": "https://img.logo.dev/qdrant.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Qodo",
+    "slug": "qodo",
+    "url": "https://img.logo.dev/qodo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
@@ -576,6 +678,12 @@
     "status": "found"
   },
   {
+    "label": "Sentry Seer",
+    "slug": "sentry-seer",
+    "url": "https://img.logo.dev/sentryseer.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "StackStorm",
     "slug": "stackstorm",
     "url": "https://img.logo.dev/stackstorm.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
@@ -588,6 +696,12 @@
     "status": "found"
   },
   {
+    "label": "Tembo",
+    "slug": "tembo",
+    "url": "https://img.logo.dev/tembo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
     "label": "ToolJet",
     "slug": "tooljet",
     "url": "https://img.logo.dev/tooljet.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
@@ -597,6 +711,12 @@
     "label": "VSCode + Copilot",
     "slug": "vscode-copilot",
     "url": "https://img.logo.dev/code.visualstudio.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Vercel Agent",
+    "slug": "vercel-agent",
+    "url": "https://img.logo.dev/vercelagent.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   },
   {
