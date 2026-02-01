@@ -1339,6 +1339,60 @@
       "moved": 2,
       "active": true,
       "description": "Qodo is an enterprise AI code review platform that provides deep codebase context with 15+ agentic workflows automating reviews in IDEs and pull requests.\n\n**Key Features:**\n- Context Engine: indexes multi-repo codebases for system behavior understanding\n- 80% accuracy in benchmark testing (vs competitors' 45-74%)\n- 15+ specialized review agents (bug detection, test coverage, documentation, changelog)\n- Security & compliance validation against enterprise policies\n- IDE integration (VS Code, JetBrains) for pre-push reviews\n- Local code review with quality agents inside IDEs\n- Git provider support (GitHub, GitLab, Bitbucket)\n- Enterprise deployment options (single-tenant, customer-hosted)\n\nQodo enables engineering teams to move faster without sacrificing code quality through comprehensive codebase context and automated quality workflows."
+    },
+    {
+      "label": "Langfuse",
+      "link": "https://langfuse.com/",
+      "quadrant": 5,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "Langfuse is the open source leader in LLM observability with 19k+ GitHub stars and MIT license, enabling self-hosted deployments without restrictions.\n\n**Key Features:**\n- LLM tracing and debugging with detailed spans\n- Prompt management and versioning\n- Evaluation pipelines and scoring\n- Dataset creation for testing and fine-tuning\n- Cost tracking and analytics\n- OpenTelemetry integration\n- Integrates with LangChain, OpenAI SDK, LiteLLM, and more\n- Self-hosted or cloud deployment options\n\nLangfuse provides comprehensive LLM engineering platform capabilities for teams building production AI applications."
+    },
+    {
+      "label": "LangSmith",
+      "link": "https://www.langchain.com/langsmith",
+      "quadrant": 5,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "LangSmith is LangChain's closed-source observability and testing platform, providing deep integration with the LangChain framework ecosystem.\n\n**Key Features:**\n- Trace debugging and visualization\n- Prompt hub and versioning\n- Evaluation framework with custom evaluators\n- Dataset management for testing\n- Annotation queues for human feedback\n- Online evaluation and monitoring\n- Native LangChain/LangGraph integration\n- Playground for prompt iteration\n\nLangSmith is ideal for teams already using LangChain who want tightly integrated observability and testing capabilities."
+    },
+    {
+      "label": "LangWatch",
+      "link": "https://langwatch.ai/",
+      "quadrant": 5,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "LangWatch is an LLM observability platform using OpenTelemetry for full-stack tracing of prompts, tool invocations, and agent interactions.\n\n**Key Features:**\n- OpenTelemetry-based tracing\n- Real-time visibility into token usage and latency\n- Cost monitoring and optimization\n- Prompt and variable tracking\n- Agent interaction visualization\n- Evaluation and testing tools\n- Integration with major LLM providers\n\nLangWatch provides standardized observability using OpenTelemetry protocols for visibility into LLM-powered applications."
+    },
+    {
+      "label": "Opik",
+      "link": "https://www.comet.com/site/products/opik/",
+      "quadrant": 5,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "Opik is an open source platform by Comet for evaluating, testing, and monitoring LLM applications with comprehensive tracing and annotation features.\n\n**Key Features:**\n- LLM tracing and debugging\n- Annotation and labeling workflows\n- Prompt and model playground\n- Evaluation framework with metrics\n- Dataset management\n- Integration with Comet ML platform\n- Open source with self-hosting option\n\nOpik provides end-to-end LLM evaluation capabilities integrated with Comet's broader ML platform ecosystem."
+    },
+    {
+      "label": "OpenLLMetry",
+      "link": "https://www.traceloop.com/openllmetry",
+      "quadrant": 5,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "OpenLLMetry is an open-source observability solution for LLM applications based on OpenTelemetry, built by Traceloop for seamless integration with existing observability stacks.\n\n**Key Features:**\n- OpenTelemetry-native instrumentation\n- Integrates with existing observability tools (Datadog, New Relic, Grafana)\n- Automatic tracing for popular LLM frameworks\n- Support for LangChain, OpenAI, Anthropic, and more\n- Standardized telemetry data format\n- Open source and vendor-agnostic\n\nOpenLLMetry enables teams to add LLM observability to applications without vendor lock-in by leveraging OpenTelemetry standards."
+    },
+    {
+      "label": "Portkey",
+      "link": "https://portkey.ai/",
+      "quadrant": 5,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "Portkey is an AI gateway that provides unified observability, reliability, and routing capabilities for LLM applications across multiple providers.\n\n**Key Features:**\n- Unified API for multiple LLM providers\n- Request caching and cost optimization\n- Automatic retries and fallbacks\n- Load balancing across providers\n- Detailed analytics and monitoring\n- Prompt management and versioning\n- Guardrails and content filtering\n- Enterprise-grade security\n\nPortkey serves as an AI infrastructure layer that adds observability and reliability without requiring changes to your LLM application code."
     }
   ]
 }
