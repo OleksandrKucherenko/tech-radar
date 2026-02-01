@@ -1,302 +1,20 @@
 [
   {
-    "label": "APITable",
-    "slug": "apitable",
-    "url": "https://img.logo.dev/apitable.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Activepieces",
-    "slug": "activepieces",
-    "url": "https://img.logo.dev/activepieces.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Aider CLI",
-    "slug": "aider-cli",
-    "url": "https://img.logo.dev/aider.chat?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Amazon Q",
-    "slug": "amazon-q",
-    "url": "https://img.logo.dev/aws.amazon.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Amazon Q Developer CLI",
-    "slug": "amazon-q-developer-cli",
-    "url": "https://img.logo.dev/aws.amazon.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Anthropic Claude",
-    "slug": "anthropic-claude",
-    "url": "https://img.logo.dev/anthropic.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Antigravity",
-    "slug": "antigravity",
-    "url": "https://img.logo.dev/antigravity.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Appsmith",
-    "slug": "appsmith",
-    "url": "https://img.logo.dev/appsmith.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Arize Phoenix",
-    "slug": "arize-phoenix",
-    "url": "https://img.logo.dev/arizephoenix.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Augment Code",
-    "slug": "augment-code",
-    "url": "https://img.logo.dev/augmentcode.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Automatisch",
-    "slug": "automatisch",
-    "url": "https://img.logo.dev/automatisch.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
     "label": "Azure AI Foundry",
     "slug": "azure-ai-foundry",
     "url": "https://img.logo.dev/azure.microsoft.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "Azure DevOps Mcp",
-    "slug": "azure-devops-mcp",
-    "url": "https://img.logo.dev/azure.microsoft.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Baserow",
-    "slug": "baserow",
-    "url": "https://img.logo.dev/baserow.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Beetle AI",
-    "slug": "beetle-ai",
-    "url": "https://img.logo.dev/beetle.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Bolt.new",
-    "slug": "bolt-new",
-    "url": "https://img.logo.dev/bolt.new?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Brave Search MCP",
-    "slug": "brave-search-mcp",
-    "url": "https://img.logo.dev/brave.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Budibase",
-    "slug": "budibase",
-    "url": "https://img.logo.dev/budibase.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "BugBot",
-    "slug": "bugbot",
-    "url": "https://img.logo.dev/bugbot.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Capy",
-    "slug": "capy",
-    "url": "https://img.logo.dev/capy.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "ChatGPT Desktop",
-    "slug": "chatgpt-desktop",
+    "label": "OpenAI",
+    "slug": "openai",
     "url": "https://img.logo.dev/openai.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "ChromaDB",
-    "slug": "chromadb",
-    "url": "https://img.logo.dev/chromadb.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Claude Code CLI",
-    "slug": "claude-code-cli",
+    "label": "Anthropic Claude",
+    "slug": "anthropic-claude",
     "url": "https://img.logo.dev/anthropic.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Claude Desktop",
-    "slug": "claude-desktop",
-    "url": "https://img.logo.dev/anthropic.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Cline",
-    "slug": "cline",
-    "url": "https://img.logo.dev/cline.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "CodeRabbit",
-    "slug": "coderabbit",
-    "url": "https://img.logo.dev/coderabbit.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "CodeWiki",
-    "slug": "codewiki",
-    "url": "https://img.logo.dev/codewiki.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Codeium AI IDE",
-    "slug": "codeium-ai-ide",
-    "url": "https://img.logo.dev/codeiumaiide.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Codex CLI",
-    "slug": "codex-cli",
-    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
-    "status": "found"
-  },
-  {
-    "label": "Codex Code Review",
-    "slug": "codex-code-review",
-    "url": "https://img.logo.dev/codexcodereview.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Codex VsCode",
-    "slug": "codex-vscode",
-    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
-    "status": "found"
-  },
-  {
-    "label": "Copilot CLI",
-    "slug": "copilot-cli",
-    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
-    "status": "found"
-  },
-  {
-    "label": "Cubic",
-    "slug": "cubic",
-    "url": "https://img.logo.dev/cubic.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Cursor",
-    "slug": "cursor",
-    "url": "https://img.logo.dev/cursor.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "DeepEval",
-    "slug": "deepeval",
-    "url": "https://img.logo.dev/deepeval.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "DeepSeek",
-    "slug": "deepseek",
-    "url": "https://img.logo.dev/deepseek.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "DeepWiki",
-    "slug": "deepwiki",
-    "url": "https://img.logo.dev/deepwiki.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Dify",
-    "slug": "dify",
-    "url": "https://img.logo.dev/dify.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Docker MCP Toolkit",
-    "slug": "docker-mcp-toolkit",
-    "url": "https://img.logo.dev/docker.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Elasticsearch",
-    "slug": "elasticsearch",
-    "url": "https://www.elastic.co/static-res/images/elastic-logo-200.png",
-    "status": "found"
-  },
-  {
-    "label": "Exa MCP",
-    "slug": "exa-mcp",
-    "url": "https://img.logo.dev/exa.ai?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Factory Droids",
-    "slug": "factory-droids",
-    "url": "https://img.logo.dev/factorydroids.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Firebase Studio",
-    "slug": "firebase-studio",
-    "url": "https://img.logo.dev/firebasestudio.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Flowise",
-    "slug": "flowise",
-    "url": "https://raw.githubusercontent.com/FlowiseAI/Flowise/main/images/flowise.png",
-    "status": "found"
-  },
-  {
-    "label": "Gemini CLI",
-    "slug": "gemini-cli",
-    "url": "https://img.logo.dev/google.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Gemini Code Assist",
-    "slug": "gemini-code-assist",
-    "url": "https://img.logo.dev/geminicodeassist.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "GitHub Copilot",
-    "slug": "github-copilot",
-    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
-    "status": "found"
-  },
-  {
-    "label": "GitHub Copilot Review",
-    "slug": "github-copilot-review",
-    "url": "https://img.logo.dev/githubcopilotreview.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Gitar",
-    "slug": "gitar",
-    "url": "https://img.logo.dev/gitar.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Google AI Studio",
-    "slug": "google-ai-studio",
-    "url": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
     "status": "found"
   },
   {
@@ -312,291 +30,21 @@
     "status": "found"
   },
   {
-    "label": "GraphRAG",
-    "slug": "graphrag",
-    "url": "https://img.logo.dev/graphrag.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Graphite",
-    "slug": "graphite",
-    "url": "https://img.logo.dev/graphite.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Greptile",
-    "slug": "greptile",
-    "url": "https://img.logo.dev/greptile.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Groq",
-    "slug": "groq",
-    "url": "https://img.logo.dev/groq.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Helicone",
-    "slug": "helicone",
-    "url": "https://img.logo.dev/helicone.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Hugging Face",
-    "slug": "hugging-face",
-    "url": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
-    "status": "found"
-  },
-  {
-    "label": "Huginn",
-    "slug": "huginn",
-    "url": "https://img.logo.dev/huginn.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Humanloop",
-    "slug": "humanloop",
-    "url": "https://img.logo.dev/humanloop.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "ILLA Builder",
-    "slug": "illa-builder",
-    "url": "https://img.logo.dev/illabuilder.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Indent",
-    "slug": "indent",
-    "url": "https://img.logo.dev/indent.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "JetBrains AI",
-    "slug": "jetbrains-ai",
-    "url": "https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg",
-    "status": "found"
-  },
-  {
-    "label": "Jina AI",
-    "slug": "jina-ai",
-    "url": "https://img.logo.dev/jina.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Joget",
-    "slug": "joget",
-    "url": "https://img.logo.dev/joget.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "KiloCode",
-    "slug": "kilocode",
-    "url": "https://kilo.ai/favicon/favicon.svg",
-    "status": "found"
-  },
-  {
-    "label": "KiloCode CLI",
-    "slug": "kilocode-cli",
-    "url": "https://kilo.ai/favicon/favicon.svg",
-    "status": "found"
-  },
-  {
-    "label": "KiloCode Code Review",
-    "slug": "kilocode-code-review",
-    "url": "https://img.logo.dev/kilocodecodereview.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "KiloCode IntelliJ",
-    "slug": "kilocode-intellij",
-    "url": "https://kilo.ai/favicon/favicon.svg",
-    "status": "found"
-  },
-  {
-    "label": "KiloCode VsCode",
-    "slug": "kilocode-vscode",
-    "url": "https://kilo.ai/favicon/favicon.svg",
-    "status": "found"
-  },
-  {
-    "label": "Kimi",
-    "slug": "kimi",
-    "url": "https://img.logo.dev/kimi.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Kiro",
-    "slug": "kiro",
-    "url": "https://img.logo.dev/kiro.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Kodus",
-    "slug": "kodus",
-    "url": "https://img.logo.dev/kodus.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "LM Studio",
-    "slug": "lm-studio",
-    "url": "https://img.logo.dev/lmstudio.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "LangChain",
-    "slug": "langchain",
-    "url": "https://img.logo.dev/langchain.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Langflow",
-    "slug": "langflow",
-    "url": "https://img.logo.dev/langflow.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "LightRAG",
-    "slug": "lightrag",
-    "url": "https://img.logo.dev/lightrag.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "LlamaIndex",
-    "slug": "llamaindex",
-    "url": "https://www.llamaindex.ai/favicon.svg",
-    "status": "found"
-  },
-  {
-    "label": "LobeChat",
-    "slug": "lobechat",
-    "url": "https://img.logo.dev/lobechat.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Lovable",
-    "slug": "lovable",
-    "url": "https://img.logo.dev/lovable.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Memgraph",
-    "slug": "memgraph",
-    "url": "https://img.logo.dev/memgraph.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Mesa",
-    "slug": "mesa",
-    "url": "https://img.logo.dev/mesa.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
     "label": "Microsoft Copilot",
     "slug": "microsoft-copilot",
     "url": "https://img.logo.dev/microsoft.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "Milvus",
-    "slug": "milvus",
-    "url": "https://img.logo.dev/milvus.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "xAI Grok",
+    "slug": "xai-grok",
+    "url": "https://img.logo.dev/x.ai?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "MiniMax",
-    "slug": "minimax",
-    "url": "https://img.logo.dev/minimax.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Natively",
-    "slug": "natively",
-    "url": "https://img.logo.dev/natively.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Neo4j",
-    "slug": "neo4j",
-    "url": "https://img.logo.dev/neo4j.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "NocoBase",
-    "slug": "nocobase",
-    "url": "https://img.logo.dev/nocobase.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "NocoDB",
-    "slug": "nocodb",
-    "url": "https://img.logo.dev/nocodb.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Node-RED",
-    "slug": "node-red",
-    "url": "https://img.logo.dev/nodered.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "NotebookLM",
-    "slug": "notebooklm",
-    "url": "https://img.logo.dev/google.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Obsidian + Tars + Semantic Search + Smart Connections",
-    "slug": "obsidian-tars-semantic-search-smart-connections",
-    "url": "https://obsidian.md/images/obsidian-logo-gradient.svg",
-    "status": "found"
-  },
-  {
-    "label": "Ollama",
-    "slug": "ollama",
-    "url": "https://img.logo.dev/ollama.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "OpenAI",
-    "slug": "openai",
-    "url": "https://img.logo.dev/openai.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "OpenHands",
-    "slug": "openhands",
-    "url": "https://img.logo.dev/openhands.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "OpenRouter AI",
-    "slug": "openrouter-ai",
-    "url": "https://img.logo.dev/openrouter.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "OpenSearch",
-    "slug": "opensearch",
-    "url": "https://img.logo.dev/opensearch.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "OpenWebUI",
-    "slug": "openwebui",
-    "url": "https://img.logo.dev/openwebui.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Openblocks",
-    "slug": "openblocks",
-    "url": "https://img.logo.dev/openblocks.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Opencode CLI",
-    "slug": "opencode-cli",
-    "url": "https://img.logo.dev/opencode.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "Amazon Q",
+    "slug": "amazon-q",
+    "url": "https://img.logo.dev/aws.amazon.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
@@ -606,45 +54,69 @@
     "status": "found"
   },
   {
-    "label": "Pinecone",
-    "slug": "pinecone",
-    "url": "https://www.pinecone.io/images/pinecone-logo.svg",
+    "label": "Hugging Face",
+    "slug": "hugging-face",
+    "url": "https://huggingface.co/front/assets/huggingface_logo-noborder.svg",
     "status": "found"
   },
   {
-    "label": "PocketBase",
-    "slug": "pocketbase",
-    "url": "https://img.logo.dev/pocketbase.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "DeepSeek",
+    "slug": "deepseek",
+    "url": "https://img.logo.dev/deepseek.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "Polarity Paragon",
-    "slug": "polarity-paragon",
-    "url": "https://img.logo.dev/polarityparagon.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "label": "Groq",
+    "slug": "groq",
+    "url": "https://img.logo.dev/groq.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "Promptfoo",
-    "slug": "promptfoo",
-    "url": "https://img.logo.dev/promptfoo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "label": "Ollama",
+    "slug": "ollama",
+    "url": "https://img.logo.dev/ollama.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "Pullfrog",
-    "slug": "pullfrog",
-    "url": "https://img.logo.dev/pullfrog.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "label": "OpenRouter AI",
+    "slug": "openrouter-ai",
+    "url": "https://img.logo.dev/openrouter.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "Qdrant",
-    "slug": "qdrant",
-    "url": "https://img.logo.dev/qdrant.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "Z.AI",
+    "slug": "z-ai",
+    "url": "https://img.logo.dev/zai.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "Qodo",
-    "slug": "qodo",
-    "url": "https://img.logo.dev/qodo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "label": "Google AI Studio",
+    "slug": "google-ai-studio",
+    "url": "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg",
+    "status": "found"
+  },
+  {
+    "label": "LM Studio",
+    "slug": "lm-studio",
+    "url": "https://img.logo.dev/lmstudio.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Claude Desktop",
+    "slug": "claude-desktop",
+    "url": "https://img.logo.dev/anthropic.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "ChatGPT Desktop",
+    "slug": "chatgpt-desktop",
+    "url": "https://img.logo.dev/openai.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Kimi",
+    "slug": "kimi",
+    "url": "https://img.logo.dev/kimi.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
@@ -654,81 +126,15 @@
     "status": "found"
   },
   {
-    "label": "Redis Vector",
-    "slug": "redis-vector",
-    "url": "https://img.logo.dev/redisvector.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "MiniMax",
+    "slug": "minimax",
+    "url": "https://img.logo.dev/minimax.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "RooCode",
-    "slug": "roocode",
-    "url": "https://img.logo.dev/roocode.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Rowy",
-    "slug": "rowy",
-    "url": "https://img.logo.dev/rowy.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Saltcorn",
-    "slug": "saltcorn",
-    "url": "https://img.logo.dev/saltcorn.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Sentry Seer",
-    "slug": "sentry-seer",
-    "url": "https://img.logo.dev/sentryseer.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "StackStorm",
-    "slug": "stackstorm",
-    "url": "https://img.logo.dev/stackstorm.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Tavily",
-    "slug": "tavily",
-    "url": "https://img.logo.dev/tavily.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Tembo",
-    "slug": "tembo",
-    "url": "https://img.logo.dev/tembo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "ToolJet",
-    "slug": "tooljet",
-    "url": "https://img.logo.dev/tooljet.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "VSCode + Copilot",
-    "slug": "vscode-copilot",
-    "url": "https://img.logo.dev/code.visualstudio.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Vercel Agent",
-    "slug": "vercel-agent",
-    "url": "https://img.logo.dev/vercel.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
-    "status": "found"
-  },
-  {
-    "label": "Warp",
-    "slug": "warp",
-    "url": "https://img.logo.dev/warp.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
-    "status": "found"
-  },
-  {
-    "label": "Windmill",
-    "slug": "windmill",
-    "url": "https://img.logo.dev/windmill.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "Cursor",
+    "slug": "cursor",
+    "url": "https://img.logo.dev/cursor.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
@@ -750,33 +156,99 @@
     "status": "found"
   },
   {
-    "label": "Z.AI",
-    "slug": "z-ai",
-    "url": "https://img.logo.dev/zai.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "GitHub Copilot",
+    "slug": "github-copilot",
+    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
     "status": "found"
   },
   {
-    "label": "Zed",
-    "slug": "zed",
-    "url": "https://img.logo.dev/zed.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "VSCode + Copilot",
+    "slug": "vscode-copilot",
+    "url": "https://img.logo.dev/code.visualstudio.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "lsFusion",
-    "slug": "lsfusion",
-    "url": "https://img.logo.dev/lsfusion.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "JetBrains AI",
+    "slug": "jetbrains-ai",
+    "url": "https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg",
     "status": "found"
   },
   {
-    "label": "n8n",
-    "slug": "n8n",
-    "url": "https://img.logo.dev/n8n.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "Codeium AI IDE",
+    "slug": "codeium-ai-ide",
+    "url": "https://img.logo.dev/codeiumaiide.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
-    "label": "pgvector",
-    "slug": "pgvector",
-    "url": "https://www.postgresql.org/media/img/about/press/elephant.png",
+    "label": "KiloCode",
+    "slug": "kilocode",
+    "url": "https://kilo.ai/favicon/favicon.svg",
+    "status": "found"
+  },
+  {
+    "label": "KiloCode CLI",
+    "slug": "kilocode-cli",
+    "url": "https://kilo.ai/favicon/favicon.svg",
+    "status": "found"
+  },
+  {
+    "label": "KiloCode IntelliJ",
+    "slug": "kilocode-intellij",
+    "url": "https://kilo.ai/favicon/favicon.svg",
+    "status": "found"
+  },
+  {
+    "label": "KiloCode VsCode",
+    "slug": "kilocode-vscode",
+    "url": "https://kilo.ai/favicon/favicon.svg",
+    "status": "found"
+  },
+  {
+    "label": "Gemini CLI",
+    "slug": "gemini-cli",
+    "url": "https://img.logo.dev/google.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Claude Code CLI",
+    "slug": "claude-code-cli",
+    "url": "https://img.logo.dev/anthropic.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Copilot CLI",
+    "slug": "copilot-cli",
+    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
+    "status": "found"
+  },
+  {
+    "label": "Opencode CLI",
+    "slug": "opencode-cli",
+    "url": "https://img.logo.dev/opencode.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Codex CLI",
+    "slug": "codex-cli",
+    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
+    "status": "found"
+  },
+  {
+    "label": "Codex VsCode",
+    "slug": "codex-vscode",
+    "url": "https://github.githubassets.com/images/modules/site/copilot/copilot.png",
+    "status": "found"
+  },
+  {
+    "label": "Cline",
+    "slug": "cline",
+    "url": "https://img.logo.dev/cline.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "RooCode",
+    "slug": "roocode",
+    "url": "https://img.logo.dev/roocode.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
@@ -786,9 +258,339 @@
     "status": "found"
   },
   {
-    "label": "xAI Grok",
-    "slug": "xai-grok",
-    "url": "https://img.logo.dev/x.ai?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "label": "Bolt.new",
+    "slug": "bolt-new",
+    "url": "https://img.logo.dev/bolt.new?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Lovable",
+    "slug": "lovable",
+    "url": "https://img.logo.dev/lovable.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Natively",
+    "slug": "natively",
+    "url": "https://img.logo.dev/natively.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "OpenHands",
+    "slug": "openhands",
+    "url": "https://img.logo.dev/openhands.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Zed",
+    "slug": "zed",
+    "url": "https://img.logo.dev/zed.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Warp",
+    "slug": "warp",
+    "url": "https://img.logo.dev/warp.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Amazon Q Developer CLI",
+    "slug": "amazon-q-developer-cli",
+    "url": "https://img.logo.dev/aws.amazon.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Factory Droids",
+    "slug": "factory-droids",
+    "url": "https://img.logo.dev/factorydroids.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Aider CLI",
+    "slug": "aider-cli",
+    "url": "https://img.logo.dev/aider.chat?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Kiro",
+    "slug": "kiro",
+    "url": "https://img.logo.dev/kiro.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Firebase Studio",
+    "slug": "firebase-studio",
+    "url": "https://img.logo.dev/firebasestudio.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Antigravity",
+    "slug": "antigravity",
+    "url": "https://img.logo.dev/antigravity.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "LlamaIndex",
+    "slug": "llamaindex",
+    "url": "https://www.llamaindex.ai/favicon.svg",
+    "status": "found"
+  },
+  {
+    "label": "LangChain",
+    "slug": "langchain",
+    "url": "https://img.logo.dev/langchain.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "NotebookLM",
+    "slug": "notebooklm",
+    "url": "https://img.logo.dev/google.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "GraphRAG",
+    "slug": "graphrag",
+    "url": "https://img.logo.dev/graphrag.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "LightRAG",
+    "slug": "lightrag",
+    "url": "https://img.logo.dev/lightrag.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "CodeWiki",
+    "slug": "codewiki",
+    "url": "https://img.logo.dev/codewiki.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "DeepWiki",
+    "slug": "deepwiki",
+    "url": "https://img.logo.dev/deepwiki.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Obsidian + Tars + Semantic Search + Smart Connections",
+    "slug": "obsidian-tars-semantic-search-smart-connections",
+    "url": "https://obsidian.md/images/obsidian-logo-gradient.svg",
+    "status": "found"
+  },
+  {
+    "label": "Pinecone",
+    "slug": "pinecone",
+    "url": "https://www.pinecone.io/images/pinecone-logo.svg",
+    "status": "found"
+  },
+  {
+    "label": "Qdrant",
+    "slug": "qdrant",
+    "url": "https://img.logo.dev/qdrant.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Milvus",
+    "slug": "milvus",
+    "url": "https://img.logo.dev/milvus.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Elasticsearch",
+    "slug": "elasticsearch",
+    "url": "https://www.elastic.co/static-res/images/elastic-logo-200.png",
+    "status": "found"
+  },
+  {
+    "label": "Neo4j",
+    "slug": "neo4j",
+    "url": "https://img.logo.dev/neo4j.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "ChromaDB",
+    "slug": "chromadb",
+    "url": "https://img.logo.dev/chromadb.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "pgvector",
+    "slug": "pgvector",
+    "url": "https://www.postgresql.org/media/img/about/press/elephant.png",
+    "status": "found"
+  },
+  {
+    "label": "Redis Vector",
+    "slug": "redis-vector",
+    "url": "https://img.logo.dev/redisvector.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "OpenSearch",
+    "slug": "opensearch",
+    "url": "https://img.logo.dev/opensearch.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Memgraph",
+    "slug": "memgraph",
+    "url": "https://img.logo.dev/memgraph.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "n8n",
+    "slug": "n8n",
+    "url": "https://img.logo.dev/n8n.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Activepieces",
+    "slug": "activepieces",
+    "url": "https://img.logo.dev/activepieces.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Node-RED",
+    "slug": "node-red",
+    "url": "https://img.logo.dev/nodered.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Appsmith",
+    "slug": "appsmith",
+    "url": "https://img.logo.dev/appsmith.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "ToolJet",
+    "slug": "tooljet",
+    "url": "https://img.logo.dev/tooljet.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Budibase",
+    "slug": "budibase",
+    "url": "https://img.logo.dev/budibase.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "NocoDB",
+    "slug": "nocodb",
+    "url": "https://img.logo.dev/nocodb.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Baserow",
+    "slug": "baserow",
+    "url": "https://img.logo.dev/baserow.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "NocoBase",
+    "slug": "nocobase",
+    "url": "https://img.logo.dev/nocobase.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Flowise",
+    "slug": "flowise",
+    "url": "https://raw.githubusercontent.com/FlowiseAI/Flowise/main/images/flowise.png",
+    "status": "found"
+  },
+  {
+    "label": "Langflow",
+    "slug": "langflow",
+    "url": "https://img.logo.dev/langflow.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Dify",
+    "slug": "dify",
+    "url": "https://img.logo.dev/dify.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "ILLA Builder",
+    "slug": "illa-builder",
+    "url": "https://img.logo.dev/illabuilder.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Openblocks",
+    "slug": "openblocks",
+    "url": "https://img.logo.dev/openblocks.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Windmill",
+    "slug": "windmill",
+    "url": "https://img.logo.dev/windmill.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Automatisch",
+    "slug": "automatisch",
+    "url": "https://img.logo.dev/automatisch.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "APITable",
+    "slug": "apitable",
+    "url": "https://img.logo.dev/apitable.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Rowy",
+    "slug": "rowy",
+    "url": "https://img.logo.dev/rowy.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "PocketBase",
+    "slug": "pocketbase",
+    "url": "https://img.logo.dev/pocketbase.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Saltcorn",
+    "slug": "saltcorn",
+    "url": "https://img.logo.dev/saltcorn.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Joget",
+    "slug": "joget",
+    "url": "https://img.logo.dev/joget.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "lsFusion",
+    "slug": "lsfusion",
+    "url": "https://img.logo.dev/lsfusion.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Huginn",
+    "slug": "huginn",
+    "url": "https://img.logo.dev/huginn.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "StackStorm",
+    "slug": "stackstorm",
+    "url": "https://img.logo.dev/stackstorm.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "LobeChat",
+    "slug": "lobechat",
+    "url": "https://img.logo.dev/lobechat.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Azure DevOps Mcp",
+    "slug": "azure-devops-mcp",
+    "url": "https://img.logo.dev/azure.microsoft.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
     "status": "found"
   },
   {
@@ -801,6 +603,264 @@
     "label": "z.ai WebSearch MCP",
     "slug": "z-ai-websearch-mcp",
     "url": "https://img.logo.dev/zaiwebsearch.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Exa MCP",
+    "slug": "exa-mcp",
+    "url": "https://img.logo.dev/exa.ai?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Brave Search MCP",
+    "slug": "brave-search-mcp",
+    "url": "https://img.logo.dev/brave.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Jina AI",
+    "slug": "jina-ai",
+    "url": "https://img.logo.dev/jina.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Tavily",
+    "slug": "tavily",
+    "url": "https://img.logo.dev/tavily.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "Docker MCP Toolkit",
+    "slug": "docker-mcp-toolkit",
+    "url": "https://img.logo.dev/docker.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "OpenWebUI",
+    "slug": "openwebui",
+    "url": "https://img.logo.dev/openwebui.com?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
+  },
+  {
+    "label": "DeepEval",
+    "slug": "deepeval",
+    "url": "https://img.logo.dev/deepeval.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Promptfoo",
+    "slug": "promptfoo",
+    "url": "https://img.logo.dev/promptfoo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Humanloop",
+    "slug": "humanloop",
+    "url": "https://img.logo.dev/humanloop.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Helicone",
+    "slug": "helicone",
+    "url": "https://img.logo.dev/helicone.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Arize Phoenix",
+    "slug": "arize-phoenix",
+    "url": "https://img.logo.dev/arizephoenix.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Greptile",
+    "slug": "greptile",
+    "url": "https://img.logo.dev/greptile.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "CodeRabbit",
+    "slug": "coderabbit",
+    "url": "https://img.logo.dev/coderabbit.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Codex Code Review",
+    "slug": "codex-code-review",
+    "url": "https://img.logo.dev/codexcodereview.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "KiloCode Code Review",
+    "slug": "kilocode-code-review",
+    "url": "https://img.logo.dev/kilocodecodereview.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "BugBot",
+    "slug": "bugbot",
+    "url": "https://img.logo.dev/bugbot.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Sentry Seer",
+    "slug": "sentry-seer",
+    "url": "https://img.logo.dev/sentryseer.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Vercel Agent",
+    "slug": "vercel-agent",
+    "url": "https://img.logo.dev/vercel.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Gemini Code Assist",
+    "slug": "gemini-code-assist",
+    "url": "https://img.logo.dev/geminicodeassist.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Tembo",
+    "slug": "tembo",
+    "url": "https://img.logo.dev/tembo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Pullfrog",
+    "slug": "pullfrog",
+    "url": "https://img.logo.dev/pullfrog.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Cubic",
+    "slug": "cubic",
+    "url": "https://img.logo.dev/cubic.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Mesa",
+    "slug": "mesa",
+    "url": "https://img.logo.dev/mesa.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Augment Code",
+    "slug": "augment-code",
+    "url": "https://img.logo.dev/augmentcode.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "GitHub Copilot Review",
+    "slug": "github-copilot-review",
+    "url": "https://img.logo.dev/githubcopilotreview.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Indent",
+    "slug": "indent",
+    "url": "https://img.logo.dev/indent.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Capy",
+    "slug": "capy",
+    "url": "https://img.logo.dev/capy.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Gitar",
+    "slug": "gitar",
+    "url": "https://img.logo.dev/gitar.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Polarity Paragon",
+    "slug": "polarity-paragon",
+    "url": "https://img.logo.dev/polarityparagon.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Kodus",
+    "slug": "kodus",
+    "url": "https://img.logo.dev/kodus.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Beetle AI",
+    "slug": "beetle-ai",
+    "url": "https://img.logo.dev/beetle.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Graphite",
+    "slug": "graphite",
+    "url": "https://img.logo.dev/graphite.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Qodo",
+    "slug": "qodo",
+    "url": "https://img.logo.dev/qodo.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Langfuse",
+    "slug": "langfuse",
+    "url": "https://img.logo.dev/langfuse.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "LangSmith",
+    "slug": "langsmith",
+    "url": "https://img.logo.dev/langsmith.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "LangWatch",
+    "slug": "langwatch",
+    "url": "https://img.logo.dev/langwatch.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Opik",
+    "slug": "opik",
+    "url": "https://img.logo.dev/opik.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "OpenLLMetry",
+    "slug": "openllmetry",
+    "url": "https://img.logo.dev/openllmetry.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Portkey",
+    "slug": "portkey",
+    "url": "https://img.logo.dev/portkey.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "TruLens",
+    "slug": "trulens",
+    "url": "https://img.logo.dev/trulens.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "PromptLayer",
+    "slug": "promptlayer",
+    "url": "https://img.logo.dev/promptlayer.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "Lunary",
+    "slug": "lunary",
+    "url": "https://img.logo.dev/lunary.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
+    "status": "found"
+  },
+  {
+    "label": "HoneyHive",
+    "slug": "honeyhive",
+    "url": "https://img.logo.dev/honeyhive.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
   }
 ]

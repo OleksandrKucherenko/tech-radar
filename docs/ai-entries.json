@@ -1118,7 +1118,7 @@
       "ring": 1,
       "moved": 2,
       "active": true,
-      "description": "Arize Phoenix is an open-source AI observability platform for experimentation, evaluation, and troubleshooting of LLM applications.\n\n**Platform Features:**\n- OpenTelemetry protocol (OTLP) tracing support\n- First-class instrumentation for LlamaIndex, LangChain, DSPy\n- Multi-provider support (OpenAI, Bedrock, Mistral, Vertex)\n- LLM-powered evaluation and benchmarking\n- Datasets and versioned examples for experimentation\n- Playground for prompt optimization and model comparison\n- Prompt management with version control\n- Vendor and language agnostic architecture\n\nFully open-source with no feature gates, Phoenix runs anywhere—local machine, Jupyter, containers, or cloud—making it ideal for comprehensive AI application observability."
+      "description": "Arize Phoenix is an open-source AI observability platform for experimentation, evaluation, and troubleshooting of LLM applications.\n\n**Platform Features:**\n- OpenTelemetry protocol (OTLP) tracing support\n- First-class instrumentation for LlamaIndex, LangChain, DSPy\n- Multi-provider support (OpenAI, Bedrock, Mistral, Vertex)\n- LLM-powered evaluation and benchmarking\n- Datasets and versioned examples for experimentation\n- Playground for prompt optimization and model comparison\n- Prompt management with version control\n- Vendor and language agnostic architecture\n\nFully open-source with no feature gates, Phoenix runs anywhere\u2014local machine, Jupyter, containers, or cloud\u2014making it ideal for comprehensive AI application observability."
     },
     {
       "label": "Greptile",
@@ -1152,7 +1152,7 @@
     },
     {
       "label": "KiloCode Code Review",
-      "logo": "https://kilo.ai/favicon/favicon.svg",
+      "logo": "logos/kilocode-code-review-logo-64x64.webp",
       "link": "https://kilo.ai/docs/advanced-usage/code-reviews",
       "quadrant": 5,
       "ring": 4,
@@ -1168,7 +1168,7 @@
       "ring": 5,
       "moved": 2,
       "active": true,
-      "description": "BugBot is an AI agent built by Cursor that runs automatically on pull requests to detect logic bugs, tricky edge cases, and security issues before code reaches production.\n\n**Key Features:**\n- Automatic code review on each PR update\n- Detects logic bugs with low false positive rate\n- Security issue identification\n- \"Fix in Cursor\" button to apply fixes directly in IDE\n- GitHub PR integration\n- Optimized for finding hard-to-catch logic bugs\n\nIn early testing, BugBot reviewed over one million pull requests and flagged 1.5 million potential issues—with about 50% fixed before merging. New users receive a 14-day free trial."
+      "description": "BugBot is an AI agent built by Cursor that runs automatically on pull requests to detect logic bugs, tricky edge cases, and security issues before code reaches production.\n\n**Key Features:**\n- Automatic code review on each PR update\n- Detects logic bugs with low false positive rate\n- Security issue identification\n- \"Fix in Cursor\" button to apply fixes directly in IDE\n- GitHub PR integration\n- Optimized for finding hard-to-catch logic bugs\n\nIn early testing, BugBot reviewed over one million pull requests and flagged 1.5 million potential issues\u2014with about 50% fixed before merging. New users receive a 14-day free trial."
     },
     {
       "label": "Sentry Seer",
@@ -1347,7 +1347,8 @@
       "ring": 4,
       "moved": 2,
       "active": true,
-      "description": "Langfuse is the open source leader in LLM observability with 19k+ GitHub stars and MIT license, enabling self-hosted deployments without restrictions.\n\n**Key Features:**\n- LLM tracing and debugging with detailed spans\n- Prompt management and versioning\n- Evaluation pipelines and scoring\n- Dataset creation for testing and fine-tuning\n- Cost tracking and analytics\n- OpenTelemetry integration\n- Integrates with LangChain, OpenAI SDK, LiteLLM, and more\n- Self-hosted or cloud deployment options\n\nLangfuse provides comprehensive LLM engineering platform capabilities for teams building production AI applications."
+      "description": "Langfuse is the open source leader in LLM observability with 19k+ GitHub stars and MIT license, enabling self-hosted deployments without restrictions.\n\n**Key Features:**\n- LLM tracing and debugging with detailed spans\n- Prompt management and versioning\n- Evaluation pipelines and scoring\n- Dataset creation for testing and fine-tuning\n- Cost tracking and analytics\n- OpenTelemetry integration\n- Integrates with LangChain, OpenAI SDK, LiteLLM, and more\n- Self-hosted or cloud deployment options\n\nLangfuse provides comprehensive LLM engineering platform capabilities for teams building production AI applications.",
+      "logo": "logos/langfuse-logo-64x64.webp"
     },
     {
       "label": "LangSmith",
@@ -1356,7 +1357,8 @@
       "ring": 4,
       "moved": 2,
       "active": true,
-      "description": "LangSmith is LangChain's closed-source observability and testing platform, providing deep integration with the LangChain framework ecosystem.\n\n**Key Features:**\n- Trace debugging and visualization\n- Prompt hub and versioning\n- Evaluation framework with custom evaluators\n- Dataset management for testing\n- Annotation queues for human feedback\n- Online evaluation and monitoring\n- Native LangChain/LangGraph integration\n- Playground for prompt iteration\n\nLangSmith is ideal for teams already using LangChain who want tightly integrated observability and testing capabilities."
+      "description": "LangSmith is LangChain's closed-source observability and testing platform, providing deep integration with the LangChain framework ecosystem.\n\n**Key Features:**\n- Trace debugging and visualization\n- Prompt hub and versioning\n- Evaluation framework with custom evaluators\n- Dataset management for testing\n- Annotation queues for human feedback\n- Online evaluation and monitoring\n- Native LangChain/LangGraph integration\n- Playground for prompt iteration\n\nLangSmith is ideal for teams already using LangChain who want tightly integrated observability and testing capabilities.",
+      "logo": "logos/langsmith-logo-64x64.webp"
     },
     {
       "label": "LangWatch",
@@ -1365,7 +1367,8 @@
       "ring": 5,
       "moved": 2,
       "active": true,
-      "description": "LangWatch is an LLM observability platform using OpenTelemetry for full-stack tracing of prompts, tool invocations, and agent interactions.\n\n**Key Features:**\n- OpenTelemetry-based tracing\n- Real-time visibility into token usage and latency\n- Cost monitoring and optimization\n- Prompt and variable tracking\n- Agent interaction visualization\n- Evaluation and testing tools\n- Integration with major LLM providers\n\nLangWatch provides standardized observability using OpenTelemetry protocols for visibility into LLM-powered applications."
+      "description": "LangWatch is an LLM observability platform using OpenTelemetry for full-stack tracing of prompts, tool invocations, and agent interactions.\n\n**Key Features:**\n- OpenTelemetry-based tracing\n- Real-time visibility into token usage and latency\n- Cost monitoring and optimization\n- Prompt and variable tracking\n- Agent interaction visualization\n- Evaluation and testing tools\n- Integration with major LLM providers\n\nLangWatch provides standardized observability using OpenTelemetry protocols for visibility into LLM-powered applications.",
+      "logo": "logos/langwatch-logo-64x64.webp"
     },
     {
       "label": "Opik",
@@ -1374,7 +1377,8 @@
       "ring": 5,
       "moved": 2,
       "active": true,
-      "description": "Opik is an open source platform by Comet for evaluating, testing, and monitoring LLM applications with comprehensive tracing and annotation features.\n\n**Key Features:**\n- LLM tracing and debugging\n- Annotation and labeling workflows\n- Prompt and model playground\n- Evaluation framework with metrics\n- Dataset management\n- Integration with Comet ML platform\n- Open source with self-hosting option\n\nOpik provides end-to-end LLM evaluation capabilities integrated with Comet's broader ML platform ecosystem."
+      "description": "Opik is an open source platform by Comet for evaluating, testing, and monitoring LLM applications with comprehensive tracing and annotation features.\n\n**Key Features:**\n- LLM tracing and debugging\n- Annotation and labeling workflows\n- Prompt and model playground\n- Evaluation framework with metrics\n- Dataset management\n- Integration with Comet ML platform\n- Open source with self-hosting option\n\nOpik provides end-to-end LLM evaluation capabilities integrated with Comet's broader ML platform ecosystem.",
+      "logo": "logos/opik-logo-64x64.webp"
     },
     {
       "label": "OpenLLMetry",
@@ -1383,7 +1387,8 @@
       "ring": 5,
       "moved": 2,
       "active": true,
-      "description": "OpenLLMetry is an open-source observability solution for LLM applications based on OpenTelemetry, built by Traceloop for seamless integration with existing observability stacks.\n\n**Key Features:**\n- OpenTelemetry-native instrumentation\n- Integrates with existing observability tools (Datadog, New Relic, Grafana)\n- Automatic tracing for popular LLM frameworks\n- Support for LangChain, OpenAI, Anthropic, and more\n- Standardized telemetry data format\n- Open source and vendor-agnostic\n\nOpenLLMetry enables teams to add LLM observability to applications without vendor lock-in by leveraging OpenTelemetry standards."
+      "description": "OpenLLMetry is an open-source observability solution for LLM applications based on OpenTelemetry, built by Traceloop for seamless integration with existing observability stacks.\n\n**Key Features:**\n- OpenTelemetry-native instrumentation\n- Integrates with existing observability tools (Datadog, New Relic, Grafana)\n- Automatic tracing for popular LLM frameworks\n- Support for LangChain, OpenAI, Anthropic, and more\n- Standardized telemetry data format\n- Open source and vendor-agnostic\n\nOpenLLMetry enables teams to add LLM observability to applications without vendor lock-in by leveraging OpenTelemetry standards.",
+      "logo": "logos/openllmetry-logo-64x64.webp"
     },
     {
       "label": "Portkey",
@@ -1392,7 +1397,8 @@
       "ring": 4,
       "moved": 2,
       "active": true,
-      "description": "Portkey is an AI gateway that provides unified observability, reliability, and routing capabilities for LLM applications across multiple providers.\n\n**Key Features:**\n- Unified API for multiple LLM providers\n- Request caching and cost optimization\n- Automatic retries and fallbacks\n- Load balancing across providers\n- Detailed analytics and monitoring\n- Prompt management and versioning\n- Guardrails and content filtering\n- Enterprise-grade security\n\nPortkey serves as an AI infrastructure layer that adds observability and reliability without requiring changes to your LLM application code."
+      "description": "Portkey is an AI gateway that provides unified observability, reliability, and routing capabilities for LLM applications across multiple providers.\n\n**Key Features:**\n- Unified API for multiple LLM providers\n- Request caching and cost optimization\n- Automatic retries and fallbacks\n- Load balancing across providers\n- Detailed analytics and monitoring\n- Prompt management and versioning\n- Guardrails and content filtering\n- Enterprise-grade security\n\nPortkey serves as an AI infrastructure layer that adds observability and reliability without requiring changes to your LLM application code.",
+      "logo": "logos/portkey-logo-64x64.webp"
     },
     {
       "label": "TruLens",
@@ -1401,7 +1407,8 @@
       "ring": 5,
       "moved": 2,
       "active": true,
-      "description": "TruLens is an open-source evaluation framework focusing on measuring and improving LLM response quality through built-in metrics and feedback systems.\n\n**Key Features:**\n- Built-in evaluation metrics (coherence, correctness, faithfulness)\n- Human-in-the-loop feedback systems\n- Response quality benchmarking\n- Integration with major LLM frameworks\n- Detailed evaluation reports\n- Open source and customizable\n\nTruLens is ideal for AI researchers and teams focused on benchmarking and systematically improving LLM response quality."
+      "description": "TruLens is an open-source evaluation framework focusing on measuring and improving LLM response quality through built-in metrics and feedback systems.\n\n**Key Features:**\n- Built-in evaluation metrics (coherence, correctness, faithfulness)\n- Human-in-the-loop feedback systems\n- Response quality benchmarking\n- Integration with major LLM frameworks\n- Detailed evaluation reports\n- Open source and customizable\n\nTruLens is ideal for AI researchers and teams focused on benchmarking and systematically improving LLM response quality.",
+      "logo": "logos/trulens-logo-64x64.webp"
     },
     {
       "label": "PromptLayer",
@@ -1410,7 +1417,8 @@
       "ring": 5,
       "moved": 2,
       "active": true,
-      "description": "PromptLayer is a prompt engineering and version control platform that helps teams track, manage, and optimize their prompts across LLM applications.\n\n**Key Features:**\n- Prompt version control and history\n- Track prompts and responses\n- Identify top-performing prompts\n- Lightweight and easy to integrate\n- Experimentation and A/B testing support\n- Analytics dashboard\n\nPromptLayer is best suited for prompt engineers and small teams focused on iterative prompt optimization and experimentation."
+      "description": "PromptLayer is a prompt engineering and version control platform that helps teams track, manage, and optimize their prompts across LLM applications.\n\n**Key Features:**\n- Prompt version control and history\n- Track prompts and responses\n- Identify top-performing prompts\n- Lightweight and easy to integrate\n- Experimentation and A/B testing support\n- Analytics dashboard\n\nPromptLayer is best suited for prompt engineers and small teams focused on iterative prompt optimization and experimentation.",
+      "logo": "logos/promptlayer-logo-64x64.webp"
     },
     {
       "label": "Lunary",
@@ -1419,7 +1427,8 @@
       "ring": 5,
       "moved": 2,
       "active": true,
-      "description": "Lunary combines LLM observability, user feedback collection, and evaluation in a unified platform with session-based tracing and real-time monitoring.\n\n**Key Features:**\n- Session-based tracing and analytics\n- User feedback collection\n- Real-time monitoring dashboard\n- Built-in evaluation tools\n- User-friendly interface\n- Quick integration setup\n\nLunary is well-suited for startups and teams building customer-facing AI applications who need combined observability and feedback capabilities."
+      "description": "Lunary combines LLM observability, user feedback collection, and evaluation in a unified platform with session-based tracing and real-time monitoring.\n\n**Key Features:**\n- Session-based tracing and analytics\n- User feedback collection\n- Real-time monitoring dashboard\n- Built-in evaluation tools\n- User-friendly interface\n- Quick integration setup\n\nLunary is well-suited for startups and teams building customer-facing AI applications who need combined observability and feedback capabilities.",
+      "logo": "logos/lunary-logo-64x64.webp"
     },
     {
       "label": "HoneyHive",
@@ -1428,7 +1437,8 @@
       "ring": 4,
       "moved": 2,
       "active": true,
-      "description": "HoneyHive is a prompt management, evaluation, and testing platform designed for production-grade LLM systems with collaboration and continuous improvement features.\n\n**Key Features:**\n- Prompt version control and management\n- Automated testing pipelines\n- Collaboration features for teams\n- Continuous improvement cycles\n- Performance benchmarking\n- Integration with CI/CD workflows\n\nHoneyHive is designed for product teams building and maintaining production-grade LLM systems requiring rigorous testing and prompt management."
+      "description": "HoneyHive is a prompt management, evaluation, and testing platform designed for production-grade LLM systems with collaboration and continuous improvement features.\n\n**Key Features:**\n- Prompt version control and management\n- Automated testing pipelines\n- Collaboration features for teams\n- Continuous improvement cycles\n- Performance benchmarking\n- Integration with CI/CD workflows\n\nHoneyHive is designed for product teams building and maintaining production-grade LLM systems requiring rigorous testing and prompt management.",
+      "logo": "logos/honeyhive-logo-64x64.webp"
     }
   ]
 }
