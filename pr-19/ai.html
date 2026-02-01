@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Primary Meta Tags -->
+    <title>AI Tech Radar - AI Technologies & Tools</title>
+    <meta name="title" content="AI Tech Radar - AI Technologies & Tools" />
+    <meta
+      name="description"
+      content="Comprehensive AI Tech Radar covering Core AI Providers, AI Coding Tools, RAG systems, and Vector Databases. Navigate the rapidly evolving AI landscape."
+    />
+    <meta name="keywords" content="ai tech radar, llm, ai coding, rag, vector database, graph database, ai tools" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://oleksandrkucherenko.github.io/tech-radar/ai.html" />
+    <meta property="og:title" content="AI Tech Radar - AI Technologies & Tools" />
+    <meta
+      property="og:description"
+      content="Comprehensive AI Tech Radar covering Core AI Providers, AI Coding Tools, RAG systems, and Vector Databases."
+    />
+    <meta
+      property="og:image"
+      content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg"
+    />
+    <meta property="og:site_name" content="AI Tech Radar" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://oleksandrkucherenko.github.io/tech-radar/ai.html" />
+    <meta name="twitter:title" content="AI Tech Radar - AI Technologies & Tools" />
+    <meta
+      name="twitter:description"
+      content="Comprehensive AI Tech Radar covering Core AI Providers, AI Coding Tools, RAG systems, and Vector Databases."
+    />
+    <meta
+      name="twitter:image"
+      content="https://oleksandrkucherenko.github.io/tech-radar/screenshots/4x8-quadrants-rings.jpg"
+    />
+
+    <!-- Repository & Links -->
+    <link rel="canonical" href="https://oleksandrkucherenko.github.io/tech-radar/ai.html" />
+    <link rel="repository" href="https://github.com/OleksandrKucherenko/tech-radar" />
+    <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Tech Radar" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <meta name="theme-color" content="#1976d2" />
+
+    <script src="vendor/d3.v7.min.js"></script>
+    <script src="vendor/marked.min.js"></script>
+    <script src="radar.js"></script>
+
+    <link rel="stylesheet" href="radar.css" />
+    <link rel="stylesheet" href="vendor/font-awesome.min.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      nav.demo-links {
+        padding: 15px 20px;
+        background: #f8f8f8;
+        border-bottom: 1px solid #e0e0e0;
+        margin: 0;
+      }
+
+      .radar-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      #radar {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .radar-notes {
+        max-width: 1200px;
+        margin: 10px auto 40px;
+        padding: 0 20px;
+      }
+
+      .radar-notes ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      footer {
+        text-align: center;
+        padding: 15px 20px;
+        margin: 0;
+        border-top: 1px solid #e0e0e0;
+        background: #f8f8f8;
+        color: #666;
+        font-size: 12px;
+      }
+
+      footer code {
+        background: #e8e8e8;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "Courier New", monospace;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="demo-links">
+      <strong>Demo pages:</strong>
+      <a href="./index.html">Default</a>
+      <a href="./demo-2x4.html">2 Quadrants × 4 Rings</a>
+      <a href="./demo-3x4.html">3 Quadrants × 4 Rings</a>
+      <a href="./demo-4x8.html">4 Quadrants × 8 Rings</a>
+      <a href="./demo-5x4.html">5 Quadrants × 4 Rings</a>
+      <a href="./demo-6x5.html">6 Quadrants × 5 Rings</a>
+      <a href="./demo-7x4.html">7 Quadrants × 4 Rings</a>
+      <a href="./demo-8x8.html">8 Quadrants × 8 Rings</a>
+      <span class="separator">|</span>
+      <a href="./ai.html">🤖 AI Tech Radar</a>
+      <span class="separator">|</span>
+      <a href="./builder.html" class="builder-link">⚙️ Tech Radar Builder</a>
+    </nav>
+
+    <div id="toolbar"></div>
+
+    <div class="radar-container">
+      <svg id="radar"></svg>
+    </div>
+
+    <section class="radar-notes">
+      <h3>What do the rings mean?</h3>
+      <p>
+        The AI Tech Radar is a list of technologies, complemented by an assessment result, called
+        <em>ring assignment</em>. We use the following ring semantics:
+      </p>
+
+      <ul>
+        <li>
+          <strong>ADOPT</strong> &mdash; Tools we should migrate to, from HOLD or other non-AI tools. These are the
+          strategic defaults we actively promote and move toward.
+        </li>
+        <li>
+          <strong>VALUE</strong> &mdash; Tools that show clear value for new projects. We want to use them when the fit
+          is good and the expected impact is high.
+        </li>
+        <li><strong>HOLD</strong> &mdash; Tools we can use and maintain, but will not choose for new projects.</li>
+        <li>
+          <strong>SKIP</strong> &mdash; Tools we intentionally skip due to fit, maturity, cost, or strategic focus.
+        </li>
+        <li>
+          <strong>TRIAL</strong> &mdash; Tools we try in practice to evaluate them. We create accounts, run pilots, and
+          validate real-world usage.
+        </li>
+        <li>
+          <strong>WATCH</strong> &mdash; Tool awareness: we start to see the tool and track signals before committing to
+          hands-on evaluation.
+        </li>
+      </ul>
+    </section>
+
+    <script>
+      let radarInstance = null;
+
+      fetch("./ai-entries.json")
+        .then(response => response.json())
+        .then(data => {
+          radarInstance = radar_visualization({
+            repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
+            svg_id: "radar",
+            toolbar_id: "toolbar",
+            colors: {
+              background: "#fff",
+              grid: "#bbb",
+              inactive: "#ddd",
+            },
+            font_family: "Arial, Helvetica",
+            title: "AI Tech Radar (2026)",
+            quadrants: [
+              { name: "Core AI Providers" },
+              { name: "AI Coding Tools" },
+              { name: "RAG & Retrieval & Knowledge Base" },
+              { name: "Databases" },
+              { name: "Low-Code & MCP" },
+              { name: "Observability & Testing" },
+            ],
+            rings: [
+              { name: "ADOPT", color: "#5ba300" },
+              { name: "VALUE", color: "#c7ba00" },
+              { name: "HOLD", color: "#e09b96" },
+              { name: "SKIP", color: "#e09b96" },
+              { name: "TRIAL", color: "#009eb0" },
+              { name: "WATCH", color: "#bb6bd9" },
+            ],
+            print_layout: true,
+            links_in_new_tabs: true,
+            descriptionTransform: typeof marked !== "undefined" ? text => marked.parse(text) : null,
+            entries: data.entries,
+          });
+
+          // Assign import/export capability to instance
+          radarInstance.importExport = radar_visualization.jsonIO;
+
+          // Initialize and assign toolbar to instance
+          // Toolbar automatically wires to instance methods (render, reset, getConfig)
+          radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
+        })
+        .catch(err => {
+          console.error("Error loading ai-entries.json", err);
+        });
+    </script>
+
+    <footer>Build: <code>0487b4d</code></footer>
+  </body>
+</html>
