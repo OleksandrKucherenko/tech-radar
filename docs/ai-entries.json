@@ -1393,6 +1393,42 @@
       "moved": 2,
       "active": true,
       "description": "Portkey is an AI gateway that provides unified observability, reliability, and routing capabilities for LLM applications across multiple providers.\n\n**Key Features:**\n- Unified API for multiple LLM providers\n- Request caching and cost optimization\n- Automatic retries and fallbacks\n- Load balancing across providers\n- Detailed analytics and monitoring\n- Prompt management and versioning\n- Guardrails and content filtering\n- Enterprise-grade security\n\nPortkey serves as an AI infrastructure layer that adds observability and reliability without requiring changes to your LLM application code."
+    },
+    {
+      "label": "TruLens",
+      "link": "https://www.trulens.org/",
+      "quadrant": 5,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "TruLens is an open-source evaluation framework focusing on measuring and improving LLM response quality through built-in metrics and feedback systems.\n\n**Key Features:**\n- Built-in evaluation metrics (coherence, correctness, faithfulness)\n- Human-in-the-loop feedback systems\n- Response quality benchmarking\n- Integration with major LLM frameworks\n- Detailed evaluation reports\n- Open source and customizable\n\nTruLens is ideal for AI researchers and teams focused on benchmarking and systematically improving LLM response quality."
+    },
+    {
+      "label": "PromptLayer",
+      "link": "https://promptlayer.com/",
+      "quadrant": 5,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "PromptLayer is a prompt engineering and version control platform that helps teams track, manage, and optimize their prompts across LLM applications.\n\n**Key Features:**\n- Prompt version control and history\n- Track prompts and responses\n- Identify top-performing prompts\n- Lightweight and easy to integrate\n- Experimentation and A/B testing support\n- Analytics dashboard\n\nPromptLayer is best suited for prompt engineers and small teams focused on iterative prompt optimization and experimentation."
+    },
+    {
+      "label": "Lunary",
+      "link": "https://lunary.ai/",
+      "quadrant": 5,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "Lunary combines LLM observability, user feedback collection, and evaluation in a unified platform with session-based tracing and real-time monitoring.\n\n**Key Features:**\n- Session-based tracing and analytics\n- User feedback collection\n- Real-time monitoring dashboard\n- Built-in evaluation tools\n- User-friendly interface\n- Quick integration setup\n\nLunary is well-suited for startups and teams building customer-facing AI applications who need combined observability and feedback capabilities."
+    },
+    {
+      "label": "HoneyHive",
+      "link": "https://www.honeyhive.ai/",
+      "quadrant": 5,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "HoneyHive is a prompt management, evaluation, and testing platform designed for production-grade LLM systems with collaboration and continuous improvement features.\n\n**Key Features:**\n- Prompt version control and management\n- Automated testing pipelines\n- Collaboration features for teams\n- Continuous improvement cycles\n- Performance benchmarking\n- Integration with CI/CD workflows\n\nHoneyHive is designed for product teams building and maintaining production-grade LLM systems requiring rigorous testing and prompt management."
     }
   ]
 }
