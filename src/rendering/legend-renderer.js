@@ -105,7 +105,7 @@ export function renderLegendColumns(
       .append('div')
       .attr('class', 'legend-rings')
       .style('display', 'grid')
-      .style('grid-template-columns', `repeat(${legendSectionColumns}, 1fr)`)
+      .style('grid-template-columns', `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`)
       .style('gap', '10px 14px')
       .style('align-items', 'start');
 
@@ -136,8 +136,10 @@ export function renderLegendColumns(
         .style('display', 'flex')
         .style('flex-direction', 'column')
         .style('gap', '2px');
+      // Note: color is NOT set inline — it's handled by .legend-entry CSS class (color:inherit)
+      // so that .legend-highlight { color:#fff } can override it on hover
       const entryBaseStyle =
-        'font-size:11px;text-decoration:none;color:inherit;word-break:break-word;padding:2px 4px;border-radius:4px;';
+        'font-size:11px;text-decoration:none;word-break:break-word;padding:2px 4px;border-radius:4px;';
       entriesList
         .selectAll('a')
         .data(entriesInRing)
