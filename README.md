@@ -19,9 +19,9 @@ Feel free to use and adapt it for your own purposes.
 
 ```html
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://github.com/OleksandrKucherenko/tech-radar/releases/download/v0.18.0/radar-0.18.0.js"></script>
-<!-- Optional: Responsive layout enhancements (since v0.18.0, critical styles are inlined in JS) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/OleksandrKucherenko/tech-radar@v0.18.0/docs/radar.css">
+<script src="https://github.com/OleksandrKucherenko/tech-radar/releases/download/v0.19.0/radar-0.19.0.js"></script>
+<!-- Optional: Responsive layout enhancements (since v0.19.0, critical styles are inlined in JS) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/OleksandrKucherenko/tech-radar@v0.19.0/docs/radar.css">
 ```
 
 > [!IMPORTANT]
@@ -29,7 +29,7 @@ Feel free to use and adapt it for your own purposes.
 > `Content-Type: text/plain` and browsers reject them as stylesheets. Use
 > [jsDelivr](https://www.jsdelivr.com/) (`cdn.jsdelivr.net/gh/user/repo@tag/path`) which serves
 > repository tree files with correct MIME types, or use GitHub Pages.
-> Since v0.18.0, all critical layout styles are inlined in the JS, so the CSS file is optional.
+> Since v0.19.0, all critical layout styles are inlined in the JS, so the CSS file is optional.
 >
 > **JS loading:** GitHub Release download URLs (`github.com/.../releases/download/...`) work fine
 > for `<script>` tags — browsers are lenient about MIME types for scripts.
@@ -103,7 +103,7 @@ The Tech Radar can be embedded in Confluence pages using the
 [HTML macro](https://confluence.atlassian.com/doc/html-macro-38273085.html) (Confluence Server/Data Center)
 or a third-party HTML embed app (Confluence Cloud).
 
-Since v0.18.0, all layout-critical styles are inlined in the JavaScript, so the radar renders
+Since v0.19.0, all layout-critical styles are inlined in the JavaScript, so the radar renders
 correctly **without an external CSS file**. Only two `<script>` tags are needed (D3.js + radar.js
 from GitHub Releases). This is important for Confluence because:
 
@@ -120,8 +120,8 @@ Paste this into a Confluence HTML macro:
 <!-- Load D3.js (required) -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
-<!-- Load Tech Radar (v0.18.0+) -->
-<script src="https://github.com/OleksandrKucherenko/tech-radar/releases/download/v0.18.0/radar-0.18.0.js"></script>
+<!-- Load Tech Radar (v0.19.0+) -->
+<script src="https://github.com/OleksandrKucherenko/tech-radar/releases/download/v0.19.0/radar-0.19.0.js"></script>
 
 <!-- Radar container -->
 <div class="radar-container">
@@ -170,8 +170,8 @@ Tech Radar supports 4 to 8 rings. Here is an example with 7 rings:
 <!-- Load D3.js (required) -->
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
-<!-- Load Tech Radar (v0.18.0+) -->
-<script src="https://github.com/OleksandrKucherenko/tech-radar/releases/download/v0.18.0/radar-0.18.0.js"></script>
+<!-- Load Tech Radar (v0.19.0+) -->
+<script src="https://github.com/OleksandrKucherenko/tech-radar/releases/download/v0.19.0/radar-0.19.0.js"></script>
 
 <!-- Radar container -->
 <div class="radar-container">
@@ -225,12 +225,12 @@ Tech Radar supports 4 to 8 rings. Here is an example with 7 rings:
 
 | Problem | Solution |
 |---------|----------|
-| Radar doesn't render at all | Check browser console for errors. Ensure D3.js loads before radar.js. Use v0.18.0+. |
-| CSS not applied / unstyled layout | Use `cdn.jsdelivr.net` for CSS, never `raw.githubusercontent.com`. Since v0.18.0, CSS is optional. |
+| Radar doesn't render at all | Check browser console for errors. Ensure D3.js loads before radar.js. Use v0.19.0+. |
+| CSS not applied / unstyled layout | Use `cdn.jsdelivr.net` for CSS, never `raw.githubusercontent.com`. Since v0.19.0, CSS is optional. |
 | `print_details` not recognized | This is not a valid config option. Use `description` field on entries for detail modals. |
 | Legends missing | Ensure `print_layout: true` is set in the configuration. |
 | Script blocked by CSP | Ask your Confluence admin to allowlist `d3js.org` and `github.com` domains. |
-| Modal appears outside visible area | Upgrade to v0.18.0+ which includes inline modal styles. |
+| Modal appears outside visible area | Upgrade to v0.19.0+ which includes inline modal styles. |
 
 ## Deployment
 
