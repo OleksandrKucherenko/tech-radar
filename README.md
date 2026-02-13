@@ -20,15 +20,22 @@ Feel free to use and adapt it for your own purposes.
 ```html
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://github.com/OleksandrKucherenko/tech-radar/releases/download/v0.18.0/radar-0.18.0.js"></script>
-<!-- Optional: Styled and Optimized Layouts (enhances responsive behavior) -->
+<!-- Optional: Responsive layout enhancements (since v0.18.0, critical styles are inlined in JS) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/OleksandrKucherenko/tech-radar@v0.18.0/docs/radar.css">
 ```
 
 > [!IMPORTANT]
-> Do **not** use `raw.githubusercontent.com` for CSS files. GitHub raw URLs serve files with
-> `Content-Type: text/plain`, and browsers will refuse to apply them as stylesheets.
-> Use [jsDelivr](https://www.jsdelivr.com/) or GitHub Pages URLs instead.
-> Since v0.18.0, the radar includes inline critical styles and renders correctly without an external CSS file.
+> **CSS loading:** Do **not** use `raw.githubusercontent.com` for CSS — GitHub raw URLs serve
+> `Content-Type: text/plain` and browsers reject them as stylesheets. Use
+> [jsDelivr](https://www.jsdelivr.com/) (`cdn.jsdelivr.net/gh/user/repo@tag/path`) which serves
+> repository tree files with correct MIME types, or use GitHub Pages.
+> Since v0.18.0, all critical layout styles are inlined in the JS, so the CSS file is optional.
+>
+> **JS loading:** GitHub Release download URLs (`github.com/.../releases/download/...`) work fine
+> for `<script>` tags — browsers are lenient about MIME types for scripts.
+>
+> **Note:** jsDelivr serves files from the **git repository tree** (branches/tags), not GitHub
+> Release assets. The JS file must be loaded from GitHub Releases directly.
 
 2. insert an empty `svg` tag:
 
@@ -97,10 +104,12 @@ The Tech Radar can be embedded in Confluence pages using the
 or a third-party HTML embed app (Confluence Cloud).
 
 Since v0.18.0, all layout-critical styles are inlined in the JavaScript, so the radar renders
-correctly **without an external CSS file**. This is important for Confluence because:
+correctly **without an external CSS file**. Only two `<script>` tags are needed (D3.js + radar.js
+from GitHub Releases). This is important for Confluence because:
 
 - Confluence HTML macros run inside restricted containers or iframes
-- External CSS loaded from `raw.githubusercontent.com` is blocked by browsers (wrong MIME type)
+- External CSS from `raw.githubusercontent.com` is blocked (browsers reject `text/plain` MIME type for stylesheets)
+- jsDelivr works for CSS (serves repo tree files with correct MIME types) but is an extra dependency
 - Content Security Policy (CSP) headers may block external resources
 
 #### Working Confluence HTML Snippet
