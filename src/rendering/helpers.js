@@ -122,15 +122,23 @@ export function ensureLayoutStructure(svgSelection) {
   const parent = svgNode.parentNode;
   const wrapper = document.createElement('div');
   wrapper.className = 'radar-layout';
+  // Inline critical styles so layout works without external CSS (e.g., Confluence HTML macro)
+  wrapper.style.cssText = 'display:flex;align-items:stretch;gap:24px;width:100%;position:relative;';
 
   const leftColumn = document.createElement('div');
   leftColumn.className = 'radar-legend-column left';
+  leftColumn.style.cssText =
+    'display:none;flex-direction:column;gap:16px;font-size:12px;line-height:1.4;position:relative;';
 
   const svgContainer = document.createElement('div');
   svgContainer.className = 'radar-svg-container';
+  svgContainer.style.cssText =
+    'flex:0 1 auto;display:flex;justify-content:center;align-items:center;overflow:visible;width:100%;';
 
   const rightColumn = document.createElement('div');
   rightColumn.className = 'radar-legend-column right';
+  rightColumn.style.cssText =
+    'display:none;flex-direction:column;gap:16px;font-size:12px;line-height:1.4;position:relative;';
 
   parent.insertBefore(wrapper, svgNode);
   svgContainer.appendChild(svgNode);

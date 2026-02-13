@@ -146,11 +146,14 @@ export function createDescriptionModal() {
   modal = document.createElement('div');
   modal.id = 'tech-radar-description-modal';
   modal.className = 'tech-radar-modal';
+  // Inline critical styles so modal works without external CSS (e.g., Confluence HTML macro)
+  modal.style.cssText =
+    'display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;align-items:center;justify-content:center;';
   modal.innerHTML = `
-    <div class="tech-radar-modal-backdrop"></div>
-    <div class="tech-radar-modal-content">
-      <button class="tech-radar-modal-close" aria-label="Close">&times;</button>
-      <div class="tech-radar-modal-body"></div>
+    <div class="tech-radar-modal-backdrop" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);"></div>
+    <div class="tech-radar-modal-content" style="position:relative;background:white;border-radius:12px;padding:32px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:10001;">
+      <button class="tech-radar-modal-close" aria-label="Close" style="position:absolute;top:16px;right:16px;background:transparent;border:none;font-size:28px;line-height:1;color:#666;cursor:pointer;padding:4px 8px;border-radius:4px;">&times;</button>
+      <div class="tech-radar-modal-body" style="font-size:15px;line-height:1.6;color:#555;"></div>
     </div>
   `;
 
@@ -203,6 +206,7 @@ export function showDescriptionModal(entry, config) {
   // Create header container
   const header = document.createElement('div');
   header.className = 'tech-radar-modal-header';
+  header.style.cssText = 'display:flex;align-items:flex-start;gap:16px;margin-bottom:16px;';
 
   // Add logo if available
   if (entry.logo) {
@@ -210,6 +214,8 @@ export function showDescriptionModal(entry, config) {
     logo.className = 'tech-radar-modal-logo';
     logo.src = entry.logo;
     logo.alt = `${entry.label} logo`;
+    logo.style.cssText =
+      'flex-shrink:0;width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #e0e0e0;';
     // Hide logo if it fails to load
     logo.onerror = function () {
       this.style.display = 'none';
@@ -220,6 +226,7 @@ export function showDescriptionModal(entry, config) {
   // Create and add title
   const title = document.createElement('h2');
   title.className = 'tech-radar-modal-title';
+  title.style.cssText = 'margin:0 32px 0 0;font-size:24px;font-weight:600;color:#333;line-height:1.3;flex:1;';
   title.textContent = entry.label;
   header.appendChild(title);
 
