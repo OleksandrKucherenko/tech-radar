@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.19.0
+// Version: 0.0.1-dev+cb00981
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1547,7 +1547,7 @@ function renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, con
     const column = targetColumn(quadrant);
     const section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns).style("border-radius", "6px").style("padding", "6px").style("display", "flex").style("flex-direction", "column").style("gap", "6px").style("flex", "1 1 0");
     section.append("div").attr("class", "legend-quadrant-name").style("font-weight", "600").text(config.quadrants[quadrant].name);
-    const ringsContainer = section.append("div").attr("class", "legend-rings").style("display", "grid").style("grid-template-columns", `repeat(${legendSectionColumns}, 1fr)`).style("gap", "10px 14px").style("align-items", "start");
+    const ringsContainer = section.append("div").attr("class", "legend-rings").style("display", "grid").style("grid-template-columns", `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`).style("gap", "10px 14px").style("align-items", "start");
     for (let ring = 0;ring < numRings; ring++) {
       const entriesInRing = segmented[quadrant][ring];
       if (!entriesInRing.length) {
@@ -1556,7 +1556,7 @@ function renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, con
       const ringBlock = ringsContainer.append("div").attr("class", "legend-ring").style("min-width", "0").style("max-width", "100%");
       ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).style("font-size", "11px").style("font-weight", "600").style("margin-bottom", "2px").text(config.rings[ring].name);
       const entriesList = ringBlock.append("div").attr("class", "legend-ring-entries").style("display", "flex").style("flex-direction", "column").style("gap", "2px");
-      const entryBaseStyle = "font-size:11px;text-decoration:none;color:inherit;word-break:break-word;padding:2px 4px;border-radius:4px;";
+      const entryBaseStyle = "font-size:11px;text-decoration:none;word-break:break-word;padding:2px 4px;border-radius:4px;";
       entriesList.selectAll("a").data(entriesInRing).enter().append("a").attr("href", (d) => d.link && !d.description ? d.link : "#").attr("target", (d) => d.link && !d.description && config.links_in_new_tabs ? "_blank" : null).attr("id", (d) => `legendItem${d.id}`).attr("class", "legend-entry").attr("style", (d) => entryBaseStyle + (d.description ? "cursor:pointer;" : "")).text((d) => `${d.id}. ${d.label}`).on("mouseover", (_event, d) => {
         showBubble2(d, config);
         highlightLegendItem2(d);
