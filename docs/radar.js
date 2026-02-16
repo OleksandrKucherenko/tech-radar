@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+89616c2
+// Version: 0.0.1-dev+cb00981
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -65,12 +65,16 @@ function ensureLayoutStructure(svgSelection) {
   const parent = svgNode.parentNode;
   const wrapper = document.createElement("div");
   wrapper.className = "radar-layout";
+  wrapper.style.cssText = "display:flex;align-items:stretch;gap:24px;width:100%;position:relative;";
   const leftColumn = document.createElement("div");
   leftColumn.className = "radar-legend-column left";
+  leftColumn.style.cssText = "display:none;flex-direction:column;gap:16px;font-size:12px;line-height:1.4;position:relative;";
   const svgContainer = document.createElement("div");
   svgContainer.className = "radar-svg-container";
+  svgContainer.style.cssText = "flex:0 1 auto;display:flex;justify-content:center;align-items:center;overflow:visible;width:100%;";
   const rightColumn = document.createElement("div");
   rightColumn.className = "radar-legend-column right";
+  rightColumn.style.cssText = "display:none;flex-direction:column;gap:16px;font-size:12px;line-height:1.4;position:relative;";
   parent.insertBefore(wrapper, svgNode);
   svgContainer.appendChild(svgNode);
   wrapper.appendChild(leftColumn);
@@ -1246,11 +1250,12 @@ function createDescriptionModal() {
   modal = document.createElement("div");
   modal.id = "tech-radar-description-modal";
   modal.className = "tech-radar-modal";
+  modal.style.cssText = "display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;align-items:center;justify-content:center;";
   modal.innerHTML = `
-    <div class="tech-radar-modal-backdrop"></div>
-    <div class="tech-radar-modal-content">
-      <button class="tech-radar-modal-close" aria-label="Close">&times;</button>
-      <div class="tech-radar-modal-body"></div>
+    <div class="tech-radar-modal-backdrop" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);"></div>
+    <div class="tech-radar-modal-content" style="position:relative;background:white;border-radius:12px;padding:32px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:10001;">
+      <button class="tech-radar-modal-close" aria-label="Close" style="position:absolute;top:16px;right:16px;background:transparent;border:none;font-size:28px;line-height:1;color:#666;cursor:pointer;padding:4px 8px;border-radius:4px;">&times;</button>
+      <div class="tech-radar-modal-body" style="font-size:15px;line-height:1.6;color:#555;"></div>
     </div>
   `;
   document.body.appendChild(modal);
@@ -1281,11 +1286,13 @@ function showDescriptionModal(entry, config) {
   });
   const header = document.createElement("div");
   header.className = "tech-radar-modal-header";
+  header.style.cssText = "display:flex;align-items:flex-start;gap:16px;margin-bottom:16px;";
   if (entry.logo) {
     const logo = document.createElement("img");
     logo.className = "tech-radar-modal-logo";
     logo.src = entry.logo;
     logo.alt = `${entry.label} logo`;
+    logo.style.cssText = "flex-shrink:0;width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #e0e0e0;";
     logo.onerror = function() {
       this.style.display = "none";
     };
@@ -1293,6 +1300,7 @@ function showDescriptionModal(entry, config) {
   }
   const title = document.createElement("h2");
   title.className = "tech-radar-modal-title";
+  title.style.cssText = "margin:0 32px 0 0;font-size:24px;font-weight:600;color:#333;line-height:1.3;flex:1;";
   title.textContent = entry.label;
   header.appendChild(title);
   modalContent.insertBefore(header, body);
@@ -1537,18 +1545,19 @@ function renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, con
   }
   for (let quadrant = 0;quadrant < numQuadrants; quadrant++) {
     const column = targetColumn(quadrant);
-    const section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns);
-    section.append("div").attr("class", "legend-quadrant-name").text(config.quadrants[quadrant].name);
-    const ringsContainer = section.append("div").attr("class", "legend-rings");
+    const section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns).style("border-radius", "6px").style("padding", "6px").style("display", "flex").style("flex-direction", "column").style("gap", "6px").style("flex", "1 1 0");
+    section.append("div").attr("class", "legend-quadrant-name").style("font-weight", "600").text(config.quadrants[quadrant].name);
+    const ringsContainer = section.append("div").attr("class", "legend-rings").style("display", "grid").style("grid-template-columns", `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`).style("gap", "10px 14px").style("align-items", "start");
     for (let ring = 0;ring < numRings; ring++) {
       const entriesInRing = segmented[quadrant][ring];
       if (!entriesInRing.length) {
         continue;
       }
-      const ringBlock = ringsContainer.append("div").attr("class", "legend-ring");
-      ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).text(config.rings[ring].name);
-      const entriesList = ringBlock.append("div").attr("class", "legend-ring-entries");
-      entriesList.selectAll("a").data(entriesInRing).enter().append("a").attr("href", (d) => d.link && !d.description ? d.link : "#").attr("target", (d) => d.link && !d.description && config.links_in_new_tabs ? "_blank" : null).attr("id", (d) => `legendItem${d.id}`).attr("class", "legend-entry").attr("style", (d) => d.description ? "cursor: pointer;" : "").text((d) => `${d.id}. ${d.label}`).on("mouseover", (_event, d) => {
+      const ringBlock = ringsContainer.append("div").attr("class", "legend-ring").style("min-width", "0").style("max-width", "100%");
+      ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).style("font-size", "11px").style("font-weight", "600").style("margin-bottom", "2px").text(config.rings[ring].name);
+      const entriesList = ringBlock.append("div").attr("class", "legend-ring-entries").style("display", "flex").style("flex-direction", "column").style("gap", "2px");
+      const entryBaseStyle = "font-size:11px;text-decoration:none;word-break:break-word;padding:2px 4px;border-radius:4px;";
+      entriesList.selectAll("a").data(entriesInRing).enter().append("a").attr("href", (d) => d.link && !d.description ? d.link : "#").attr("target", (d) => d.link && !d.description && config.links_in_new_tabs ? "_blank" : null).attr("id", (d) => `legendItem${d.id}`).attr("class", "legend-entry").attr("style", (d) => entryBaseStyle + (d.description ? "cursor:pointer;" : "")).text((d) => `${d.id}. ${d.label}`).on("mouseover", (_event, d) => {
         showBubble2(d, config);
         highlightLegendItem2(d);
       }).on("mouseout", (_event, d) => {
