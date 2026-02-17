@@ -38,7 +38,7 @@ This repository generates a **Technology Radar visualization** for engineering t
 
 ### Release Process
 
-Versioned releases are stored in `docs/release/radar-{version}.js`. Current version is 0.13 (using d3.js v7, supports 2-8 quadrants and 4-8 rings).
+Versioned releases are stored in `docs/release/radar-{version}.js`. Current version is 0.19.0 (using d3.js v7, supports 2-8 quadrants and 4-8 rings).
 
 #### Automated Release (Recommended)
 
@@ -66,7 +66,7 @@ The repository has automated CI/CD for releases via GitHub Actions:
 #### Manual Release
 
 To create a release locally:
-1. Set the version: `export RELEASE_VERSION=0.14.0`
+1. Set the version: `export RELEASE_VERSION=0.19.0`
 2. Run `bun run build`
 3. Test the generated file in `docs/release/` (use `test-minified.html`)
 4. Commit the new release file
@@ -88,14 +88,14 @@ bun start         # Start local dev server with live reload (opens http://localh
 ### Building
 ```bash
 bun run build     # Build minified version using Bun + terser
-                  # Output: docs/release/radar-0.13.js (~56% smaller)
+                  # Output: docs/release/radar-0.19.0.js (~48% smaller)
 ```
 
 The build process:
 - Uses Bun to run the build script (`build.ts`)
 - Minifies with terser while preserving the `radar_visualization` function name
 - Generates versioned output in `docs/release/`
-- Typical size reduction: ~56% (25KB → 11KB)
+- Typical size reduction: ~48% (80KB → 41KB)
 
 ### Linting
 ```bash
@@ -153,7 +153,7 @@ Test files are available in the `docs/` directory:
 - 6 quadrants x 5 rings
 - 8 quadrants x 8 rings
 
-**`test-minified.html`** - Tests the minified release version (`release/radar-0.13.js`):
+**`test-minified.html`** - Tests the minified release version (`release/radar-0.19.0.js`):
 - Verifies the minified version works correctly
 - Confirms `radar_visualization` function is accessible
 - Uses the same configuration as the main radar
