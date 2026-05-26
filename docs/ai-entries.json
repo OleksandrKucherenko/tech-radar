@@ -1443,6 +1443,7 @@
     {
       "label": "Spec-Kit",
       "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/github/spec-kit",
       "quadrant": 6,
       "ring": 0,
       "moved": 2,
@@ -1452,6 +1453,7 @@
     {
       "label": "Superpowers",
       "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/obra/superpowers",
       "quadrant": 6,
       "ring": 1,
       "moved": 2,
@@ -1470,6 +1472,7 @@
     {
       "label": "OpenSpec",
       "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/Fission-AI/OpenSpec",
       "quadrant": 6,
       "ring": 0,
       "moved": 2,
@@ -1479,6 +1482,7 @@
     {
       "label": "BMAD-METHOD",
       "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/bmad-code-org/bmad-method",
       "quadrant": 6,
       "ring": 4,
       "moved": 2,
@@ -1488,6 +1492,7 @@
     {
       "label": "GSD",
       "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/gsd-build/get-shit-done",
       "quadrant": 6,
       "ring": 4,
       "moved": 2,
@@ -1560,6 +1565,7 @@
     {
       "label": "Tessl",
       "logo": "logos/github-logo-64x64.svg",
+      "link": "https://docs.tessl.io/",
       "quadrant": 6,
       "ring": 5,
       "moved": 2,
@@ -1583,6 +1589,66 @@
       "moved": 2,
       "active": true,
       "description": "WordPress SDD Constitution (GPLv2+, no public metric) is an L1 domain-specific framework implementing the Constitution Pattern for CMS workflows.\n\n**Domain focus:**\n- CMS-specific spec workflow tailored to WordPress\n- Constitution-style inviolable project principles\n- Narrow applicability outside the WordPress ecosystem\n\n**Rigor level:** L1 Spec-First (constitution).\n\nIntentionally skipped for general engineering work due to its narrow CMS fit — relevant only to teams building on WordPress."
+    },
+    {
+      "label": "Task Master",
+      "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/eyaltoledano/claude-task-master",
+      "quadrant": 6,
+      "ring": 1,
+      "moved": 2,
+      "active": true,
+      "description": "Task Master (claude-task-master) is a popular AI-powered task-management system that turns a PRD into an ordered, dependency-aware task plan agents can execute.\n\n**What it offers:**\n- Parses a PRD into structured, sequenced tasks with dependencies\n- Drops into Cursor, Lovable, Windsurf, Roo, Claude Code, and others\n- MCP server plus CLI for managing the task graph\n- Model-agnostic (works across multiple LLM providers)\n- Keeps the agent focused one task at a time to reduce drift\n\n**Where it fits:** a lightweight planning/execution layer that complements spec-first workflows.\n\nClear value for teams that want structured, resumable AI task execution without a heavy methodology."
+    },
+    {
+      "label": "Spec Kitty",
+      "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/Priivacy-ai/spec-kitty",
+      "quadrant": 6,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "Spec Kitty is a Spec-Driven Development toolkit aimed at serious software developers, layering project management on top of spec coding.\n\n**Distinctive features:**\n- Spec coding with Claude, Cursor, Gemini, and Codex\n- Kanban dashboard for tracking spec/task progress\n- Git worktrees for isolated parallel work\n- Auto-merge and other workflow automation\n\n**Rigor level:** L1 Spec-First, with built-in project orchestration.\n\nWorth trialling for teams that want Spec-Kit-style discipline plus a visual board and worktree/auto-merge automation."
+    },
+    {
+      "label": "Clavix",
+      "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/loppety/Clavix",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "Clavix transforms vague ideas into production-ready prompts and specifications, acting as the upstream stage of an AI coding workflow.\n\n**Capabilities:**\n- Analyzes gaps and ambiguities in an initial idea\n- Generates PRDs from rough intent\n- Built around the CLEAR framework for prompt structure\n- Designed to feed downstream spec/coding agents\n\n**Where it fits:** intent-to-spec authoring, before plan/implement stages.\n\nWatch as a front-of-funnel prompt/PRD generator that pairs with spec-driven pipelines."
+    },
+    {
+      "label": "PRD Taskmaster",
+      "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/anombyte93/prd-taskmaster",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "PRD Taskmaster is an AI-powered PRD generation tool for Claude Code with Task Master integration.\n\n**Focus:**\n- Generates Product Requirement Documents from intent\n- Integrates with Task Master to turn PRDs into executable task graphs\n- Tailored to the Claude Code workflow\n\n**Where it fits:** the spec/PRD authoring step feeding a task-management layer.\n\nA small, focused companion tool — watch as a Claude Code + Task Master bridge."
+    },
+    {
+      "label": "AI Dev Tasks",
+      "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/Mkid095/ai-dev-tasks-guide",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "AI Dev Tasks is a simple, lightweight task-management system for orchestrating AI development agents.\n\n**Approach:**\n- Minimal, guide-driven task workflow\n- Structures how agents pick up and complete dev tasks\n- Low ceremony compared to full SDD frameworks\n\n**Where it fits:** a starter pattern for teams wanting basic agent task structure.\n\nWatch as a lightweight alternative for small projects that don't need a full methodology."
+    },
+    {
+      "label": "Ralph",
+      "logo": "logos/github-logo-64x64.svg",
+      "link": "https://github.com/snwfdhmp/awesome-ralph",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "Ralph is an AI coding technique that runs coding agents in automated loops until a specification is fulfilled, rather than a single packaged tool.\n\n**Core idea:**\n- Run an agent in a repeating loop against a spec/goal\n- Continue iterating until acceptance criteria are met\n- Pairs naturally with spec-driven definitions of \"done\"\n- `awesome-ralph` curates resources, patterns, and tooling around the technique\n\n**Where it fits:** an execution pattern layered on top of a spec, not a framework itself.\n\nWatch as an emerging autonomous-loop technique; promising but experimental and requires guardrails."
     }
   ]
 }
