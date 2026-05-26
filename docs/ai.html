@@ -117,6 +117,148 @@
         border-radius: 3px;
         font-family: "Courier New", monospace;
       }
+
+      /* Radar zoom toolbar (desktop only, AI page scoped) */
+      .radar-zoom-toolbar {
+        display: none;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        margin: 8px auto 0;
+      }
+
+      .radar-zoom-toolbar .rzt-label {
+        color: #666;
+        font-size: 13px;
+        margin-right: 4px;
+      }
+
+      .radar-zoom-toolbar .rzt-level {
+        min-width: 46px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        font-size: 13px;
+        color: #333;
+      }
+
+      .radar-zoom-toolbar .rzt-btn {
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 6px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        color: #333;
+      }
+
+      .radar-zoom-toolbar .rzt-btn.rzt-reset {
+        width: auto;
+        padding: 0 12px;
+        font-size: 13px;
+      }
+
+      .radar-zoom-toolbar .rzt-btn:hover {
+        background: #f0f0f0;
+      }
+
+      /* Overlay/zoom layout: radar as background, legends overlaid on top.
+         Activated by JS (.zoom-radar) only on desktop widths.
+
+         radar.js sets the layout wrapper styles inline (display:flex, etc.) and
+         renders the legends as in-flow flex columns, so these overrides use
+         !important to win over those inline styles. The layout becomes a block
+         with a full-width, centered radar; the legend columns are pulled out of
+         flow and pinned to the left/right edges so they float over the radar.
+
+         The radar is height-constrained on desktop (radar.css caps the SVG at
+         max-height: 100vh - 150px), so size is driven by HEIGHT here; width
+         follows the viewBox aspect ratio. --radar-scale (1 = fill available
+         height) controls how much of the page the radar occupies, which in
+         turn governs how much it overlaps the legend columns. */
+      .zoom-radar {
+        overflow-x: clip;
+      }
+
+      .zoom-radar .radar-layout {
+        display: block !important;
+        position: relative !important;
+        max-height: none !important;
+      }
+
+      .zoom-radar .radar-svg-container {
+        width: 100% !important;
+        margin: 0 auto !important;
+      }
+
+      .zoom-radar .radar-svg-container svg {
+        width: auto !important;
+        height: calc((100vh - 150px) * var(--radar-scale, 0.9)) !important;
+        max-width: none !important;
+        max-height: none !important;
+        transition: height 0.15s ease;
+      }
+
+      .zoom-radar .radar-legend-column.left {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        z-index: 2;
+      }
+
+      .zoom-radar .radar-legend-column.right {
+        position: absolute !important;
+        right: 0 !important;
+        top: 0 !important;
+        z-index: 2;
+      }
+
+      .zoom-radar .radar-legend-column {
+        z-index: 2;
+      }
+
+      /* Keep legends readable where they overlap the radar graph */
+      .zoom-radar .legend-section {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.6),
+          0 2px 6px rgba(0, 0, 0, 0.08);
+      }
+
+      /* Collapsible legend cards: click a quadrant header to fold its entries
+         away and reclaim vertical space in the legend columns. */
+      .legend-section .legend-quadrant-name {
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .legend-section .legend-quadrant-name::before {
+        content: "▾";
+        font-size: 10px;
+        line-height: 1;
+        color: #888;
+        transition: transform 0.15s ease;
+      }
+
+      .legend-section.collapsed .legend-quadrant-name::before {
+        transform: rotate(-90deg);
+      }
+
+      /* When collapsed, show the entry count next to the quadrant name */
+      .legend-section.collapsed .legend-quadrant-name::after {
+        content: " - " attr(data-count);
+        color: #888;
+        font-weight: 400;
+      }
+
+      .legend-section.collapsed .legend-rings {
+        display: none !important;
+      }
     </style>
   </head>
 
@@ -138,6 +280,14 @@
     </nav>
 
     <div id="toolbar"></div>
+
+    <div class="radar-zoom-toolbar" id="radarZoomToolbar" role="toolbar" aria-label="Radar zoom controls">
+      <span class="rzt-label">Radar size</span>
+      <button type="button" class="rzt-btn" data-zoom="out" aria-label="Decrease radar size">&minus;</button>
+      <span class="rzt-level" id="radarZoomLevel">90%</span>
+      <button type="button" class="rzt-btn" data-zoom="in" aria-label="Increase radar size">+</button>
+      <button type="button" class="rzt-btn rzt-reset" data-zoom="reset" aria-label="Reset radar size">Reset</button>
+    </div>
 
     <div class="radar-container">
       <svg id="radar"></svg>
@@ -177,6 +327,154 @@
     <script>
       let radarInstance = null;
 
+      // Zoom control: lets the radar act as a background layer whose size
+      // (and thus how much it overlaps the edge-pinned legend columns) is
+      // adjustable. Desktop-only; mobile keeps the default responsive layout.
+      function setupRadarZoom() {
+        const toolbar = document.getElementById("radarZoomToolbar");
+        const container = document.querySelector(".radar-container");
+        const levelEl = document.getElementById("radarZoomLevel");
+        if (!toolbar || !container) return;
+
+        // level is a percentage of the available height (100 = fill the
+        // viewport height; above 100 the radar grows taller than the screen).
+        const MIN = 40;
+        const MAX = 150;
+        const STEP = 10;
+        const DEFAULT = 90;
+        const STORAGE_KEY = "ai-radar-occupancy";
+        const isDesktop = () => window.matchMedia("(min-width: 1024px)").matches;
+
+        let level = DEFAULT;
+        try {
+          const stored = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+          if (!Number.isNaN(stored)) level = stored;
+        } catch (_) {
+          /* storage may be unavailable; use default */
+        }
+
+        const clamp = v => Math.min(MAX, Math.max(MIN, v));
+
+        function apply() {
+          level = clamp(level);
+          container.style.setProperty("--radar-scale", (level / 100).toString());
+          if (levelEl) levelEl.textContent = level + "%";
+          try {
+            localStorage.setItem(STORAGE_KEY, String(level));
+          } catch (_) {
+            /* storage may be unavailable; ignore */
+          }
+        }
+
+        function enable(on) {
+          container.classList.toggle("zoom-radar", on);
+          toolbar.style.display = on ? "flex" : "none";
+          if (on) {
+            apply();
+          } else {
+            container.style.removeProperty("--radar-scale");
+          }
+        }
+
+        toolbar.addEventListener("click", event => {
+          const btn = event.target.closest("button[data-zoom]");
+          if (!btn) return;
+          const action = btn.dataset.zoom;
+          if (action === "in") level += STEP;
+          else if (action === "out") level -= STEP;
+          else if (action === "reset") level = DEFAULT;
+          apply();
+        });
+
+        enable(isDesktop());
+        let resizeTimer;
+        window.addEventListener("resize", () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => enable(isDesktop()), 200);
+        });
+      }
+
+      // Collapsible legend cards: clicking a quadrant header folds its entries
+      // away. State is keyed by quadrant name, persisted, and reapplied when the
+      // legend re-renders (e.g. after import/reset).
+      function setupCollapsibleLegends() {
+        const STORAGE_KEY = "ai-radar-collapsed-legends";
+        let collapsed = new Set();
+        try {
+          const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+          if (Array.isArray(stored)) collapsed = new Set(stored);
+        } catch (_) {
+          /* ignore unreadable/blocked storage */
+        }
+
+        const columns = Array.from(document.querySelectorAll(".radar-legend-column"));
+        if (!columns.length) return;
+
+        const persist = () => {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(collapsed)));
+          } catch (_) {
+            /* ignore blocked storage */
+          }
+        };
+
+        const nameOf = section => {
+          const el = section.querySelector(".legend-quadrant-name");
+          return el ? el.textContent.trim() : "";
+        };
+
+        const setState = (section, isCollapsed) => {
+          section.classList.toggle("collapsed", isCollapsed);
+          const nameEl = section.querySelector(".legend-quadrant-name");
+          if (nameEl) {
+            nameEl.setAttribute("role", "button");
+            nameEl.setAttribute("tabindex", "0");
+            nameEl.setAttribute("aria-expanded", String(!isCollapsed));
+            nameEl.setAttribute("data-count", String(section.querySelectorAll(".legend-entry").length));
+          }
+        };
+
+        const applyStored = () => {
+          document.querySelectorAll(".radar-legend-column .legend-section").forEach(section => {
+            setState(section, collapsed.has(nameOf(section)));
+          });
+        };
+
+        const toggle = section => {
+          const isCollapsed = !section.classList.contains("collapsed");
+          setState(section, isCollapsed);
+          const name = nameOf(section);
+          if (isCollapsed) collapsed.add(name);
+          else collapsed.delete(name);
+          persist();
+        };
+
+        const handleActivate = event => {
+          const header = event.target.closest(".legend-quadrant-name");
+          if (!header) return;
+          const section = header.closest(".legend-section");
+          if (section) toggle(section);
+        };
+
+        columns.forEach(col => {
+          col.addEventListener("click", handleActivate);
+          col.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleActivate(event);
+            }
+          });
+        });
+
+        // Reapply persisted state whenever the legend columns are re-rendered.
+        const observer = new MutationObserver(mutations => {
+          if (mutations.some(m => m.addedNodes && m.addedNodes.length)) applyStored();
+        });
+        columns.forEach(col => observer.observe(col, { childList: true }));
+
+        applyStored();
+      }
+
       fetch("./ai-entries.json")
         .then(response => response.json())
         .then(data => {
@@ -198,6 +496,7 @@
               { name: "Databases" },
               { name: "Low-Code & MCP" },
               { name: "Observability & Testing" },
+              { name: "AI Frameworks" },
             ],
             rings: [
               { name: "ADOPT", color: "#5ba300" },
@@ -219,6 +518,10 @@
           // Initialize and assign toolbar to instance
           // Toolbar automatically wires to instance methods (render, reset, getConfig)
           radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
+
+          // Enable the radar background/zoom layout once the radar DOM exists
+          setupRadarZoom();
+          setupCollapsibleLegends();
         })
         .catch(err => {
           console.error("Error loading ai-entries.json", err);
