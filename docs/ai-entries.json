@@ -1471,7 +1471,7 @@
       "label": "OpenSpec",
       "logo": "logos/github-logo-64x64.svg",
       "quadrant": 6,
-      "ring": 4,
+      "ring": 0,
       "moved": 2,
       "active": true,
       "description": "OpenSpec is the lightest L2 Spec-Anchored framework (~5.8k stars, Apache 2.0), built around delta specs as its core primitive.\n\n**Brownfield-first design:**\n- Delta specs describe only ADDED/MODIFIED/REMOVED changes relative to current state\n- `openspec propose` workflow for incremental changes\n- Low ceremony compared to full L2 orthodoxy (MUSUBI)\n- Ideal for adding features to existing/legacy codebases\n\n**Rigor level:** L2 Spec-Anchored (delta specs).\n\nWorth trialling for brownfield work — often paired with a code-graph generator like Shotgun CLI. Currently beta."
