@@ -198,6 +198,32 @@
           0 0 0 1px rgba(255, 255, 255, 0.6),
           0 2px 6px rgba(0, 0, 0, 0.08);
       }
+
+      /* Collapsible legend cards: click a quadrant header to fold its entries
+         away and reclaim vertical space in the legend columns. */
+      .legend-section .legend-quadrant-name {
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .legend-section .legend-quadrant-name::before {
+        content: "▾";
+        font-size: 10px;
+        line-height: 1;
+        color: #888;
+        transition: transform 0.15s ease;
+      }
+
+      .legend-section.collapsed .legend-quadrant-name::before {
+        transform: rotate(-90deg);
+      }
+
+      .legend-section.collapsed .legend-rings {
+        display: none !important;
+      }
     </style>
   </head>
 
@@ -331,6 +357,86 @@
         });
       }
 
+      // Collapsible legend cards: clicking a quadrant header folds its entries
+      // away. State is keyed by quadrant name, persisted, and reapplied when the
+      // legend re-renders (e.g. after import/reset).
+      function setupCollapsibleLegends() {
+        const STORAGE_KEY = "ai-radar-collapsed-legends";
+        let collapsed = new Set();
+        try {
+          const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+          if (Array.isArray(stored)) collapsed = new Set(stored);
+        } catch (_) {
+          /* ignore unreadable/blocked storage */
+        }
+
+        const columns = Array.from(document.querySelectorAll(".radar-legend-column"));
+        if (!columns.length) return;
+
+        const persist = () => {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(collapsed)));
+          } catch (_) {
+            /* ignore blocked storage */
+          }
+        };
+
+        const nameOf = section => {
+          const el = section.querySelector(".legend-quadrant-name");
+          return el ? el.textContent.trim() : "";
+        };
+
+        const setState = (section, isCollapsed) => {
+          section.classList.toggle("collapsed", isCollapsed);
+          const nameEl = section.querySelector(".legend-quadrant-name");
+          if (nameEl) {
+            nameEl.setAttribute("role", "button");
+            nameEl.setAttribute("tabindex", "0");
+            nameEl.setAttribute("aria-expanded", String(!isCollapsed));
+          }
+        };
+
+        const applyStored = () => {
+          document.querySelectorAll(".radar-legend-column .legend-section").forEach(section => {
+            setState(section, collapsed.has(nameOf(section)));
+          });
+        };
+
+        const toggle = section => {
+          const isCollapsed = !section.classList.contains("collapsed");
+          setState(section, isCollapsed);
+          const name = nameOf(section);
+          if (isCollapsed) collapsed.add(name);
+          else collapsed.delete(name);
+          persist();
+        };
+
+        const handleActivate = event => {
+          const header = event.target.closest(".legend-quadrant-name");
+          if (!header) return;
+          const section = header.closest(".legend-section");
+          if (section) toggle(section);
+        };
+
+        columns.forEach(col => {
+          col.addEventListener("click", handleActivate);
+          col.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleActivate(event);
+            }
+          });
+        });
+
+        // Reapply persisted state whenever the legend columns are re-rendered.
+        const observer = new MutationObserver(mutations => {
+          if (mutations.some(m => m.addedNodes && m.addedNodes.length)) applyStored();
+        });
+        columns.forEach(col => observer.observe(col, { childList: true }));
+
+        applyStored();
+      }
+
       fetch("./ai-entries.json")
         .then(response => response.json())
         .then(data => {
@@ -377,12 +483,13 @@
 
           // Enable the radar background/zoom layout once the radar DOM exists
           setupRadarZoom();
+          setupCollapsibleLegends();
         })
         .catch(err => {
           console.error("Error loading ai-entries.json", err);
         });
     </script>
 
-    <footer>Build: <code>070ae7f</code></footer>
+    <footer>Build: <code>2f352b4</code></footer>
   </body>
 </html>
