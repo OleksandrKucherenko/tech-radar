@@ -117,6 +117,87 @@
         border-radius: 3px;
         font-family: "Courier New", monospace;
       }
+
+      /* Radar zoom toolbar (desktop only, AI page scoped) */
+      .radar-zoom-toolbar {
+        display: none;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        margin: 8px auto 0;
+      }
+
+      .radar-zoom-toolbar .rzt-label {
+        color: #666;
+        font-size: 13px;
+        margin-right: 4px;
+      }
+
+      .radar-zoom-toolbar .rzt-level {
+        min-width: 46px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        font-size: 13px;
+        color: #333;
+      }
+
+      .radar-zoom-toolbar .rzt-btn {
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 6px;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        color: #333;
+      }
+
+      .radar-zoom-toolbar .rzt-btn.rzt-reset {
+        width: auto;
+        padding: 0 12px;
+        font-size: 13px;
+      }
+
+      .radar-zoom-toolbar .rzt-btn:hover {
+        background: #f0f0f0;
+      }
+
+      /* Overlay/zoom layout: radar as background, legends overlaid on top.
+         Activated by JS (.zoom-radar) only on desktop widths. */
+      .zoom-radar {
+        overflow-x: clip;
+      }
+
+      .zoom-radar .radar-layout {
+        display: block;
+        position: relative;
+      }
+
+      .zoom-radar .radar-svg-container {
+        width: var(--radar-occupancy, 80%);
+        margin: 0 auto;
+        transition: width 0.15s ease;
+      }
+
+      .zoom-radar .radar-svg-container svg {
+        width: 100% !important;
+        height: auto !important;
+        max-width: none !important;
+      }
+
+      .zoom-radar .radar-legend-column {
+        z-index: 2;
+      }
+
+      /* Keep legends readable where they overlap the radar graph */
+      .zoom-radar .legend-section {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.6),
+          0 2px 6px rgba(0, 0, 0, 0.08);
+      }
     </style>
   </head>
 
@@ -138,6 +219,14 @@
     </nav>
 
     <div id="toolbar"></div>
+
+    <div class="radar-zoom-toolbar" id="radarZoomToolbar" role="toolbar" aria-label="Radar zoom controls">
+      <span class="rzt-label">Radar size</span>
+      <button type="button" class="rzt-btn" data-zoom="out" aria-label="Decrease radar size">&minus;</button>
+      <span class="rzt-level" id="radarZoomLevel">80%</span>
+      <button type="button" class="rzt-btn" data-zoom="in" aria-label="Increase radar size">+</button>
+      <button type="button" class="rzt-btn rzt-reset" data-zoom="reset" aria-label="Reset radar size">Reset</button>
+    </div>
 
     <div class="radar-container">
       <svg id="radar"></svg>
@@ -176,6 +265,71 @@
 
     <script>
       let radarInstance = null;
+
+      // Zoom control: lets the radar act as a background layer whose size
+      // (and thus how much it overlaps the edge-pinned legend columns) is
+      // adjustable. Desktop-only; mobile keeps the default responsive layout.
+      function setupRadarZoom() {
+        const toolbar = document.getElementById("radarZoomToolbar");
+        const container = document.querySelector(".radar-container");
+        const levelEl = document.getElementById("radarZoomLevel");
+        if (!toolbar || !container) return;
+
+        const MIN = 40;
+        const MAX = 100;
+        const STEP = 10;
+        const DEFAULT = 80;
+        const STORAGE_KEY = "ai-radar-occupancy";
+        const isDesktop = () => window.matchMedia("(min-width: 1024px)").matches;
+
+        let level = DEFAULT;
+        try {
+          const stored = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+          if (!Number.isNaN(stored)) level = stored;
+        } catch (_) {
+          /* storage may be unavailable; use default */
+        }
+
+        const clamp = v => Math.min(MAX, Math.max(MIN, v));
+
+        function apply() {
+          level = clamp(level);
+          container.style.setProperty("--radar-occupancy", level + "%");
+          if (levelEl) levelEl.textContent = level + "%";
+          try {
+            localStorage.setItem(STORAGE_KEY, String(level));
+          } catch (_) {
+            /* storage may be unavailable; ignore */
+          }
+        }
+
+        function enable(on) {
+          container.classList.toggle("zoom-radar", on);
+          toolbar.style.display = on ? "flex" : "none";
+          if (on) {
+            apply();
+          } else {
+            container.style.removeProperty("--radar-occupancy");
+          }
+        }
+
+        toolbar.addEventListener("click", event => {
+          const btn = event.target.closest("button[data-zoom]");
+          if (!btn) return;
+          const action = btn.dataset.zoom;
+          if (action === "in") level += STEP;
+          else if (action === "out") level -= STEP;
+          else if (action === "reset") level = DEFAULT;
+          apply();
+        });
+
+        enable(isDesktop());
+        let resizeTimer;
+        window.addEventListener("resize", () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => enable(isDesktop()), 200);
+        });
+      }
 
       fetch("./ai-entries.json")
         .then(response => response.json())
@@ -220,6 +374,9 @@
           // Initialize and assign toolbar to instance
           // Toolbar automatically wires to instance methods (render, reset, getConfig)
           radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
+
+          // Enable the radar background/zoom layout once the radar DOM exists
+          setupRadarZoom();
         })
         .catch(err => {
           console.error("Error loading ai-entries.json", err);
