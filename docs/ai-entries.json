@@ -1439,6 +1439,150 @@
       "active": true,
       "description": "HoneyHive is a prompt management, evaluation, and testing platform designed for production-grade LLM systems with collaboration and continuous improvement features.\n\n**Key Features:**\n- Prompt version control and management\n- Automated testing pipelines\n- Collaboration features for teams\n- Continuous improvement cycles\n- Performance benchmarking\n- Integration with CI/CD workflows\n\nHoneyHive is designed for product teams building and maintaining production-grade LLM systems requiring rigorous testing and prompt management.",
       "logo": "logos/honeyhive-logo-64x64.webp"
+    },
+    {
+      "label": "Spec-Kit",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 0,
+      "moved": 2,
+      "active": true,
+      "description": "Spec-Kit is the de facto baseline for Spec-Driven Development (SDD), installing a `.specify/` workspace with a five-command pipeline (constitution → specify → plan → tasks → implement).\n\n**What it installs:**\n- `constitution.md` with nine articles (Library-First, CLI Mandate, Test-First, etc.), each MUST/SHOULD/MAY\n- spec/plan/tasks templates that enforce structure (User Stories, FR-001.., SC-001..)\n- CLI prerequisite gates that block `implement` without spec/plan/tasks\n- Native support for 20+ AI agents (Apache 2.0, ~90k stars)\n\n**Rigor level:** L1 Spec-First — the spec lives per feature branch, then becomes historical documentation.\n\nThe recommended starting point for most teams (solo/greenfield with the `lean` preset). Accepts higher first-cycle overhead in exchange for repeatable structure."
+    },
+    {
+      "label": "Superpowers",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 1,
+      "moved": 2,
+      "active": true,
+      "description": "Superpowers is the most-installed SDD framework (~166k stars, MIT), delivering a zero-friction Claude Code plugin with an ironclad HARD-GATE and TDD as an iron law.\n\n**Core mechanics:**\n- One-command install (`/plugin install superpowers@claude-plugins-official`), no CLI or repo config\n- Skill files for brainstorming, writing-plans, TDD, git-worktrees, subagent-driven and executing-plans\n- Wave-based execution: Brainstorm → HARD-GATE → Plan → Test prep → RED-GREEN-REFACTOR\n- HARD-GATE blocks any code before an approved design; \"NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST\" enforced by review subagents\n\n**Rigor level:** L1 Spec-First (HARD-GATE prompt).\n\nThe cheapest possible quality gate for solo developers and small teams — but opinionated, Claude Code only, with no traceability or brownfield support."
+    },
+    {
+      "label": "MUSUBI",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 1,
+      "moved": 2,
+      "active": true,
+      "description": "MUSUBI has the highest formal rigor in the SDD ecosystem despite tiny adoption (~28 stars, BSD-3-Clause), built for teams that must satisfy an auditor.\n\n**What it provides:**\n- 25+ keyword-activated skills (`@requirements-analyst`, `@system-architect`, `@traceability-auditor`, `@constitution-enforcer`, `@security-auditor`)\n- EARS requirements format (5 patterns; bans should/may/could/might/would)\n- C4 diagrams + ADRs, and a REQ→Design→Code→Test traceability matrix with 100%-coverage merge gate\n- Nine constitutional articles with critical/advisory/flexible levels; brownfield mode via delta specs\n\n**Rigor level:** L2 Spec-Anchored — the spec lives through the full project lifecycle.\n\nClear value for enterprise/compliance contexts (SOC2, ISO 42001, NIST AI RMF); overhead is unjustifiable for teams that never face traceability questions."
+    },
+    {
+      "label": "OpenSpec",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "OpenSpec is the lightest L2 Spec-Anchored framework (~5.8k stars, Apache 2.0), built around delta specs as its core primitive.\n\n**Brownfield-first design:**\n- Delta specs describe only ADDED/MODIFIED/REMOVED changes relative to current state\n- `openspec propose` workflow for incremental changes\n- Low ceremony compared to full L2 orthodoxy (MUSUBI)\n- Ideal for adding features to existing/legacy codebases\n\n**Rigor level:** L2 Spec-Anchored (delta specs).\n\nWorth trialling for brownfield work — often paired with a code-graph generator like Shotgun CLI. Currently beta."
+    },
+    {
+      "label": "BMAD-METHOD",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "BMAD-METHOD (~45k stars, Creative Commons) is an L1→L2 SDD framework organized around agent roles, with optional 100% traceability.\n\n**Highlights:**\n- Multi-agent role-based workflow\n- Optional traceability and TDD (not enforced)\n- Brownfield support\n- Signaling movement toward an Audit Trail SaaS\n\n**Rigor level:** L1 Spec-First, reaching toward L2.\n\nA popular, flexible option to trial for teams that want agent roles without mandatory gates. Currently beta."
+    },
+    {
+      "label": "GSD",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "GSD (~48k stars, MPL 2.0) is an L1 Spec-First framework whose signature is the `@generate` → `GENERATED` flow plus fresh-context execution.\n\n**Notable traits:**\n- `@generate` annotations producing generated artifacts\n- Fresh context per stage to combat context rot\n- Multi-agent support; optional TDD\n\n**Rigor level:** L1 Spec-First.\n\nA high-adoption framework worth trialling, especially for teams interested in generation-oriented workflows. Currently beta."
+    },
+    {
+      "label": "Shotgun CLI",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "Shotgun CLI is an L1 spec generator (GPL-3.0) that indexes a repository and builds a code graph before the first line of spec is written.\n\n**Brownfield enabler:**\n- `uvx shotgun plan \"...\"` to index the repo and produce a code graph\n- Rapid prototyping specs\n- Multi-agent support; optional TDD\n- Pairs well with OpenSpec for legacy work\n\n**Rigor level:** L1 Spec-First (code-graph generator).\n\nA strong companion to trial for brownfield/legacy feature work where repository context matters. Currently beta."
+    },
+    {
+      "label": "OWASP Security Skill",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "The OWASP Security Skill (~145 stars) is an L1 context-enrichment layer that injects security knowledge into the SDD workflow.\n\n**Security integration:**\n- Drops into `.claude/skills/` as a security spec layer\n- Enriches agent context with OWASP guidance (does not enforce TDD)\n- Used alongside MUSUBI + CSDD for security-critical domains\n\n**Rigor level:** L1 Spec-First (context enrichment).\n\nWorth trialling as a security add-on for fintech/healthcare/automotive workflows; not a standalone methodology. Stable."
+    },
+    {
+      "label": "cc-sdd",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "cc-sdd (~1.5k stars, MIT) is an L1 Spec-First framework whose distinguishing feature is Semantic Commit Specs and 7+ approval gates.\n\n**Characteristics:**\n- Semantic commit-driven specifications\n- 7+ approval gates throughout the workflow\n- Multi-agent support; optional TDD\n\n**Rigor level:** L1 Spec-First.\n\nA smaller, beta-stage framework to keep on the watch list while its approach to commit-level specs matures."
+    },
+    {
+      "label": "Don Cheli SDD",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "Don Cheli SDD (ISC) is an L1 framework with no public adoption metric but notable depth: 93+ commands and a code-level TDD gate.\n\n**Distinctive enforcement:**\n- 93+ commands for Spec-Driven DevOps\n- Programmatic TDD gate (TypeScript orchestrator blocks merge below 85% coverage)\n- Brownfield and multi-agent support\n\n**Rigor level:** L1 Spec-First with mandatory programmatic TDD.\n\nLow visibility but technically interesting — watch it, particularly for its merge-blocking coverage gate. Stable."
+    },
+    {
+      "label": "Agent OS v3",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "Agent OS v3 (proprietary, no public metric) is an L1 enhancer that acts as a standards-injection layer rather than a full pipeline.\n\n**Role in the stack:**\n- Autonomous agent specs\n- Standards/conventions injection for agents\n- Multi-agent support; optional TDD\n\n**Rigor level:** L1 Spec-First (standards injection).\n\nUseful as a lightweight standards layer; keep on watch as a complement to a primary SDD pipeline. Stable."
+    },
+    {
+      "label": "SpecSwarm",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "SpecSwarm (~57 stars, Apache 2.0) is an L1 framework exploring Distributed Spec Consensus across agents, gated by a quality score.\n\n**Experimental approach:**\n- Distributed consensus over specifications\n- Mandatory quality-score gate\n- Early-stage adoption\n\n**Rigor level:** L1 Spec-First (quality score).\n\nAn early, niche experiment worth watching to see whether distributed spec consensus proves valuable. Currently beta."
+    },
+    {
+      "label": "Intent",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "Intent (by Augment Code, $252M funding, proprietary/commercial) is a modern L2 framework built on a bidirectional Living Spec.\n\n**Living Spec architecture:**\n- Spec actively synchronized with code and agent-writable\n- Agent roles: Coordinator, Specialists in isolated git worktrees, and a Verifier\n- Verifier atomically updates the spec when an API change or missing requirement is discovered\n\n**Rigor level:** L2 Spec-Anchored (bidirectional Living Spec).\n\nA pioneer of \"spec as a database of intent\" — watch as the Living Spec model and commercial offering mature. Currently beta."
+    },
+    {
+      "label": "Tessl",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "Tessl (by Guy Podjarny, $125M funding, commercial) is the leading L3 Spec-as-Source framework: you edit the spec, not the code.\n\n**How it works:**\n- `.spec.md` with `@generate`/`@describe`/`@test`/`@use` annotations\n- `tessl build` regenerates code prefixed with `// GENERATED FROM SPEC - DO NOT EDIT`\n- Spec Registry: 10,000+ verified library usage specs (an \"npm for AI-ready knowledge\")\n- Split Manifest System (`tessl.json` + `KNOWLEDGE.md`); uses MCP as its agent protocol\n\n**Rigor level:** L3 Spec-as-Source — the spec is the only edited artifact.\n\nThe most ambitious framework, but in closed beta (registry in open beta). Watch, don't deploy, until it exits beta with independent enterprise case studies."
+    },
+    {
+      "label": "CSDD",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 5,
+      "moved": 2,
+      "active": true,
+      "description": "CSDD (Constitutional Spec-Driven Development, academic — arXiv:2602.02584) is an L3 Spec-as-Source methodology with a security-by-construction layer.\n\n**Security by construction:**\n- Constitutional clauses with SEC-NNN IDs, CWE references, MUST/SHOULD/MAY levels\n- Rule violation REJECTS code (e.g. SEC-001 SQL injection prevention via semgrep)\n- Compliance Traceability Matrix mapping rules to lines of code\n- Empirically reduced security defects by 73% with no velocity loss in banking microservices\n\n**Rigor level:** L3 Spec-as-Source (Constitution + CTM).\n\nA research-grade approach (alpha) compelling for security-critical domains — watch closely, often discussed as a security layer atop MUSUBI."
+    },
+    {
+      "label": "WordPress SDD Constitution",
+      "logo": "logos/github-logo-64x64.svg",
+      "quadrant": 6,
+      "ring": 3,
+      "moved": 2,
+      "active": true,
+      "description": "WordPress SDD Constitution (GPLv2+, no public metric) is an L1 domain-specific framework implementing the Constitution Pattern for CMS workflows.\n\n**Domain focus:**\n- CMS-specific spec workflow tailored to WordPress\n- Constitution-style inviolable project principles\n- Narrow applicability outside the WordPress ecosystem\n\n**Rigor level:** L1 Spec-First (constitution).\n\nIntentionally skipped for general engineering work due to its narrow CMS fit — relevant only to teams building on WordPress."
     }
   ]
 }
