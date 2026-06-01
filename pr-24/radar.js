@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+b250e2a
+// Version: 0.0.1-dev+1681ea1
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1546,17 +1546,17 @@ function renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, con
   }
   for (let quadrant = 0;quadrant < numQuadrants; quadrant++) {
     const column = targetColumn(quadrant);
-    const section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns);
+    const section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns).style("display", "flex").style("flex-direction", "column").style("gap", "6px").style("flex", "1 1 0");
     section.append("div").attr("class", "legend-quadrant-name").text(config.quadrants[quadrant].name);
-    const ringsContainer = section.append("div").attr("class", "legend-rings").style("grid-template-columns", `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`);
+    const ringsContainer = section.append("div").attr("class", "legend-rings").style("display", "grid").style("grid-template-columns", `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`).style("gap", "10px 14px").style("align-items", "start");
     for (let ring = 0;ring < numRings; ring++) {
       const entriesInRing = segmented[quadrant][ring];
       if (!entriesInRing.length) {
         continue;
       }
-      const ringBlock = ringsContainer.append("div").attr("class", "legend-ring");
+      const ringBlock = ringsContainer.append("div").attr("class", "legend-ring").style("min-width", "0").style("max-width", "100%");
       ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).text(config.rings[ring].name);
-      const entriesList = ringBlock.append("div").attr("class", "legend-ring-entries");
+      const entriesList = ringBlock.append("div").attr("class", "legend-ring-entries").style("display", "flex").style("flex-direction", "column").style("gap", "2px");
       const entryBaseStyle = "";
       entriesList.selectAll("a").data(entriesInRing).enter().append("a").attr("href", (d) => d.link && !d.description ? d.link : "#").attr("target", (d) => d.link && !d.description && config.links_in_new_tabs ? "_blank" : null).attr("id", (d) => `legendItem${d.id}`).attr("class", "legend-entry").attr("style", (d) => entryBaseStyle + (d.description ? "cursor:pointer;" : "")).text((d) => `${d.id}. ${d.label}`).on("mouseover", (_event, d) => {
         showBubble2(d, config);
