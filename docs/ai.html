@@ -341,18 +341,43 @@
 
       .zoom-radar .radar-legend-column {
         z-index: 2;
-        width: 22% !important;
-        max-width: 320px;
+        /* A touch wider than before, and wider still on big screens (where there
+           is room) so each card fits 2–3 readable columns and stays shorter. */
+        width: 26% !important;
+        max-width: 460px;
         /* Bound the columns to the radar's vertical band so they frame it
            instead of overflowing below into the caption; scroll if taller. */
         height: auto !important;
         max-height: calc((100vh - 170px) * var(--radar-scale, 0.85)) !important;
         overflow-y: auto;
         overscroll-behavior: contain;
+        /* Keep the inner scrollbar thin and quiet when a card does overflow. */
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
         /* Align section tops to a shared baseline with one consistent gap
            (was space-between, which produced ragged, irregular spacing). */
         justify-content: flex-start !important;
         gap: var(--sp-md) !important;
+      }
+
+      .zoom-radar .radar-legend-column::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .zoom-radar .radar-legend-column::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      /* Size the ring sub-columns by intrinsic WIDTH, not a fixed count, so the
+         capped-width overlay cards never collapse to ~70px "one-word-per-line"
+         columns. The masonry then picks 1–3 readable tracks from the card width
+         (overrides the inline column-count that the wide-screen --legend-columns
+         media queries set for the full-width, non-overlay legend). */
+      .zoom-radar .legend-rings {
+        column-count: auto !important;
+        column-width: 120px !important;
+        column-gap: var(--sp-md) !important;
       }
 
       /* Opaque reference cards: text stays clean over any blip; the card edge
