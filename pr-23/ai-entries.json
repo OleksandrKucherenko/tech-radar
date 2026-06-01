@@ -1441,6 +1441,16 @@
       "logo": "logos/honeyhive-logo-64x64.webp"
     },
     {
+      "label": "MLflow",
+      "link": "https://mlflow.org/docs/latest/genai/",
+      "quadrant": 5,
+      "ring": 4,
+      "moved": 2,
+      "active": true,
+      "description": "MLflow is an open-source platform for managing the end-to-end machine learning and GenAI lifecycle. Its GenAI capabilities bring first-class observability, evaluation, and prompt management to LLM and agent applications.\n\n**GenAI Features:**\n- Tracing and observability for LLM apps and agents (OpenTelemetry-compatible)\n- LLM/agent evaluation with built-in and custom metrics (LLM-as-a-judge)\n- Prompt registry for versioning and managing prompts\n- Experiment tracking and a model registry\n- Broad framework integrations (LangChain, LlamaIndex, OpenAI, DSPy, and more)\n- Self-hosted or managed (Databricks) deployment\n\nMLflow GenAI lets teams instrument, debug, evaluate, and monitor generative AI applications using the same trusted platform that standardized classic ML lifecycle management.",
+      "logo": "logos/mlflow-logo-64x64.webp"
+    },
+    {
       "label": "Spec-Kit",
       "logo": "logos/github-logo-64x64.svg",
       "link": "https://github.com/github/spec-kit",
