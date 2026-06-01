@@ -67,6 +67,16 @@
     },
     {
       "quadrant": 3,
+      "ring": 2,
+      "label": "MLflow",
+      "link": "https://mlflow.org/docs/latest/genai/",
+      "active": true,
+      "moved": 2,
+      "description": "MLflow is an open-source platform for managing the end-to-end machine learning and GenAI lifecycle. It provides experiment tracking, model packaging, a model registry, and deployment tooling.\n\nMLflow's GenAI features add first-class support for building, evaluating, and monitoring LLM and agent applications, including:\n- Tracing and observability for GenAI apps and agents\n- Prompt management and versioning\n- LLM/agent evaluation with built-in and custom metrics\n- Integration with popular frameworks (LangChain, LlamaIndex, OpenAI, and more)",
+      "logo": "https://mlflow.org/img/mlflow-black.svg"
+    },
+    {
+      "quadrant": 3,
       "ring": 1,
       "label": "Presto",
       "active": true,
