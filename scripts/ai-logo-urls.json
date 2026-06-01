@@ -862,5 +862,11 @@
     "slug": "honeyhive",
     "url": "https://img.logo.dev/honeyhive.com?token=pk_FXRjkoUmRqar1JYCG6FFTw",
     "status": "found"
+  },
+  {
+    "label": "MLflow",
+    "slug": "mlflow",
+    "url": "https://img.logo.dev/mlflow.org?token=pk_Z7FJx3uQRDGjt4ioCLpuMA",
+    "status": "found"
   }
 ]
