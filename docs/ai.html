@@ -659,6 +659,25 @@
         opacity: 0.12;
       }
 
+      /* Hover tooltip (#bubble): the engine renders it at 10px white-on-#333,
+         which is hard to read. Bump to the body font at a legible size/weight
+         and a higher-contrast near-black background. showBubble() re-measures
+         the text's bbox on each hover, so the background rect resizes to fit.
+         (Inline engine styles are overridden with !important.) */
+      #bubble text {
+        font-family: var(--font-body) !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        fill: #fff !important;
+        letter-spacing: 0.01em;
+        text-shadow: none !important;
+      }
+
+      #bubble rect,
+      #bubble path {
+        fill: #0a0a0a !important;
+      }
+
       /* Loading / error states (U2) */
       .radar-container {
         position: relative;
