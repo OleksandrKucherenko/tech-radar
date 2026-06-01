@@ -952,6 +952,30 @@
           else if (action === "reset") level = DEFAULT;
           apply();
         });
+        toolbar.title = "Tip: Ctrl/⌘ + scroll over the radar to resize it";
+
+        // Ctrl/⌘ + wheel over the radar resizes the radar instead of zooming the
+        // whole page. deltaY is accumulated and scaled so a mouse notch nudges a
+        // few percent and a slow trackpad pinch (which the browser also reports
+        // as ctrl+wheel) steps smoothly. Requires a non-passive listener so the
+        // browser's page zoom can be prevented.
+        let wheelRemainder = 0;
+        container.addEventListener(
+          "wheel",
+          event => {
+            if (!(event.ctrlKey || event.metaKey)) return;
+            if (!container.classList.contains("zoom-radar")) return;
+            event.preventDefault();
+            wheelRemainder += -event.deltaY * 0.05; // scroll up / pinch out = zoom in
+            const stepBy = Math.trunc(wheelRemainder);
+            if (stepBy !== 0) {
+              wheelRemainder -= stepBy;
+              level += stepBy;
+              apply();
+            }
+          },
+          { passive: false }
+        );
 
         enable(isDesktop());
         let resizeTimer;
