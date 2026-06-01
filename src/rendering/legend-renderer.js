@@ -84,30 +84,20 @@ export function renderLegendColumns(
   // Render each quadrant's legend section
   for (let quadrant = 0; quadrant < numQuadrants; quadrant++) {
     const column = targetColumn(quadrant);
+    // Typography/spacing (font-size, padding, gap, border-radius, flex) is owned
+    // by radar.css / page stylesheet so it can be themed; only the dynamic
+    // column count is set inline here.
     const section = column
       .append('div')
       .attr('class', 'legend-section')
-      .style('--legend-columns', legendSectionColumns)
-      .style('border-radius', '6px')
-      .style('padding', '6px')
-      .style('display', 'flex')
-      .style('flex-direction', 'column')
-      .style('gap', '6px')
-      .style('flex', '1 1 0');
+      .style('--legend-columns', legendSectionColumns);
 
-    section
-      .append('div')
-      .attr('class', 'legend-quadrant-name')
-      .style('font-weight', '600')
-      .text(config.quadrants[quadrant].name);
+    section.append('div').attr('class', 'legend-quadrant-name').text(config.quadrants[quadrant].name);
 
     const ringsContainer = section
       .append('div')
       .attr('class', 'legend-rings')
-      .style('display', 'grid')
-      .style('grid-template-columns', `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`)
-      .style('gap', '10px 14px')
-      .style('align-items', 'start');
+      .style('grid-template-columns', `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`);
 
     // Render each ring's entries
     for (let ring = 0; ring < numRings; ring++) {
@@ -116,30 +106,20 @@ export function renderLegendColumns(
         continue; // Skip empty rings
       }
 
-      const ringBlock = ringsContainer
-        .append('div')
-        .attr('class', 'legend-ring')
-        .style('min-width', '0')
-        .style('max-width', '100%');
+      const ringBlock = ringsContainer.append('div').attr('class', 'legend-ring');
+      // Ring-name keeps its ring hue (the one place ring color survives in the
+      // legend); size/weight/spacing come from the stylesheet.
       ringBlock
         .append('div')
         .attr('class', 'legend-ring-name')
         .style('color', config.rings[ring].color)
-        .style('font-size', '11px')
-        .style('font-weight', '600')
-        .style('margin-bottom', '2px')
         .text(config.rings[ring].name);
 
-      const entriesList = ringBlock
-        .append('div')
-        .attr('class', 'legend-ring-entries')
-        .style('display', 'flex')
-        .style('flex-direction', 'column')
-        .style('gap', '2px');
-      // Note: color is NOT set inline — it's handled by .legend-entry CSS class (color:inherit)
-      // so that .legend-highlight { color:#fff } can override it on hover
-      const entryBaseStyle =
-        'font-size:11px;text-decoration:none;word-break:break-word;padding:2px 4px;border-radius:4px;';
+      const entriesList = ringBlock.append('div').attr('class', 'legend-ring-entries');
+      // Note: color/size/padding are handled by the .legend-entry CSS class
+      // (color:inherit) so that hover/highlight states can override them.
+      // Only the per-entry interaction affordance is set inline.
+      const entryBaseStyle = '';
       entriesList
         .selectAll('a')
         .data(entriesInRing)

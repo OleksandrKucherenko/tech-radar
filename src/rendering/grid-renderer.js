@@ -96,7 +96,14 @@ export function renderGrid(gridSelection, config, quadrants, rings, outerRadius)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .style('fill', config.rings[i].color)
-        .style('opacity', 0.35)
+        .style('opacity', 0.55)
+        // Paint a background-colored halo behind the glyphs so the ring name
+        // stays legible even when blips are drawn on top of it (renderGrid runs
+        // before renderBlips). paint-order:stroke keeps the stroke behind the fill.
+        .style('paint-order', 'stroke')
+        .style('stroke', config.colors.background)
+        .style('stroke-width', '4px')
+        .style('stroke-linejoin', 'round')
         .style('font-family', config.font_family)
         .style('font-size', `${labelFontSize}px`)
         .style('font-weight', 'bold')

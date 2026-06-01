@@ -59,20 +59,106 @@
     <link rel="stylesheet" href="radar.css" />
     <link rel="stylesheet" href="vendor/font-awesome.min.css" />
     <style>
+      /* ===================================================================
+         Design tokens — "Modern Minimal" (Linear/Vercel/Stripe register).
+         One blue-violet accent, reserved strictly for interaction; the radar
+         blips carry the only other saturated color on the page.
+         =================================================================== */
+      :root {
+        --bg: #ffffff;
+        --surface: #fafafa;
+        --border: #e5e5e5;
+        --fg: #0a0a0a;
+        --fg-secondary: #525252;
+        --muted: #a3a3a3;
+        --accent: #3056d3; /* interaction only: hover / focus / active legend */
+
+        --font-display: "Geist", "Inter Display", Inter, system-ui, sans-serif;
+        --font-body: Inter, system-ui, sans-serif;
+        --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+        --fs-title: 30px;
+        --fs-quadrant: 13px;
+        --fs-ring: 11px;
+        --fs-entry: 13px;
+        --fs-id: 10px;
+
+        --sp-xs: 4px;
+        --sp-sm: 8px;
+        --sp-md: 16px;
+        --sp-lg: 24px;
+        --sp-xl: 48px;
+
+        --radius-sm: 4px;
+        --radius-md: 8px;
+      }
+
       body {
         margin: 0;
         padding: 0;
-        background: white;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-body);
         display: flex;
         flex-direction: column;
         min-height: 100vh;
       }
 
+      /* Top nav recedes to chrome: muted, accent only on hover. */
       nav.demo-links {
-        padding: 15px 20px;
-        background: #f8f8f8;
-        border-bottom: 1px solid #e0e0e0;
+        padding: 12px 20px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
         margin: 0;
+        font-size: 13px;
+        color: var(--fg-secondary);
+      }
+
+      nav.demo-links strong {
+        color: var(--fg-secondary);
+        font-weight: 600;
+      }
+
+      nav.demo-links a {
+        color: var(--fg-secondary);
+        text-decoration: none;
+      }
+
+      nav.demo-links a:hover {
+        color: var(--accent);
+        text-decoration: underline;
+      }
+
+      /* Reserved top strip: page title (normal flow, can never be clipped by
+         the SVG/legend overlay) on one row with the zoom toolbar. */
+      .radar-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--sp-md);
+        width: 100%;
+        max-width: 1680px;
+        margin: var(--sp-md) auto 0;
+        padding: 0 var(--sp-lg);
+        box-sizing: border-box;
+      }
+
+      .radar-header h1 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: var(--fs-title);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        color: var(--fg);
+      }
+
+      .radar-header h1 .radar-subtitle {
+        color: var(--muted);
+        font-weight: 400;
+        font-size: 0.6em;
+        margin-left: var(--sp-sm);
+        letter-spacing: 0;
       }
 
       .radar-container {
@@ -80,7 +166,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 20px;
+        padding: var(--sp-sm) var(--sp-lg) var(--sp-md);
         max-width: 100%;
         box-sizing: border-box;
       }
@@ -90,10 +176,38 @@
         height: auto;
       }
 
+      /* Reserved bottom strip: the movement key as an HTML caption, framing the
+         radar instead of living inside (and clipping with) the SVG. */
+      .radar-caption {
+        width: 100%;
+        max-width: 1680px;
+        margin: 0 auto var(--sp-md);
+        padding: 0 var(--sp-lg);
+        box-sizing: border-box;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--sp-lg);
+        color: var(--fg-secondary);
+        font-size: 12px;
+      }
+
+      .radar-caption .legend-key {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--sp-xs);
+      }
+
       .radar-notes {
         max-width: 1200px;
         margin: 10px auto 40px;
         padding: 0 20px;
+        font-family: var(--font-body);
+        color: var(--fg-secondary);
+        line-height: 1.6;
+      }
+
+      .radar-notes h3 {
+        color: var(--fg);
       }
 
       .radar-notes ul {
@@ -105,53 +219,57 @@
         text-align: center;
         padding: 15px 20px;
         margin: 0;
-        border-top: 1px solid #e0e0e0;
-        background: #f8f8f8;
-        color: #666;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--fg-secondary);
         font-size: 12px;
       }
 
       footer code {
-        background: #e8e8e8;
+        background: #eaeaea;
         padding: 2px 6px;
-        border-radius: 3px;
-        font-family: "Courier New", monospace;
+        border-radius: var(--radius-sm);
+        font-family: var(--font-mono);
       }
 
       /* Radar zoom toolbar (desktop only, AI page scoped) */
       .radar-zoom-toolbar {
         display: none;
-        gap: 8px;
+        gap: var(--sp-sm);
         align-items: center;
         justify-content: center;
-        padding: 8px 12px;
-        margin: 8px auto 0;
+        padding: 0;
+        margin: 0;
       }
 
       .radar-zoom-toolbar .rzt-label {
-        color: #666;
+        color: var(--fg-secondary);
         font-size: 13px;
-        margin-right: 4px;
+        margin-right: var(--sp-xs);
       }
 
       .radar-zoom-toolbar .rzt-level {
         min-width: 46px;
         text-align: center;
         font-variant-numeric: tabular-nums;
+        font-family: var(--font-mono);
         font-size: 13px;
-        color: #333;
+        color: var(--fg);
       }
 
       .radar-zoom-toolbar .rzt-btn {
-        border: 1px solid #ccc;
-        background: #fff;
-        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        border-radius: var(--radius-sm);
         width: 32px;
         height: 32px;
         font-size: 16px;
         line-height: 1;
         cursor: pointer;
-        color: #333;
+        color: var(--fg-secondary);
+        transition:
+          border-color 0.15s ease,
+          color 0.15s ease;
       }
 
       .radar-zoom-toolbar .rzt-btn.rzt-reset {
@@ -161,7 +279,9 @@
       }
 
       .radar-zoom-toolbar .rzt-btn:hover {
-        background: #f0f0f0;
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--bg);
       }
 
       /* Overlay/zoom layout: radar as background, legends overlaid on top.
@@ -195,36 +315,111 @@
 
       .zoom-radar .radar-svg-container svg {
         width: auto !important;
-        height: calc((100vh - 150px) * var(--radar-scale, 0.9)) !important;
+        height: calc((100vh - 150px) * var(--radar-scale, 0.85)) !important;
         max-width: none !important;
         max-height: none !important;
         transition: height 0.15s ease;
       }
 
+      /* Legend columns: pinned with a real gutter from the viewport edge
+         (inset, capped width) instead of sliding onto the radar. */
       .zoom-radar .radar-legend-column.left {
         position: absolute !important;
-        left: 0 !important;
+        left: var(--sp-lg) !important;
+        right: auto !important;
         top: 0 !important;
         z-index: 2;
       }
 
       .zoom-radar .radar-legend-column.right {
         position: absolute !important;
-        right: 0 !important;
+        right: var(--sp-lg) !important;
+        left: auto !important;
         top: 0 !important;
         z-index: 2;
       }
 
       .zoom-radar .radar-legend-column {
         z-index: 2;
+        width: 22% !important;
+        max-width: 320px;
+        /* Bound the columns to the radar's vertical band so they frame it
+           instead of overflowing below into the caption; scroll if taller. */
+        height: auto !important;
+        max-height: calc((100vh - 170px) * var(--radar-scale, 0.85)) !important;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        /* Align section tops to a shared baseline with one consistent gap
+           (was space-between, which produced ragged, irregular spacing). */
+        justify-content: flex-start !important;
+        gap: var(--sp-md) !important;
       }
 
-      /* Keep legends readable where they overlap the radar graph */
+      /* Opaque reference cards: text stays clean over any blip; the card edge
+         gives the columns a defined boundary against the radar. */
       .zoom-radar .legend-section {
-        background: rgba(255, 255, 255, 0.9);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
         box-shadow:
-          0 0 0 1px rgba(255, 255, 255, 0.6),
-          0 2px 6px rgba(0, 0, 0, 0.08);
+          0 1px 2px rgba(0, 0, 0, 0.04),
+          0 4px 12px rgba(0, 0, 0, 0.06);
+        padding: var(--sp-md) !important;
+        flex: 0 0 auto !important;
+      }
+
+      /* Chrome recedes: neutral, tracked headers — color stays with the blips. */
+      .zoom-radar .legend-quadrant-name {
+        font-family: var(--font-body);
+        font-size: var(--fs-quadrant);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--fg-secondary);
+      }
+
+      .zoom-radar .legend-ring-name {
+        font-size: var(--fs-ring);
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        margin-bottom: var(--sp-xs);
+      }
+
+      .zoom-radar .legend-entry {
+        font-size: var(--fs-entry);
+        line-height: 1.45;
+        color: var(--fg-secondary);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Accent budget: the one accent appears only on interaction. */
+      .zoom-radar .legend-entry:hover,
+      .zoom-radar .legend-entry:focus {
+        color: var(--accent);
+        background: rgba(48, 86, 211, 0.08);
+        text-decoration: none;
+      }
+
+      .zoom-radar .legend-highlight {
+        background: var(--accent);
+        color: var(--bg);
+      }
+
+      /* Optional, light entrance — disabled under reduced-motion. */
+      @media (prefers-reduced-motion: no-preference) {
+        .zoom-radar #rink {
+          animation: rink-in 0.5s ease-out both;
+        }
+
+        @keyframes rink-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
       }
 
       /* Collapsible legend cards: click a quadrant header to fold its entries
@@ -281,16 +476,26 @@
 
     <div id="toolbar"></div>
 
-    <div class="radar-zoom-toolbar" id="radarZoomToolbar" role="toolbar" aria-label="Radar zoom controls">
-      <span class="rzt-label">Radar size</span>
-      <button type="button" class="rzt-btn" data-zoom="out" aria-label="Decrease radar size">&minus;</button>
-      <span class="rzt-level" id="radarZoomLevel">90%</span>
-      <button type="button" class="rzt-btn" data-zoom="in" aria-label="Increase radar size">+</button>
-      <button type="button" class="rzt-btn rzt-reset" data-zoom="reset" aria-label="Reset radar size">Reset</button>
-    </div>
+    <header class="radar-header">
+      <h1>AI Tech Radar <span class="radar-subtitle">2026</span></h1>
+      <div class="radar-zoom-toolbar" id="radarZoomToolbar" role="toolbar" aria-label="Radar zoom controls">
+        <span class="rzt-label">Radar size</span>
+        <button type="button" class="rzt-btn" data-zoom="out" aria-label="Decrease radar size">&minus;</button>
+        <span class="rzt-level" id="radarZoomLevel">90%</span>
+        <button type="button" class="rzt-btn" data-zoom="in" aria-label="Increase radar size">+</button>
+        <button type="button" class="rzt-btn rzt-reset" data-zoom="reset" aria-label="Reset radar size">Reset</button>
+      </div>
+    </header>
 
     <div class="radar-container">
       <svg id="radar"></svg>
+    </div>
+
+    <div class="radar-caption" aria-label="Blip movement key">
+      <span class="legend-key">▲ moved up</span>
+      <span class="legend-key">▼ moved down</span>
+      <span class="legend-key">★ new</span>
+      <span class="legend-key">⬤ no change</span>
     </div>
 
     <section class="radar-notes">
@@ -341,7 +546,7 @@
         const MIN = 40;
         const MAX = 150;
         const STEP = 10;
-        const DEFAULT = 90;
+        const DEFAULT = 85;
         const STORAGE_KEY = "ai-radar-occupancy";
         const isDesktop = () => window.matchMedia("(min-width: 1024px)").matches;
 
@@ -484,11 +689,15 @@
             toolbar_id: "toolbar",
             colors: {
               background: "#fff",
-              grid: "#bbb",
+              grid: "#e5e5e5",
               inactive: "#ddd",
             },
-            font_family: "Arial, Helvetica",
-            title: "AI Tech Radar (2026)",
+            font_family: "Inter, system-ui, sans-serif",
+            blip_id_font_family: "'JetBrains Mono', 'SF Mono', Menlo, monospace",
+            // Title and movement key are rendered as HTML (.radar-header / .radar-caption)
+            // so they can never be clipped by the SVG/legend overlay. The blank
+            // footer suppresses the in-SVG key without re-triggering the default.
+            footer: " ",
             quadrants: [
               { name: "Core AI Providers" },
               { name: "AI Coding Tools" },
@@ -498,13 +707,16 @@
               { name: "Observability & Testing" },
               { name: "AI Frameworks" },
             ],
+            // Ordered ramp, inner→outer. SKIP is desaturated grey (the "do
+            // nothing" verdict, kept quietest) so it can no longer be confused
+            // with HOLD's amber. Each hue is distinct and AA-legible on white.
             rings: [
-              { name: "ADOPT", color: "#5ba300" },
-              { name: "VALUE", color: "#c7ba00" },
-              { name: "HOLD", color: "#e09b96" },
-              { name: "SKIP", color: "#e09b96" },
-              { name: "TRIAL", color: "#009eb0" },
-              { name: "WATCH", color: "#bb6bd9" },
+              { name: "ADOPT", color: "#1a8a4a" }, // green  — strategic default
+              { name: "VALUE", color: "#5fa800" }, // lime   — clear value
+              { name: "HOLD", color: "#c77d11" }, // amber  — maintain, don't pick
+              { name: "SKIP", color: "#9aa0a6" }, // grey   — intentionally skipped
+              { name: "TRIAL", color: "#0e8fa8" }, // teal   — piloting
+              { name: "WATCH", color: "#8e5bd0" }, // violet — tracking
             ],
             print_layout: true,
             links_in_new_tabs: true,
