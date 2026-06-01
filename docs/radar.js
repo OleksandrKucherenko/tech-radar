@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+1681ea1
+// Version: 0.0.1-dev+b33511c
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1548,13 +1548,13 @@ function renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, con
     const column = targetColumn(quadrant);
     const section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns).style("display", "flex").style("flex-direction", "column").style("gap", "6px").style("flex", "1 1 0");
     section.append("div").attr("class", "legend-quadrant-name").text(config.quadrants[quadrant].name);
-    const ringsContainer = section.append("div").attr("class", "legend-rings").style("display", "grid").style("grid-template-columns", `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`).style("gap", "10px 14px").style("align-items", "start");
+    const ringsContainer = section.append("div").attr("class", "legend-rings").style("column-count", `var(--legend-columns, ${legendSectionColumns})`).style("column-gap", "14px");
     for (let ring = 0;ring < numRings; ring++) {
       const entriesInRing = segmented[quadrant][ring];
       if (!entriesInRing.length) {
         continue;
       }
-      const ringBlock = ringsContainer.append("div").attr("class", "legend-ring").style("min-width", "0").style("max-width", "100%");
+      const ringBlock = ringsContainer.append("div").attr("class", "legend-ring").style("max-width", "100%").style("break-inside", "avoid").style("-webkit-column-break-inside", "avoid").style("margin-bottom", "10px");
       ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).text(config.rings[ring].name);
       const entriesList = ringBlock.append("div").attr("class", "legend-ring-entries").style("display", "flex").style("flex-direction", "column").style("gap", "2px");
       const entryBaseStyle = "";
