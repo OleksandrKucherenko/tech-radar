@@ -65,17 +65,23 @@ export function showBubble(d, config) {
     const x = d.rendered_x !== undefined ? d.rendered_x : d.x;
     const y = d.rendered_y !== undefined ? d.rendered_y : d.y;
 
+    // Symmetric padding derived from the text's actual bounding box, so the
+    // label always clears every edge (>= 4px) regardless of font/size.
+    const padX = 8;
+    const padY = 6;
+    const rectX = bbox.x - padX;
+    const rectY = bbox.y - padY;
+    const rectWidth = bbox.width + padX * 2;
+    const rectHeight = bbox.height + padY * 2;
+
     d3.select('#bubble')
       .attr('transform', translate(x - bbox.width / 2, y - 16))
-      .style('opacity', 0.8);
+      .style('opacity', 0.85);
 
-    d3.select('#bubble rect')
-      .attr('x', -5)
-      .attr('y', -bbox.height)
-      .attr('width', bbox.width + 10)
-      .attr('height', bbox.height + 4);
+    d3.select('#bubble rect').attr('x', rectX).attr('y', rectY).attr('width', rectWidth).attr('height', rectHeight);
 
-    d3.select('#bubble path').attr('transform', translate(bbox.width / 2 - 5, 3));
+    // Pointer centered under the label and attached to the rect's bottom edge.
+    d3.select('#bubble path').attr('transform', translate(bbox.x + bbox.width / 2 - 5, rectY + rectHeight));
   }
 }
 

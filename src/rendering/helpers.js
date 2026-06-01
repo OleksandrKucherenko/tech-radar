@@ -65,7 +65,9 @@ export function computeLegendOffsets(numQuadrants, outerRadius, config) {
   }
 
   const offsets = new Array(numQuadrants);
-  const legend_overlap = outerRadius * 0.08;
+  // No overlap: legends sit beside the radar with a real gutter rather than
+  // being slid onto the graph (which caused edge blip-vs-text collisions).
+  const legend_overlap = 0;
   const left_x = -outerRadius - config.legend_column_width + legend_overlap;
   const right_x = outerRadius - legend_overlap;
 

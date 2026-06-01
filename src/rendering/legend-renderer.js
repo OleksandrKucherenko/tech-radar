@@ -84,30 +84,31 @@ export function renderLegendColumns(
   // Render each quadrant's legend section
   for (let quadrant = 0; quadrant < numQuadrants; quadrant++) {
     const column = targetColumn(quadrant);
+    // Structural layout styles (display/flex/grid/gap) are inlined so the
+    // bundled renderer still lays the legend out correctly without
+    // docs/radar.css (e.g. the Confluence HTML macro / CDN embed). Typography
+    // (font-size, weight, color) is intentionally left to the stylesheet so the
+    // AI page — and other consumers — can theme it.
     const section = column
       .append('div')
       .attr('class', 'legend-section')
       .style('--legend-columns', legendSectionColumns)
-      .style('border-radius', '6px')
-      .style('padding', '6px')
       .style('display', 'flex')
       .style('flex-direction', 'column')
       .style('gap', '6px')
       .style('flex', '1 1 0');
 
-    section
-      .append('div')
-      .attr('class', 'legend-quadrant-name')
-      .style('font-weight', '600')
-      .text(config.quadrants[quadrant].name);
+    section.append('div').attr('class', 'legend-quadrant-name').text(config.quadrants[quadrant].name);
 
+    // Masonry-style packing: rings flow into balanced CSS multi-column tracks
+    // so a short ring (e.g. HOLD) stacks under another instead of leaving a tall
+    // gap beside a long ring (e.g. VALUE). Inlined so embeds without radar.css
+    // pack correctly too; --legend-columns still drives the track count.
     const ringsContainer = section
       .append('div')
       .attr('class', 'legend-rings')
-      .style('display', 'grid')
-      .style('grid-template-columns', `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`)
-      .style('gap', '10px 14px')
-      .style('align-items', 'start');
+      .style('column-count', `var(--legend-columns, ${legendSectionColumns})`)
+      .style('column-gap', '14px');
 
     // Render each ring's entries
     for (let ring = 0; ring < numRings; ring++) {
@@ -119,15 +120,16 @@ export function renderLegendColumns(
       const ringBlock = ringsContainer
         .append('div')
         .attr('class', 'legend-ring')
-        .style('min-width', '0')
-        .style('max-width', '100%');
+        .style('max-width', '100%')
+        .style('break-inside', 'avoid')
+        .style('-webkit-column-break-inside', 'avoid')
+        .style('margin-bottom', '10px');
+      // Ring-name keeps its ring hue (the one place ring color survives in the
+      // legend); size/weight/spacing come from the stylesheet.
       ringBlock
         .append('div')
         .attr('class', 'legend-ring-name')
         .style('color', config.rings[ring].color)
-        .style('font-size', '11px')
-        .style('font-weight', '600')
-        .style('margin-bottom', '2px')
         .text(config.rings[ring].name);
 
       const entriesList = ringBlock
@@ -136,10 +138,10 @@ export function renderLegendColumns(
         .style('display', 'flex')
         .style('flex-direction', 'column')
         .style('gap', '2px');
-      // Note: color is NOT set inline — it's handled by .legend-entry CSS class (color:inherit)
-      // so that .legend-highlight { color:#fff } can override it on hover
-      const entryBaseStyle =
-        'font-size:11px;text-decoration:none;word-break:break-word;padding:2px 4px;border-radius:4px;';
+      // Note: color/size/padding are handled by the .legend-entry CSS class
+      // (color:inherit) so that hover/highlight states can override them.
+      // Only the per-entry interaction affordance is set inline.
+      const entryBaseStyle = '';
       entriesList
         .selectAll('a')
         .data(entriesInRing)

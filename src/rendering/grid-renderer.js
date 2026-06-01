@@ -96,13 +96,90 @@ export function renderGrid(gridSelection, config, quadrants, rings, outerRadius)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
         .style('fill', config.rings[i].color)
-        .style('opacity', 0.35)
+        .style('opacity', 0.55)
+        // Paint a background-colored halo behind the glyphs so the ring name
+        // stays legible even when blips are drawn on top of it (renderGrid runs
+        // before renderBlips). paint-order:stroke keeps the stroke behind the fill.
+        .style('paint-order', 'stroke')
+        .style('stroke', config.colors.background)
+        .style('stroke-width', '4px')
+        .style('stroke-linejoin', 'round')
         .style('font-family', config.font_family)
         .style('font-size', `${labelFontSize}px`)
         .style('font-weight', 'bold')
         .style('pointer-events', 'none')
         .style('user-select', 'none');
     }
+  }
+}
+
+/**
+ * Renders the quadrant (sector) names as curved text along the outer edge of
+ * the radar, so each sector's purpose is identifiable on the chart itself.
+ *
+ * Each label rides a `<textPath>` on an arc just outside the outer ring,
+ * centered on the sector's mid-angle. Labels on the bottom half are drawn on a
+ * reversed arc so the text stays upright. Font size auto-fits the arc length.
+ * Opt-in via `config.curved_quadrant_labels`.
+ *
+ * @param {Object} radarSelection - D3 selection of the main radar group
+ * @param {Object} config - Configuration object
+ * @param {Array<Object>} quadrants - Array of quadrant configurations
+ * @param {number} outerRadius - Outer radius of the radar
+ */
+export function renderQuadrantLabels(radarSelection, config, quadrants, outerRadius) {
+  if (!config.curved_quadrant_labels) {
+    return;
+  }
+
+  const labelRadius = outerRadius + 22;
+  const defs = radarSelection.append('defs');
+  const idBase = `radar-qlabel-${config.svg_id || 'radar'}`;
+  const point = angle => [labelRadius * Math.cos(angle), labelRadius * Math.sin(angle)];
+
+  for (let i = 0; i < quadrants.length; i++) {
+    const a0 = quadrants[i].radial_min * Math.PI;
+    const a1 = quadrants[i].radial_max * Math.PI;
+    const onBottomHalf = Math.sin((a0 + a1) / 2) > 0;
+    const largeArc = Math.abs(a1 - a0) > Math.PI ? 1 : 0;
+
+    // Bottom-half labels ride a reversed arc (a1 -> a0) so they read upright.
+    const [from, to, sweep] = onBottomHalf ? [point(a1), point(a0), 0] : [point(a0), point(a1), 1];
+
+    const pathId = `${idBase}-${i}`;
+    defs
+      .append('path')
+      .attr('id', pathId)
+      .attr('fill', 'none')
+      .attr('d', `M ${from[0]} ${from[1]} A ${labelRadius} ${labelRadius} 0 ${largeArc} ${sweep} ${to[0]} ${to[1]}`);
+
+    // Auto-fit: shrink the label so it fits the available arc length.
+    const name = config.quadrants[i].name;
+    const arcLength = Math.abs(a1 - a0) * labelRadius;
+    const fontSize = Math.max(10, Math.min(16, arcLength / Math.max(1, name.length * 0.62)));
+
+    const text = radarSelection
+      .append('text')
+      .attr('class', `quadrant-label quadrant-label-${i}`)
+      .style('fill', '#52525b')
+      .style('font-family', config.font_family)
+      .style('font-size', `${fontSize}px`)
+      .style('font-weight', '600')
+      .style('letter-spacing', '0.08em')
+      // Halo so the label survives over the grid/blips it may touch.
+      .style('paint-order', 'stroke')
+      .style('stroke', config.colors.background)
+      .style('stroke-width', '4px')
+      .style('stroke-linejoin', 'round')
+      .style('pointer-events', 'none')
+      .style('user-select', 'none');
+
+    text
+      .append('textPath')
+      .attr('href', `#${pathId}`)
+      .attr('startOffset', '50%')
+      .style('text-anchor', 'middle')
+      .text(name);
   }
 }
 

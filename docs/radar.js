@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.19.0
+// Version: 0.0.1-dev+580efa4
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -25,7 +25,7 @@ function computeLegendOffsets(numQuadrants, outerRadius, config) {
     return config.legend_offset;
   }
   const offsets = new Array(numQuadrants);
-  const legend_overlap = outerRadius * 0.08;
+  const legend_overlap = 0;
   const left_x = -outerRadius - config.legend_column_width + legend_overlap;
   const right_x = outerRadius - legend_overlap;
   const left_column = [];
@@ -1221,9 +1221,15 @@ function showBubble(d, config) {
     const bbox = tooltip.node().getBBox();
     const x = d.rendered_x !== undefined ? d.rendered_x : d.x;
     const y = d.rendered_y !== undefined ? d.rendered_y : d.y;
-    d3.select("#bubble").attr("transform", translate(x - bbox.width / 2, y - 16)).style("opacity", 0.8);
-    d3.select("#bubble rect").attr("x", -5).attr("y", -bbox.height).attr("width", bbox.width + 10).attr("height", bbox.height + 4);
-    d3.select("#bubble path").attr("transform", translate(bbox.width / 2 - 5, 3));
+    const padX = 8;
+    const padY = 6;
+    const rectX = bbox.x - padX;
+    const rectY = bbox.y - padY;
+    const rectWidth = bbox.width + padX * 2;
+    const rectHeight = bbox.height + padY * 2;
+    d3.select("#bubble").attr("transform", translate(x - bbox.width / 2, y - 16)).style("opacity", 0.85);
+    d3.select("#bubble rect").attr("x", rectX).attr("y", rectY).attr("width", rectWidth).attr("height", rectHeight);
+    d3.select("#bubble path").attr("transform", translate(bbox.x + bbox.width / 2 - 5, rectY + rectHeight));
   }
 }
 function hideBubble() {
@@ -1376,7 +1382,8 @@ function renderBlipShape(container, entry) {
 function renderBlipText(container, entry, config) {
   if (entry.active || config.print_layout) {
     const blipText = config.print_layout ? entry.id : entry.label.match(/[a-z]/i);
-    container.append("text").text(blipText).attr("y", 3).attr("text-anchor", "middle").style("fill", "#fff").style("font-family", config.font_family).style("font-size", (_d) => blipText.length > 2 ? "8px" : "9px").style("pointer-events", "none").style("user-select", "none");
+    const idFontFamily = config.print_layout && config.blip_id_font_family ? config.blip_id_font_family : config.font_family;
+    container.append("text").text(blipText).attr("y", 3).attr("text-anchor", "middle").style("fill", "#fff").style("font-family", idFontFamily).style("font-variant-numeric", "tabular-nums").style("font-size", (_d) => blipText.length > 2 ? "8px" : "9px").style("pointer-events", "none").style("user-select", "none");
   }
 }
 
@@ -1509,8 +1516,31 @@ function renderGrid(gridSelection, config, quadrants, rings, outerRadius) {
     }
     gridSelection.append("circle").attr("cx", 0).attr("cy", 0).attr("r", outer).attr("class", `ring-border ring-border-${i}`).style("fill", "none").style("stroke", config.colors.grid).style("stroke-width", i === 0 ? 2 : 1).style("stroke-opacity", i === 0 ? 0.4 : 0.25);
     if (config.print_layout) {
-      gridSelection.append("text").text(config.rings[i].name).attr("y", -labelRadius).attr("text-anchor", "middle").attr("dominant-baseline", "middle").style("fill", config.rings[i].color).style("opacity", 0.35).style("font-family", config.font_family).style("font-size", `${labelFontSize}px`).style("font-weight", "bold").style("pointer-events", "none").style("user-select", "none");
+      gridSelection.append("text").text(config.rings[i].name).attr("y", -labelRadius).attr("text-anchor", "middle").attr("dominant-baseline", "middle").style("fill", config.rings[i].color).style("opacity", 0.55).style("paint-order", "stroke").style("stroke", config.colors.background).style("stroke-width", "4px").style("stroke-linejoin", "round").style("font-family", config.font_family).style("font-size", `${labelFontSize}px`).style("font-weight", "bold").style("pointer-events", "none").style("user-select", "none");
     }
+  }
+}
+function renderQuadrantLabels(radarSelection, config, quadrants, outerRadius) {
+  if (!config.curved_quadrant_labels) {
+    return;
+  }
+  const labelRadius = outerRadius + 22;
+  const defs = radarSelection.append("defs");
+  const idBase = `radar-qlabel-${config.svg_id || "radar"}`;
+  const point = (angle) => [labelRadius * Math.cos(angle), labelRadius * Math.sin(angle)];
+  for (let i = 0;i < quadrants.length; i++) {
+    const a0 = quadrants[i].radial_min * Math.PI;
+    const a1 = quadrants[i].radial_max * Math.PI;
+    const onBottomHalf = Math.sin((a0 + a1) / 2) > 0;
+    const largeArc = Math.abs(a1 - a0) > Math.PI ? 1 : 0;
+    const [from, to, sweep] = onBottomHalf ? [point(a1), point(a0), 0] : [point(a0), point(a1), 1];
+    const pathId = `${idBase}-${i}`;
+    defs.append("path").attr("id", pathId).attr("fill", "none").attr("d", `M ${from[0]} ${from[1]} A ${labelRadius} ${labelRadius} 0 ${largeArc} ${sweep} ${to[0]} ${to[1]}`);
+    const name = config.quadrants[i].name;
+    const arcLength = Math.abs(a1 - a0) * labelRadius;
+    const fontSize = Math.max(10, Math.min(16, arcLength / Math.max(1, name.length * 0.62)));
+    const text = radarSelection.append("text").attr("class", `quadrant-label quadrant-label-${i}`).style("fill", "#52525b").style("font-family", config.font_family).style("font-size", `${fontSize}px`).style("font-weight", "600").style("letter-spacing", "0.08em").style("paint-order", "stroke").style("stroke", config.colors.background).style("stroke-width", "4px").style("stroke-linejoin", "round").style("pointer-events", "none").style("user-select", "none");
+    text.append("textPath").attr("href", `#${pathId}`).attr("startOffset", "50%").style("text-anchor", "middle").text(name);
   }
 }
 function renderTitleAndFooter(radarSelection, config) {
@@ -1545,18 +1575,18 @@ function renderLegendColumns(legendLeftColumn, legendRightColumn, segmented, con
   }
   for (let quadrant = 0;quadrant < numQuadrants; quadrant++) {
     const column = targetColumn(quadrant);
-    const section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns).style("border-radius", "6px").style("padding", "6px").style("display", "flex").style("flex-direction", "column").style("gap", "6px").style("flex", "1 1 0");
-    section.append("div").attr("class", "legend-quadrant-name").style("font-weight", "600").text(config.quadrants[quadrant].name);
-    const ringsContainer = section.append("div").attr("class", "legend-rings").style("display", "grid").style("grid-template-columns", `repeat(var(--legend-columns, ${legendSectionColumns}), 1fr)`).style("gap", "10px 14px").style("align-items", "start");
+    const section = column.append("div").attr("class", "legend-section").style("--legend-columns", legendSectionColumns).style("display", "flex").style("flex-direction", "column").style("gap", "6px").style("flex", "1 1 0");
+    section.append("div").attr("class", "legend-quadrant-name").text(config.quadrants[quadrant].name);
+    const ringsContainer = section.append("div").attr("class", "legend-rings").style("column-count", `var(--legend-columns, ${legendSectionColumns})`).style("column-gap", "14px");
     for (let ring = 0;ring < numRings; ring++) {
       const entriesInRing = segmented[quadrant][ring];
       if (!entriesInRing.length) {
         continue;
       }
-      const ringBlock = ringsContainer.append("div").attr("class", "legend-ring").style("min-width", "0").style("max-width", "100%");
-      ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).style("font-size", "11px").style("font-weight", "600").style("margin-bottom", "2px").text(config.rings[ring].name);
+      const ringBlock = ringsContainer.append("div").attr("class", "legend-ring").style("max-width", "100%").style("break-inside", "avoid").style("-webkit-column-break-inside", "avoid").style("margin-bottom", "10px");
+      ringBlock.append("div").attr("class", "legend-ring-name").style("color", config.rings[ring].color).text(config.rings[ring].name);
       const entriesList = ringBlock.append("div").attr("class", "legend-ring-entries").style("display", "flex").style("flex-direction", "column").style("gap", "2px");
-      const entryBaseStyle = "font-size:11px;text-decoration:none;word-break:break-word;padding:2px 4px;border-radius:4px;";
+      const entryBaseStyle = "";
       entriesList.selectAll("a").data(entriesInRing).enter().append("a").attr("href", (d) => d.link && !d.description ? d.link : "#").attr("target", (d) => d.link && !d.description && config.links_in_new_tabs ? "_blank" : null).attr("id", (d) => `legendItem${d.id}`).attr("class", "legend-entry").attr("style", (d) => entryBaseStyle + (d.description ? "cursor:pointer;" : "")).text((d) => `${d.id}. ${d.label}`).on("mouseover", (_event, d) => {
         showBubble2(d, config);
         highlightLegendItem2(d);
@@ -1883,6 +1913,7 @@ function _renderRadar(config) {
   const svgElements = setupSvg(config, quadrants, rings, dimensions);
   const { radar, legendLeftColumn, legendRightColumn, grid } = svgElements;
   renderGrid(grid, config, quadrants, rings, outer_radius);
+  renderQuadrantLabels(radar, config, quadrants, outer_radius);
   if (!config.footer) {
     config.footer = "▲ moved up     ▼ moved down     ★ new     ⬤ no change";
   }

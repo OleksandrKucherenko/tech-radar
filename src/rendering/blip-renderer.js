@@ -134,13 +134,20 @@ function renderBlipText(container, entry, config) {
   if (entry.active || config.print_layout) {
     const blipText = config.print_layout ? entry.id : entry.label.match(/[a-z]/i);
 
+    // In print mode the label is the numeric entry id; render it in the
+    // (optional) monospace id family with tabular figures so the digits align.
+    // Falls back to the regular font family when blip_id_font_family is unset.
+    const idFontFamily =
+      config.print_layout && config.blip_id_font_family ? config.blip_id_font_family : config.font_family;
+
     container
       .append('text')
       .text(blipText)
       .attr('y', 3)
       .attr('text-anchor', 'middle')
       .style('fill', '#fff')
-      .style('font-family', config.font_family)
+      .style('font-family', idFontFamily)
+      .style('font-variant-numeric', 'tabular-nums')
       .style('font-size', _d => (blipText.length > 2 ? '8px' : '9px'))
       .style('pointer-events', 'none')
       .style('user-select', 'none');

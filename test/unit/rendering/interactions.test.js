@@ -47,6 +47,29 @@ describe('Interactions', () => {
       // THEN: showBubble should be exported
       expect(typeof showBubble).toBe('function');
     });
+
+    test('sizes the background rect with >=4px padding on every side of the label', () => {
+      // GIVEN: a bubble in the DOM and a known text bounding box
+      const d3 = window.d3;
+      createBubble(d3.select('#test-radar'), 'Arial');
+      const textNode = document.querySelector('#bubble text');
+      // happy-dom doesn't implement SVG layout, so stub the measured bbox
+      textNode.getBBox = () => ({ x: 0, y: -10, width: 60, height: 14 });
+
+      // WHEN: showing the bubble for an entry
+      showBubble({ label: 'Test Tool', active: true, x: 100, y: 100 }, { print_layout: true });
+
+      // THEN: the rect pads the text by 8px horizontally and 6px vertically
+      const rect = document.querySelector('#bubble rect');
+      const left = 0 - Number.parseFloat(rect.getAttribute('x'));
+      const top = -10 - Number.parseFloat(rect.getAttribute('y'));
+      const right = Number.parseFloat(rect.getAttribute('width')) - 60 - left;
+      const bottom = Number.parseFloat(rect.getAttribute('height')) - 14 - top;
+      expect(left).toBeGreaterThanOrEqual(4);
+      expect(right).toBeGreaterThanOrEqual(4);
+      expect(top).toBeGreaterThanOrEqual(4);
+      expect(bottom).toBeGreaterThanOrEqual(4);
+    });
   });
 
   describe('hideBubble', () => {

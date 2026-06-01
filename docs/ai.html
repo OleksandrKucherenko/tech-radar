@@ -59,20 +59,106 @@
     <link rel="stylesheet" href="radar.css" />
     <link rel="stylesheet" href="vendor/font-awesome.min.css" />
     <style>
+      /* ===================================================================
+         Design tokens — "Modern Minimal" (Linear/Vercel/Stripe register).
+         One blue-violet accent, reserved strictly for interaction; the radar
+         blips carry the only other saturated color on the page.
+         =================================================================== */
+      :root {
+        --bg: #ffffff;
+        --surface: #fafafa;
+        --border: #e5e5e5;
+        --fg: #0a0a0a;
+        --fg-secondary: #525252;
+        --muted: #a3a3a3;
+        --accent: #3056d3; /* interaction only: hover / focus / active legend */
+
+        --font-display: "Geist", "Inter Display", Inter, system-ui, sans-serif;
+        --font-body: Inter, system-ui, sans-serif;
+        --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+        --fs-title: 30px;
+        --fs-quadrant: 13px;
+        --fs-ring: 11px;
+        --fs-entry: 13px;
+        --fs-id: 10px;
+
+        --sp-xs: 4px;
+        --sp-sm: 8px;
+        --sp-md: 16px;
+        --sp-lg: 24px;
+        --sp-xl: 48px;
+
+        --radius-sm: 4px;
+        --radius-md: 8px;
+      }
+
       body {
         margin: 0;
         padding: 0;
-        background: white;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-body);
         display: flex;
         flex-direction: column;
         min-height: 100vh;
       }
 
+      /* Top nav recedes to chrome: muted, accent only on hover. */
       nav.demo-links {
-        padding: 15px 20px;
-        background: #f8f8f8;
-        border-bottom: 1px solid #e0e0e0;
+        padding: 12px 20px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
         margin: 0;
+        font-size: 13px;
+        color: var(--fg-secondary);
+      }
+
+      nav.demo-links strong {
+        color: var(--fg-secondary);
+        font-weight: 600;
+      }
+
+      nav.demo-links a {
+        color: var(--fg-secondary);
+        text-decoration: none;
+      }
+
+      nav.demo-links a:hover {
+        color: var(--accent);
+        text-decoration: underline;
+      }
+
+      /* Reserved top strip: page title (normal flow, can never be clipped by
+         the SVG/legend overlay) on one row with the zoom toolbar. */
+      .radar-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--sp-md);
+        width: 100%;
+        max-width: 1680px;
+        margin: var(--sp-md) auto 0;
+        padding: 0 var(--sp-lg);
+        box-sizing: border-box;
+      }
+
+      .radar-header h1 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: var(--fs-title);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        color: var(--fg);
+      }
+
+      .radar-header h1 .radar-subtitle {
+        color: var(--muted);
+        font-weight: 400;
+        font-size: 0.6em;
+        margin-left: var(--sp-sm);
+        letter-spacing: 0;
       }
 
       .radar-container {
@@ -80,7 +166,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 20px;
+        padding: var(--sp-sm) var(--sp-lg) var(--sp-md);
         max-width: 100%;
         box-sizing: border-box;
       }
@@ -90,10 +176,38 @@
         height: auto;
       }
 
+      /* Reserved bottom strip: the movement key as an HTML caption, framing the
+         radar instead of living inside (and clipping with) the SVG. */
+      .radar-caption {
+        width: 100%;
+        max-width: 1680px;
+        margin: 0 auto var(--sp-md);
+        padding: 0 var(--sp-lg);
+        box-sizing: border-box;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--sp-lg);
+        color: var(--fg-secondary);
+        font-size: 12px;
+      }
+
+      .radar-caption .legend-key {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--sp-xs);
+      }
+
       .radar-notes {
         max-width: 1200px;
         margin: 10px auto 40px;
         padding: 0 20px;
+        font-family: var(--font-body);
+        color: var(--fg-secondary);
+        line-height: 1.6;
+      }
+
+      .radar-notes h3 {
+        color: var(--fg);
       }
 
       .radar-notes ul {
@@ -105,53 +219,57 @@
         text-align: center;
         padding: 15px 20px;
         margin: 0;
-        border-top: 1px solid #e0e0e0;
-        background: #f8f8f8;
-        color: #666;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--fg-secondary);
         font-size: 12px;
       }
 
       footer code {
-        background: #e8e8e8;
+        background: #eaeaea;
         padding: 2px 6px;
-        border-radius: 3px;
-        font-family: "Courier New", monospace;
+        border-radius: var(--radius-sm);
+        font-family: var(--font-mono);
       }
 
       /* Radar zoom toolbar (desktop only, AI page scoped) */
       .radar-zoom-toolbar {
         display: none;
-        gap: 8px;
+        gap: var(--sp-sm);
         align-items: center;
         justify-content: center;
-        padding: 8px 12px;
-        margin: 8px auto 0;
+        padding: 0;
+        margin: 0;
       }
 
       .radar-zoom-toolbar .rzt-label {
-        color: #666;
+        color: var(--fg-secondary);
         font-size: 13px;
-        margin-right: 4px;
+        margin-right: var(--sp-xs);
       }
 
       .radar-zoom-toolbar .rzt-level {
         min-width: 46px;
         text-align: center;
         font-variant-numeric: tabular-nums;
+        font-family: var(--font-mono);
         font-size: 13px;
-        color: #333;
+        color: var(--fg);
       }
 
       .radar-zoom-toolbar .rzt-btn {
-        border: 1px solid #ccc;
-        background: #fff;
-        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        border-radius: var(--radius-sm);
         width: 32px;
         height: 32px;
         font-size: 16px;
         line-height: 1;
         cursor: pointer;
-        color: #333;
+        color: var(--fg-secondary);
+        transition:
+          border-color 0.15s ease,
+          color 0.15s ease;
       }
 
       .radar-zoom-toolbar .rzt-btn.rzt-reset {
@@ -161,7 +279,9 @@
       }
 
       .radar-zoom-toolbar .rzt-btn:hover {
-        background: #f0f0f0;
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--bg);
       }
 
       /* Overlay/zoom layout: radar as background, legends overlaid on top.
@@ -195,36 +315,136 @@
 
       .zoom-radar .radar-svg-container svg {
         width: auto !important;
-        height: calc((100vh - 150px) * var(--radar-scale, 0.9)) !important;
+        height: calc((100vh - 150px) * var(--radar-scale, 0.85)) !important;
         max-width: none !important;
         max-height: none !important;
         transition: height 0.15s ease;
       }
 
+      /* Legend columns: pinned with a real gutter from the viewport edge
+         (inset, capped width) instead of sliding onto the radar. */
       .zoom-radar .radar-legend-column.left {
         position: absolute !important;
-        left: 0 !important;
+        left: var(--sp-lg) !important;
+        right: auto !important;
         top: 0 !important;
         z-index: 2;
       }
 
       .zoom-radar .radar-legend-column.right {
         position: absolute !important;
-        right: 0 !important;
+        right: var(--sp-lg) !important;
+        left: auto !important;
         top: 0 !important;
         z-index: 2;
       }
 
       .zoom-radar .radar-legend-column {
         z-index: 2;
+        /* A touch wider than before, and wider still on big screens (where there
+           is room) so each card fits 2–3 readable columns and stays shorter. */
+        width: 26% !important;
+        max-width: 460px;
+        /* Bound the columns to the radar's vertical band so they frame it
+           instead of overflowing below into the caption; scroll if taller. */
+        height: auto !important;
+        max-height: calc((100vh - 170px) * var(--radar-scale, 0.85)) !important;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        /* Keep the inner scrollbar thin and quiet when a card does overflow. */
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+        /* Align section tops to a shared baseline with one consistent gap
+           (was space-between, which produced ragged, irregular spacing). */
+        justify-content: flex-start !important;
+        gap: var(--sp-md) !important;
       }
 
-      /* Keep legends readable where they overlap the radar graph */
+      .zoom-radar .radar-legend-column::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .zoom-radar .radar-legend-column::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      /* Size the ring sub-columns by intrinsic WIDTH, not a fixed count, so the
+         capped-width overlay cards never collapse to ~70px "one-word-per-line"
+         columns. The masonry then picks 1–3 readable tracks from the card width
+         (overrides the inline column-count that the wide-screen --legend-columns
+         media queries set for the full-width, non-overlay legend). */
+      .zoom-radar .legend-rings {
+        column-count: auto !important;
+        column-width: 120px !important;
+        column-gap: var(--sp-md) !important;
+      }
+
+      /* Opaque reference cards: text stays clean over any blip; the card edge
+         gives the columns a defined boundary against the radar. */
       .zoom-radar .legend-section {
-        background: rgba(255, 255, 255, 0.9);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
         box-shadow:
-          0 0 0 1px rgba(255, 255, 255, 0.6),
-          0 2px 6px rgba(0, 0, 0, 0.08);
+          0 1px 2px rgba(0, 0, 0, 0.04),
+          0 4px 12px rgba(0, 0, 0, 0.06);
+        padding: var(--sp-md) !important;
+        flex: 0 0 auto !important;
+      }
+
+      /* Chrome recedes: neutral, tracked headers — color stays with the blips. */
+      .zoom-radar .legend-quadrant-name {
+        font-family: var(--font-body);
+        font-size: var(--fs-quadrant);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--fg-secondary);
+      }
+
+      .zoom-radar .legend-ring-name {
+        font-size: var(--fs-ring);
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        margin-bottom: var(--sp-xs);
+      }
+
+      .zoom-radar .legend-entry {
+        font-size: var(--fs-entry);
+        line-height: 1.45;
+        color: var(--fg-secondary);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Accent budget: the one accent appears only on interaction. */
+      .zoom-radar .legend-entry:hover,
+      .zoom-radar .legend-entry:focus {
+        color: var(--accent);
+        background: rgba(48, 86, 211, 0.08);
+        text-decoration: none;
+      }
+
+      .zoom-radar .legend-highlight {
+        background: var(--accent);
+        color: var(--bg);
+      }
+
+      /* Optional, light entrance — disabled under reduced-motion. */
+      @media (prefers-reduced-motion: no-preference) {
+        .zoom-radar #rink {
+          animation: rink-in 0.5s ease-out both;
+        }
+
+        @keyframes rink-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
       }
 
       /* Collapsible legend cards: click a quadrant header to fold its entries
@@ -259,6 +479,299 @@
       .legend-section.collapsed .legend-rings {
         display: none !important;
       }
+
+      /* Screen-reader-only utility */
+      .visually-hidden {
+        position: absolute !important;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* Header tools row: search + zoom toolbar */
+      .radar-tools {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-md);
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      /* Tool search (U1): find a tool among ~150 without scanning */
+      .radar-search {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .radar-search .search-icon {
+        position: absolute;
+        left: 10px;
+        width: 15px;
+        height: 15px;
+        color: var(--muted);
+        pointer-events: none;
+      }
+
+      #radarSearch {
+        font: inherit;
+        font-size: 14px;
+        color: var(--fg);
+        width: 250px;
+        max-width: 48vw;
+        padding: 8px 30px 8px 32px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--bg);
+        transition:
+          border-color 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+
+      #radarSearch::placeholder {
+        color: var(--muted);
+      }
+
+      #radarSearch:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(48, 86, 211, 0.15);
+      }
+
+      .radar-search .search-clear {
+        position: absolute;
+        right: 6px;
+        display: none;
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: var(--radius-sm);
+      }
+
+      .radar-search.has-value .search-clear {
+        display: inline-flex;
+      }
+
+      .radar-search .search-clear:hover {
+        color: var(--fg);
+      }
+
+      /* Search result count / empty state (aria-live) */
+      .search-status {
+        width: 100%;
+        max-width: 1680px;
+        margin: var(--sp-xs) auto 0;
+        padding: 0 var(--sp-lg);
+        box-sizing: border-box;
+        font-size: 12.5px;
+        color: var(--fg-secondary);
+      }
+
+      .search-status:empty {
+        display: none;
+      }
+
+      /* Orientation help + at-a-glance ring key (U3 / U4) */
+      .radar-help {
+        width: 100%;
+        max-width: 1680px;
+        margin: var(--sp-sm) auto 0;
+        padding: 0 var(--sp-lg);
+        box-sizing: border-box;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--sp-xs) var(--sp-lg);
+        font-size: 12.5px;
+        color: var(--fg-secondary);
+      }
+
+      .radar-help .radar-hint {
+        margin: 0;
+      }
+
+      .radar-help .radar-hint strong {
+        color: var(--fg);
+        font-weight: 600;
+      }
+
+      .ring-key {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--sp-xs) var(--sp-md);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .ring-key li {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+
+      .ring-key .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--c);
+        flex: 0 0 auto;
+      }
+
+      .ring-key b {
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: var(--fg-secondary);
+      }
+
+      .ring-key span {
+        color: var(--muted);
+      }
+
+      /* Live legend filtering (U1) */
+      .legend-entry.filter-hide,
+      .legend-ring.filter-hide,
+      .legend-section.filter-empty {
+        display: none !important;
+      }
+
+      /* While filtering, reveal collapsed cards that contain matches */
+      .radar-legend-column.filtering .legend-section.collapsed .legend-rings {
+        display: block !important;
+      }
+
+      /* Dim blips that don't match the active query */
+      #radar .blip {
+        transition: opacity 0.15s ease;
+      }
+
+      #radar .blip.blip-dim {
+        opacity: 0.12;
+      }
+
+      /* Hover tooltip (#bubble): the engine renders it at 10px white-on-#333,
+         which is hard to read. Bump to the body font at a legible size/weight
+         and a higher-contrast near-black background. showBubble() re-measures
+         the text's bbox on each hover, so the background rect resizes to fit.
+         (Inline engine styles are overridden with !important.) */
+      #bubble text {
+        font-family: var(--font-body) !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        fill: #fff !important;
+        letter-spacing: 0.01em;
+        text-shadow: none !important;
+      }
+
+      #bubble rect,
+      #bubble path {
+        fill: #0a0a0a !important;
+      }
+
+      /* Loading / error states (U2) */
+      .radar-container {
+        position: relative;
+      }
+
+      /* Give the loading/error overlay vertical presence before the SVG has size */
+      .radar-container:has(.radar-status-overlay.is-visible) {
+        min-height: 60vh;
+      }
+
+      .radar-status-overlay {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--sp-md);
+        text-align: center;
+        background: var(--bg);
+        color: var(--fg-secondary);
+        z-index: 5;
+      }
+
+      .radar-status-overlay.is-visible {
+        display: flex;
+      }
+
+      .radar-spinner {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        animation: radar-spin 0.8s linear infinite;
+      }
+
+      @keyframes radar-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .radar-spinner {
+          animation: none;
+        }
+      }
+
+      .radar-status-overlay .status-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--fg);
+      }
+
+      .radar-status-overlay .status-msg {
+        margin: 0;
+        font-size: 13px;
+        max-width: 42ch;
+      }
+
+      .radar-status-overlay .status-retry {
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: #fff;
+        background: var(--accent);
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+
+      .radar-status-overlay .status-retry:hover {
+        background: #274bc0;
+      }
+
+      /* Larger touch targets on touch/mobile widths (U5) */
+      @media (max-width: 1023px) {
+        .radar-tools,
+        .radar-search,
+        #radarSearch {
+          width: 100%;
+          max-width: none;
+        }
+
+        .legend-entry {
+          padding: 8px 8px;
+          min-height: 24px;
+          display: flex;
+          align-items: center;
+        }
+      }
     </style>
   </head>
 
@@ -281,16 +794,70 @@
 
     <div id="toolbar"></div>
 
-    <div class="radar-zoom-toolbar" id="radarZoomToolbar" role="toolbar" aria-label="Radar zoom controls">
-      <span class="rzt-label">Radar size</span>
-      <button type="button" class="rzt-btn" data-zoom="out" aria-label="Decrease radar size">&minus;</button>
-      <span class="rzt-level" id="radarZoomLevel">90%</span>
-      <button type="button" class="rzt-btn" data-zoom="in" aria-label="Increase radar size">+</button>
-      <button type="button" class="rzt-btn rzt-reset" data-zoom="reset" aria-label="Reset radar size">Reset</button>
+    <header class="radar-header">
+      <h1>AI Tech Radar <span class="radar-subtitle">2026</span></h1>
+      <div class="radar-tools">
+        <div class="radar-search" id="radarSearchWrap">
+          <label class="visually-hidden" for="radarSearch">Search technologies</label>
+          <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M7 1a6 6 0 0 1 4.74 9.66l3.3 3.3-1.06 1.06-3.3-3.3A6 6 0 1 1 7 1Zm0 1.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"
+              fill="currentColor"
+            />
+          </svg>
+          <input
+            id="radarSearch"
+            type="search"
+            placeholder="Search tools… e.g. Claude"
+            autocomplete="off"
+            aria-describedby="radarSearchStatus"
+          />
+          <button type="button" class="search-clear" id="radarSearchClear" aria-label="Clear search">&times;</button>
+        </div>
+        <div class="radar-zoom-toolbar" id="radarZoomToolbar" role="toolbar" aria-label="Radar zoom controls">
+          <span class="rzt-label">Radar size</span>
+          <button type="button" class="rzt-btn" data-zoom="out" aria-label="Decrease radar size">&minus;</button>
+          <span class="rzt-level" id="radarZoomLevel">90%</span>
+          <button type="button" class="rzt-btn" data-zoom="in" aria-label="Increase radar size">+</button>
+          <button type="button" class="rzt-btn rzt-reset" data-zoom="reset" aria-label="Reset radar size">Reset</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="search-status" id="radarSearchStatus" role="status" aria-live="polite"></div>
+
+    <div class="radar-help">
+      <p class="radar-hint">
+        Hover a tool for a quick summary, click for details. Rings show our recommendation, from
+        <strong>ADOPT</strong> (center) outward to <strong>WATCH</strong>.
+      </p>
+      <ul class="ring-key" aria-label="Ring meanings">
+        <li><span class="dot" style="--c: #157a40"></span><b>ADOPT</b> <span>migrate to</span></li>
+        <li><span class="dot" style="--c: #4a8000"></span><b>VALUE</b> <span>clear value</span></li>
+        <li><span class="dot" style="--c: #a16609"></span><b>HOLD</b> <span>maintain</span></li>
+        <li><span class="dot" style="--c: #6e747a"></span><b>SKIP</b> <span>avoid</span></li>
+        <li><span class="dot" style="--c: #0c7d92"></span><b>TRIAL</b> <span>piloting</span></li>
+        <li><span class="dot" style="--c: #8157c9"></span><b>WATCH</b> <span>tracking</span></li>
+      </ul>
     </div>
 
     <div class="radar-container">
-      <svg id="radar"></svg>
+      <svg
+        id="radar"
+        role="img"
+        aria-label="AI Tech Radar — technologies plotted by quadrant and ring. The full list is available in the legend and via the search box above."
+      ></svg>
+      <div class="radar-status-overlay is-visible" id="radarStatus" role="status" aria-live="polite">
+        <div class="radar-spinner" aria-hidden="true"></div>
+        <p class="status-title">Loading the radar…</p>
+      </div>
+    </div>
+
+    <div class="radar-caption" aria-label="Blip movement key">
+      <span class="legend-key">▲ moved up</span>
+      <span class="legend-key">▼ moved down</span>
+      <span class="legend-key">★ new</span>
+      <span class="legend-key">⬤ no change</span>
     </div>
 
     <section class="radar-notes">
@@ -341,7 +908,7 @@
         const MIN = 40;
         const MAX = 150;
         const STEP = 10;
-        const DEFAULT = 90;
+        const DEFAULT = 85;
         const STORAGE_KEY = "ai-radar-occupancy";
         const isDesktop = () => window.matchMedia("(min-width: 1024px)").matches;
 
@@ -385,6 +952,30 @@
           else if (action === "reset") level = DEFAULT;
           apply();
         });
+        toolbar.title = "Tip: Ctrl/⌘ + scroll over the radar to resize it";
+
+        // Ctrl/⌘ + wheel over the radar resizes the radar instead of zooming the
+        // whole page. deltaY is accumulated and scaled so a mouse notch nudges a
+        // few percent and a slow trackpad pinch (which the browser also reports
+        // as ctrl+wheel) steps smoothly. Requires a non-passive listener so the
+        // browser's page zoom can be prevented.
+        let wheelRemainder = 0;
+        container.addEventListener(
+          "wheel",
+          event => {
+            if (!(event.ctrlKey || event.metaKey)) return;
+            if (!container.classList.contains("zoom-radar")) return;
+            event.preventDefault();
+            wheelRemainder += -event.deltaY * 0.05; // scroll up / pinch out = zoom in
+            const stepBy = Math.trunc(wheelRemainder);
+            if (stepBy !== 0) {
+              wheelRemainder -= stepBy;
+              level += stepBy;
+              apply();
+            }
+          },
+          { passive: false }
+        );
 
         enable(isDesktop());
         let resizeTimer;
@@ -475,57 +1066,227 @@
         applyStored();
       }
 
-      fetch("./ai-entries.json")
-        .then(response => response.json())
-        .then(data => {
-          radarInstance = radar_visualization({
-            repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
-            svg_id: "radar",
-            toolbar_id: "toolbar",
-            colors: {
-              background: "#fff",
-              grid: "#bbb",
-              inactive: "#ddd",
-            },
-            font_family: "Arial, Helvetica",
-            title: "AI Tech Radar (2026)",
-            quadrants: [
-              { name: "Core AI Providers" },
-              { name: "AI Coding Tools" },
-              { name: "RAG & Retrieval & Knowledge Base" },
-              { name: "Databases" },
-              { name: "Low-Code & MCP" },
-              { name: "Observability & Testing" },
-              { name: "AI Frameworks" },
-            ],
-            rings: [
-              { name: "ADOPT", color: "#5ba300" },
-              { name: "VALUE", color: "#c7ba00" },
-              { name: "HOLD", color: "#e09b96" },
-              { name: "SKIP", color: "#e09b96" },
-              { name: "TRIAL", color: "#009eb0" },
-              { name: "WATCH", color: "#bb6bd9" },
-            ],
-            print_layout: true,
-            links_in_new_tabs: true,
-            descriptionTransform: typeof marked !== "undefined" ? text => marked.parse(text) : null,
-            entries: data.entries,
+      // Live tool search (U1): filter the legend, dim non-matching blips, and
+      // announce a result count / empty state. Wired once; reads the DOM live so
+      // it keeps working after the legend re-renders.
+      function setupSearch() {
+        const input = document.getElementById("radarSearch");
+        const wrap = document.getElementById("radarSearchWrap");
+        const clearBtn = document.getElementById("radarSearchClear");
+        const status = document.getElementById("radarSearchStatus");
+        if (!input || input.dataset.wired) return;
+        input.dataset.wired = "1";
+
+        const apply = () => {
+          const raw = input.value.trim();
+          const q = raw.toLowerCase();
+          wrap.classList.toggle("has-value", q.length > 0);
+
+          let matches = 0;
+          document.querySelectorAll(".radar-legend-column .legend-entry").forEach(a => {
+            const hit = !q || a.textContent.toLowerCase().includes(q);
+            a.classList.toggle("filter-hide", !hit);
+            if (hit && q) matches++;
+          });
+          document.querySelectorAll(".radar-legend-column .legend-ring").forEach(r => {
+            r.classList.toggle("filter-hide", !!q && !r.querySelector(".legend-entry:not(.filter-hide)"));
+          });
+          document.querySelectorAll(".radar-legend-column .legend-section").forEach(s => {
+            s.classList.toggle("filter-empty", !!q && !s.querySelector(".legend-entry:not(.filter-hide)"));
+          });
+          document.querySelectorAll(".radar-legend-column").forEach(c => c.classList.toggle("filtering", q.length > 0));
+
+          if (window.d3) {
+            window.d3
+              .selectAll("#radar .blip")
+              .classed("blip-dim", d => Boolean(q) && d && !(d.label || "").toLowerCase().includes(q));
+          }
+
+          if (!q) status.textContent = "";
+          else if (matches === 0) status.textContent = `No tools match “${raw}”. Try a shorter or different term.`;
+          else status.textContent = `${matches} ${matches === 1 ? "tool" : "tools"} match “${raw}”.`;
+        };
+
+        input.addEventListener("input", apply);
+        input.addEventListener("keydown", event => {
+          if (event.key === "Escape") {
+            input.value = "";
+            apply();
+          }
+        });
+        clearBtn.addEventListener("click", () => {
+          input.value = "";
+          apply();
+          input.focus();
+        });
+      }
+
+      // Modal accessibility (U5): the engine builds the description modal lazily;
+      // enhance it in place with dialog semantics, focus move-in/restore, and a
+      // focus trap — without touching the shared renderer.
+      function setupModalA11y() {
+        let lastFocused = null;
+        const enhance = modal => {
+          if (modal.dataset.a11yWired) return;
+          modal.dataset.a11yWired = "1";
+          modal.setAttribute("role", "dialog");
+          modal.setAttribute("aria-modal", "true");
+          modal.setAttribute("aria-label", "Technology details");
+
+          modal.addEventListener("keydown", event => {
+            if (event.key !== "Tab") return;
+            const focusable = Array.from(
+              modal.querySelectorAll('a[href], button, [tabindex]:not([tabindex="-1"])')
+            ).filter(el => el.offsetParent !== null);
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
           });
 
-          // Assign import/export capability to instance
-          radarInstance.importExport = radar_visualization.jsonIO;
+          const syncOpenState = () => {
+            const open = modal.style.display === "flex";
+            if (open && modal.dataset.open !== "1") {
+              modal.dataset.open = "1";
+              lastFocused = document.activeElement;
+              const closeBtn = modal.querySelector(".tech-radar-modal-close");
+              if (closeBtn) setTimeout(() => closeBtn.focus(), 0);
+            } else if (!open && modal.dataset.open === "1") {
+              modal.dataset.open = "0";
+              if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
+            }
+          };
 
-          // Initialize and assign toolbar to instance
-          // Toolbar automatically wires to instance methods (render, reset, getConfig)
-          radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
+          new MutationObserver(syncOpenState).observe(modal, { attributes: true, attributeFilter: ["style"] });
+          // The engine sets display:flex synchronously before this observer is
+          // attached (observer callbacks are async), so the first open would be
+          // missed — handle the current state immediately.
+          syncOpenState();
+        };
 
-          // Enable the radar background/zoom layout once the radar DOM exists
+        const existing = document.getElementById("tech-radar-description-modal");
+        if (existing) enhance(existing);
+        new MutationObserver(mutations => {
+          mutations.forEach(m =>
+            m.addedNodes.forEach(node => {
+              if (node.id === "tech-radar-description-modal") enhance(node);
+            })
+          );
+        }).observe(document.body, { childList: true });
+      }
+
+      // Loading / error states (U2): keep the user informed while data loads and
+      // offer a retry instead of a silent blank radar on failure.
+      const statusEl = document.getElementById("radarStatus");
+      function showStatus(state, message) {
+        if (!statusEl) return;
+        if (state === "hidden") {
+          statusEl.classList.remove("is-visible");
+          statusEl.innerHTML = "";
+          return;
+        }
+        statusEl.classList.add("is-visible");
+        if (state === "loading") {
+          statusEl.innerHTML =
+            '<div class="radar-spinner" aria-hidden="true"></div><p class="status-title">Loading the radar…</p>';
+        } else if (state === "error") {
+          statusEl.innerHTML =
+            '<p class="status-title">Couldn’t load the radar</p>' +
+            `<p class="status-msg">${message || "Something went wrong."}</p>` +
+            '<button type="button" class="status-retry">Try again</button>';
+          const retry = statusEl.querySelector(".status-retry");
+          if (retry) retry.addEventListener("click", loadRadar);
+        }
+      }
+
+      let uiWired = false;
+      function buildRadar(data) {
+        radarInstance = radar_visualization({
+          repo_url: "https://github.com/OleksandrKucherenko/tech-radar",
+          svg_id: "radar",
+          toolbar_id: "toolbar",
+          colors: {
+            background: "#fff",
+            grid: "#e5e5e5",
+            inactive: "#ddd",
+          },
+          font_family: "Inter, system-ui, sans-serif",
+          blip_id_font_family: "'JetBrains Mono', 'SF Mono', Menlo, monospace",
+          // Draw each quadrant's name as curved text along the outer edge.
+          curved_quadrant_labels: true,
+          // Title and movement key are rendered as HTML (.radar-header / .radar-caption)
+          // so they can never be clipped by the SVG/legend overlay. The blank
+          // footer suppresses the in-SVG key without re-triggering the default.
+          footer: " ",
+          quadrants: [
+            { name: "Core AI Providers" },
+            { name: "AI Coding Tools" },
+            { name: "RAG & Retrieval & Knowledge Base" },
+            { name: "Databases" },
+            { name: "Low-Code & MCP" },
+            { name: "Observability & Testing" },
+            { name: "AI Frameworks" },
+          ],
+          // Ordered ramp, inner→outer. SKIP is the desaturated grey (the "do
+          // nothing" verdict, kept quietest). Every hue is darkened to clear
+          // WCAG AA (≥4.5:1 on white) so it is legible both as a blip and as
+          // the legend ring-name text. SKIP stays clearly greyer than HOLD.
+          rings: [
+            { name: "ADOPT", color: "#157a40" }, // green  — strategic default
+            { name: "VALUE", color: "#4a8000" }, // lime   — clear value
+            { name: "HOLD", color: "#a16609" }, // amber  — maintain, don't pick
+            { name: "SKIP", color: "#6e747a" }, // grey   — intentionally skipped
+            { name: "TRIAL", color: "#0c7d92" }, // teal   — piloting
+            { name: "WATCH", color: "#8157c9" }, // violet — tracking
+          ],
+          print_layout: true,
+          links_in_new_tabs: true,
+          descriptionTransform: typeof marked !== "undefined" ? text => marked.parse(text) : null,
+          entries: data.entries,
+        });
+
+        // Assign import/export capability to instance
+        radarInstance.importExport = radar_visualization.jsonIO;
+
+        // Initialize and assign toolbar to instance
+        // Toolbar automatically wires to instance methods (render, reset, getConfig)
+        radarInstance.toolbar = radar_visualization.initDemoToolbar(radarInstance, { demoSlug: "ai-demo" });
+
+        // Wire page-level UI once (the layout/columns persist across re-renders,
+        // so listeners and observers only need to be attached a single time).
+        if (!uiWired) {
+          uiWired = true;
           setupRadarZoom();
           setupCollapsibleLegends();
-        })
-        .catch(err => {
-          console.error("Error loading ai-entries.json", err);
-        });
+          setupSearch();
+          setupModalA11y();
+        }
+      }
+
+      function loadRadar() {
+        showStatus("loading");
+        fetch("./ai-entries.json")
+          .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json();
+          })
+          .then(data => {
+            buildRadar(data);
+            showStatus("hidden");
+          })
+          .catch(err => {
+            console.error("Error loading ai-entries.json", err);
+            showStatus("error", "Check your connection and try again.");
+          });
+      }
+
+      loadRadar();
     </script>
 
     <footer>Build: <code>{{BUILD_COMMIT_HASH}}</code></footer>
