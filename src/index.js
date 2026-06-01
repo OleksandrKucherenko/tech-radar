@@ -13,7 +13,7 @@ import { EntryProcessor } from './processing/entry-processor.js';
 import { renderBlips } from './rendering/blip-renderer.js';
 import { renderDebugVisualization } from './rendering/debug-renderer.js';
 import { runForceSimulation } from './rendering/force-simulation.js';
-import { renderGrid, renderTitleAndFooter } from './rendering/grid-renderer.js';
+import { renderGrid, renderQuadrantLabels, renderTitleAndFooter } from './rendering/grid-renderer.js';
 import {
   createBubble,
   hideBubble,
@@ -113,6 +113,7 @@ function _renderRadar(config) {
   const { radar, legendLeftColumn, legendRightColumn, grid } = svgElements;
 
   renderGrid(grid, config, quadrants, rings, outer_radius);
+  renderQuadrantLabels(radar, config, quadrants, outer_radius);
 
   if (!config.footer) {
     config.footer = '▲ moved up     ▼ moved down     ★ new     ⬤ no change';

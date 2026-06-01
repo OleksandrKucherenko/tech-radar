@@ -1,5 +1,5 @@
 // Tech Radar Visualization - Bundled from ES6 modules
-// Version: 0.0.1-dev+15565d6
+// Version: 0.0.1-dev+580efa4
 // License: MIT
 // Source: https://github.com/OleksandrKucherenko/tech-radar
 
@@ -1520,6 +1520,29 @@ function renderGrid(gridSelection, config, quadrants, rings, outerRadius) {
     }
   }
 }
+function renderQuadrantLabels(radarSelection, config, quadrants, outerRadius) {
+  if (!config.curved_quadrant_labels) {
+    return;
+  }
+  const labelRadius = outerRadius + 22;
+  const defs = radarSelection.append("defs");
+  const idBase = `radar-qlabel-${config.svg_id || "radar"}`;
+  const point = (angle) => [labelRadius * Math.cos(angle), labelRadius * Math.sin(angle)];
+  for (let i = 0;i < quadrants.length; i++) {
+    const a0 = quadrants[i].radial_min * Math.PI;
+    const a1 = quadrants[i].radial_max * Math.PI;
+    const onBottomHalf = Math.sin((a0 + a1) / 2) > 0;
+    const largeArc = Math.abs(a1 - a0) > Math.PI ? 1 : 0;
+    const [from, to, sweep] = onBottomHalf ? [point(a1), point(a0), 0] : [point(a0), point(a1), 1];
+    const pathId = `${idBase}-${i}`;
+    defs.append("path").attr("id", pathId).attr("fill", "none").attr("d", `M ${from[0]} ${from[1]} A ${labelRadius} ${labelRadius} 0 ${largeArc} ${sweep} ${to[0]} ${to[1]}`);
+    const name = config.quadrants[i].name;
+    const arcLength = Math.abs(a1 - a0) * labelRadius;
+    const fontSize = Math.max(10, Math.min(16, arcLength / Math.max(1, name.length * 0.62)));
+    const text = radarSelection.append("text").attr("class", `quadrant-label quadrant-label-${i}`).style("fill", "#52525b").style("font-family", config.font_family).style("font-size", `${fontSize}px`).style("font-weight", "600").style("letter-spacing", "0.08em").style("paint-order", "stroke").style("stroke", config.colors.background).style("stroke-width", "4px").style("stroke-linejoin", "round").style("pointer-events", "none").style("user-select", "none");
+    text.append("textPath").attr("href", `#${pathId}`).attr("startOffset", "50%").style("text-anchor", "middle").text(name);
+  }
+}
 function renderTitleAndFooter(radarSelection, config) {
   if (config.title && config.print_layout) {
     const titleGroup = radarSelection.append("a").attr("href", config.repo_url).attr("target", config.links_in_new_tabs ? "_blank" : null);
@@ -1890,6 +1913,7 @@ function _renderRadar(config) {
   const svgElements = setupSvg(config, quadrants, rings, dimensions);
   const { radar, legendLeftColumn, legendRightColumn, grid } = svgElements;
   renderGrid(grid, config, quadrants, rings, outer_radius);
+  renderQuadrantLabels(radar, config, quadrants, outer_radius);
   if (!config.footer) {
     config.footer = "▲ moved up     ▼ moved down     ★ new     ⬤ no change";
   }
