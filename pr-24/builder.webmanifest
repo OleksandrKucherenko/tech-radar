@@ -1,0 +1,34 @@
+{
+  "name": "Tech Radar Builder",
+  "short_name": "Radar Builder",
+  "description": "Interactive Tech Radar Builder - Create, customize, and export your own technology radar",
+  "start_url": "./builder.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#1976d2",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "./web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "developer tools"],
+  "screenshots": [
+    {
+      "src": "./screenshots/4x8-quadrants-rings.jpg",
+      "sizes": "1200x800",
+      "type": "image/jpeg",
+      "form_factor": "wide"
+    }
+  ]
+}
